@@ -1,0 +1,28 @@
+{
+  "trim": {
+    "elevator_cmd": 0.0,
+    "elevator_pos_deg": 0.0,
+    "alpha_deg": -1.660427315513748,
+    "gamma_deg": -4.5379353722812175,
+    "vt_ms": 15.870484116504523,
+    "LD": 12.071163461959577,
+    "lift_over_weight": 1.02324475267319
+  },
+  "checks": {
+    "loads_runs_no_NaN": true,
+    "glide_alpha_sane_-2_to_6deg": true,
+    "glide_LD_9_to_15": true,
+    "glide_speed_10_to_18": true,
+    "lift_equals_weight_0.9_1.1": true,
+    "pitch_disturbance_recovers": true,
+    "phugoid_speed_bounded_<4ms": true,
+    "yaw_10deg_sideslip_washes_out": true
+  },
+  "passed": true,
+  "metrics": {
+    "pitch_peak_dev_deg": 1.2568820979442055,
+    "pitch_residual_deg": 0.3218313457917254,
+    "yaw_beta0_deg": 4.022098584680772,
+    "yaw_beta_end_deg": 0.04076436203064356
+  }
+}

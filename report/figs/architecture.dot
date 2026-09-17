@@ -1,0 +1,48 @@
+digraph arch {
+  rankdir=TB;
+  bgcolor="white";
+  nodesep=0.35; ranksep=0.55;
+  
+  graph [fontname="Helvetica", fontsize=13];
+  node  [fontname="Helvetica", fontsize=13];
+  edge  [fontname="Helvetica", fontsize=11];
+
+  node [shape=box, style="rounded,filled", margin="0.14,0.09"];
+
+  subgraph cluster_air {
+    label="AERIAL LAYER  —  autonomous quadplane";
+    labeljust="l"; fontsize=12; color="#9fb8e0"; style="filled"; fillcolor="#eef3fc";
+    node [fillcolor="#dbe7fb"];
+    tof      [label="VL53L1X ToF sensor\naltitude / obstacle ranging"];
+    fc       [label="ArduPilot QuadPlane firmware\nBrahma F4 MK-III flight controller\nflies uploaded MAVLink missions"];
+    cam      [label="RGB camera\n(ESP32-CAM class)"];
+    airframe [label="Quadplane airframe\n1.3 m wing · 4 lift + 1 forward\nmotor · 2 elevons"];
+    sd       [label="Onboard storage\nimagery + telemetry log"];
+    { rank=same; airframe; fc; cam; tof; }
+    fc -> airframe [label="servo PWM", dir=both];
+    tof -> fc [label="range"];
+    fc -> cam [label="capture", style=dashed];
+    cam -> sd [style=dashed];
+    fc -> sd [label="telemetry", style=dashed];
+  }
+
+  subgraph cluster_gnd {
+    label="GROUND LAYER  —  laptop (processing after landing)";
+    labeljust="l"; fontsize=12; color="#e6c88a"; style="filled"; fillcolor="#fff6e6";
+    node [fillcolor="#ffe9c2"];
+    ingest [label="Image + telemetry\ningest"];
+    yolo   [label="YOLO detection\ndisease & pest symptoms\n(+ frond-health model)"];
+    db     [label="Per-tree data store\nSQLite — status, confidence,\nlast visit, active / cleared", shape=cylinder];
+    planner[label="Route planner\nvisiting order + dynamic\npruning → MAVLink mission"];
+    gcs    [label="Ground-station link\npymavlink / MAVLink"];
+    dash   [label="Dashboard\nLeaflet map · battery ·\nmission time · detections"];
+    ingest -> yolo -> db;
+    db -> planner -> gcs;
+    db -> dash [constraint=false];
+    { rank=same; ingest; yolo; db; }
+    { rank=same; planner; gcs; dash; }
+  }
+
+  sd  -> ingest [label="  offload after landing", penwidth=1.5, minlen=2];
+  gcs -> fc     [label="  upload next mission", penwidth=1.5, color="#1f6feb", fontcolor="#1f6feb", constraint=false];
+}

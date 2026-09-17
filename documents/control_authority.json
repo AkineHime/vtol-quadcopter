@@ -1,0 +1,59 @@
+{
+  "design_point": {
+    "V": 12.0,
+    "CL_cruise": 0.5188703703703703,
+    "elevon_max_deg": 22.0
+  },
+  "pitch": {
+    "Cm_delta_e_per_rad": 0.37493308330548986,
+    "CL_delta_e_per_rad": 3.1603213776099968,
+    "nose_up_direction": "positive elevon arg",
+    "trim": {
+      "cg_25": {
+        "elevon_deg": 1.7925081401050853,
+        "alpha_deg": 0.12510991968512492,
+        "travel_used_pct": 8.147764273204933,
+        "Cm_alpha_per_rad": -2.0413848339662097
+      },
+      "cg_33": {
+        "elevon_deg": 0.13934173628642274,
+        "alpha_deg": 1.1697350367407024,
+        "travel_used_pct": 0.6333715285746488,
+        "Cm_alpha_per_rad": -1.641029654226992
+      },
+      "cg_40": {
+        "elevon_deg": -1.3802387063387287,
+        "alpha_deg": 2.1437473531721927,
+        "travel_used_pct": 6.273812301539676,
+        "Cm_alpha_per_rad": -1.2907188719551765
+      }
+    },
+    "elevon_spare_for_maneuver_deg": 20.207491859894915,
+    "pullup_load_factor_g": 2.5632606445626185,
+    "pullup_is_stall_limited": true,
+    "pullup_load_factor_if_no_stall_g": 3.929969694482463,
+    "pitch_accel_rad_s2": 27.478145238260772
+  },
+  "roll": {
+    "Cl_delta_a_per_rad": -0.7232477998781425,
+    "Cl_p_per_rad": -0.4468642845443652,
+    "full_elevon": {
+      "roll_rate_deg_s": 657.3581416163747,
+      "roll_time_const_s": 0.054046996680315464,
+      "time_to_45deg_bank_s": 0.11620318470566013
+    },
+    "half_saved_for_pitch": {
+      "roll_rate_deg_s": 328.67907080818736,
+      "roll_time_const_s": 0.054046996680315464,
+      "time_to_45deg_bank_s": 0.18933046543989343
+    }
+  },
+  "verdict": {
+    "pitch_trim_under_40pct_travel": true,
+    "pitch_pullup_ge_2g": true,
+    "pitch_accel_ge_2_rad_s2": true,
+    "roll_rate_full_ge_60deg_s": true,
+    "roll_rate_pitch_shared_ge_30deg_s": true
+  },
+  "passed": true
+}

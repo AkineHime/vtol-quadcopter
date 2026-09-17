@@ -1,0 +1,35 @@
+digraph uc {
+  rankdir=LR;
+  bgcolor="white";
+  ranksep=0.9; nodesep=0.35; margin="0.3";
+  
+  graph [fontname="Helvetica", fontsize=13];
+  node  [fontname="Helvetica", fontsize=13];
+  edge  [fontname="Helvetica", fontsize=11];
+
+  node [shape=box, style=filled, fillcolor="#eef1f4", width=1.3];
+  operator [label="Operator"];
+  fcx      [label="ArduPilot\nflight controller"];
+
+  subgraph cluster_sys {
+    label="Coconut-plantation surveillance quadplane";
+    labeljust="c"; fontsize=12; style="rounded,filled"; fillcolor="#fbfcfd"; color="#9aa4ad";
+    margin=16;
+    node [shape=ellipse, style=filled, fillcolor="#dbe7fb", width=2.9,
+          fixedsize=false, height=0.9, margin="0.22,0.11"];
+    u1 [label="Define survey area"];
+    u2 [label="Generate /\nprune route"];
+    u3 [label="Upload mission"];
+    u4 [label="Execute\nautonomous flight"];
+    u5 [label="Capture\npalm imagery"];
+    u6 [label="Detect disease\n& pest symptoms"];
+    u7 [label="Review dashboard & tree status"];
+    u2 -> u3 [label="«include»", style=dashed, arrowhead=onormal];
+    u4 -> u5 [label="«include»", style=dashed, arrowhead=onormal];
+    u5 -> u6 [label="«include»", style=dashed, arrowhead=onormal];
+  }
+
+  edge [dir=none];
+  operator -> u1; operator -> u2; operator -> u3; operator -> u7;
+  fcx -> u4; fcx -> u5;
+}

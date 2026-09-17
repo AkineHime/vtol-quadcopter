@@ -1,0 +1,42 @@
+digraph dfd {
+  rankdir=LR;
+  bgcolor="white";
+  nodesep=0.45; ranksep=0.85;
+  
+  graph [fontname="Helvetica", fontsize=13];
+  node  [fontname="Helvetica", fontsize=13];
+  edge  [fontname="Helvetica", fontsize=11];
+
+  node [shape=box, style=filled, fillcolor="#eef1f4", fontsize=15];
+  op   [label="Operator"];
+  env  [label="Coconut\nplantation"];
+  fc   [label="ArduPilot\nflight\ncontroller"];
+
+  node [shape=circle, style=filled, fillcolor="#dbe7fb", width=1.45, fixedsize=true, fontsize=14];
+  p1 [label="1.0\nPlan /\nprune route"];
+  p2 [label="2.0\nCapture\nimagery"];
+  p3 [label="3.0\nDetect\ndisease /\npest symptoms"];
+  p4 [label="4.0\nUpdate\ntree status"];
+  p5 [label="5.0\nRender\ndashboard"];
+
+  node [shape=box, style=filled, fillcolor="#ffe9c2", fixedsize=false, fontsize=14];
+  d1 [label="D1  Per-tree status (SQLite)"];
+  d2 [label="D2  Flight imagery store"];
+
+  { rank=same; p1; p2; }
+  { rank=same; d1; d2; }
+  { rank=same; p3; p4; }
+
+  op  -> p1 [label="survey area"];
+  d1  -> p1 [label="active\nwaypoints"];
+  p1  -> fc [label="waypoint\nmission"];
+  fc  -> p2 [label="position /\ntrigger"];
+  env -> p2 [label="palm\nimagery"];
+  p2  -> d2 [label="raw frames"];
+  d2  -> p3 [label="images"];
+  p3  -> p4 [label="detections"];
+  p4  -> d1 [label="confidence,\ncleared flag"];
+  d1  -> p5 [label="tree status"];
+  fc  -> p5 [label="telemetry", style=dashed];
+  p5  -> op [label="map / KPIs"];
+}

@@ -1,0 +1,470 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="http://jsbsim.sourceforge.net/JSBSim.xsl"?>
+<fdm_config name="CoconutQuadplane" version="2.0" release="BETA"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:noNamespaceSchemaLocation="http://jsbsim.sourceforge.net/JSBSim.xsd">
+
+<fileheader>
+ <author>Project team; aero data generated with Claude</author>
+ <description>
+   Fixed-wing CRUISE-PHASE model. VTOL lift/transition stays with ArduPilot's
+   built-in SITL QuadPlane model; JSBSim's job here is higher-fidelity
+   fixed-wing aerodynamics for the cruise/survey segment.
+
+   AERO DATA IS REAL (no longer placeholder):
+   - 2D sections: SD7037 (wing) and NACA 0009 (tail) through NeuralFoil
+     (an XFOIL surrogate) at cruise Reynolds number (~1.9e5, V = 12 m/s,
+     MAC = 236 mm), n_crit = 7 for a matte foam surface.
+   - 3D coefficients: AeroSandbox AeroBuildup component build-up over the real
+     planform (wing + H-tail + twin fins + 46 cm pod + 4 booms), cross-checked
+     against AeroSandbox VLM and a Munk slender-body fuselage yaw estimate.
+     See aero/RESULTS.md and aero/coefficients.json.
+   - Longitudinal C_L is tabulated so the stall knee shows; C_D and C_m carry
+     the real derivatives. Lateral-directional axes are populated (6-DOF).
+
+   DESIGN POINT baked in (refined from the earlier decision memo):
+   - wing incidence 1.0 deg  (2 deg gave negative trim alpha for this light
+     wing loading), cruise 12 m/s, AUW 1.4 kg, CG 33% MAC (static margin ~27%).
+   - tail incidence -1.79 deg vs fuselage (-2.79 vs wing chord) trims cruise.
+   - VERTICAL FINS ENLARGED to 340 cm2 total (170 cm2 each, V_V ~ 0.044): the
+     old 210 cm2 gave C_n_beta ~ 0.02, short of the 0.07 target for a
+     rudderless UAV. Metrics + C_n_beta below reflect the enlarged fin.
+   - Wing dihedral ~3 deg is assumed for C_l_beta (add it to the build).
+   - Control derivatives (Cmde, CLde, Clda) are from aero/control_authority.py
+     (full-span 28%c elevons). Authority is abundant, not marginal — expect
+     ArduPilot rate/throw limiting. Signs follow JSBSim convention; re-check
+     against the elevon mixing at the SITL-bridge step.
+   - Forward motor = A2212 2200KV + 1045 (engine/A2212_2200KV.xml + APC_1045),
+     replacing the undersized DJI E305 stand-in. See PROPULSION_NOTES.md:
+     cruise throttle ~0.34; static NaNs (JSBSim brushless-motor limitation);
+     use verify_model.py's power-off checks, not do_simple_trim.
+   - SITL BRIDGE additions (see BRIDGE.md): an external_reactions block for
+     4 lift rotors + 1 forward + a yaw couple, driven by jsbsim_bridge.py from
+     ArduPilot PWM (the propulsion engine is left un-started for the bridge).
+     4-point landing gear (the 3-point layout tipped over). alpha/beta are
+     clamped to +-25 deg in the derivative terms so a vertical climb does not
+     blow up. Elevon de-mix sign verified against ArduPilot fn 77/78.
+ </description>
+</fileheader>
+
+<metrics>
+  <wingarea  unit="M2">   0.300 </wingarea>
+  <wingspan  unit="M" >   1.300 </wingspan>
+  <wing_incidence unit="DEG"> 1.00 </wing_incidence>
+  <chord     unit="M" >   0.236 </chord>
+  <htailarea unit="M2">   0.063 </htailarea>
+  <htailarm  unit="M" >   0.500 </htailarm>
+  <vtailarea unit="M2">   0.034 </vtailarea>  <!-- twin fins, ENLARGED (was 0.0032) -->
+  <vtailarm  unit="M" >   0.500 </vtailarm>
+  <location name="AERORP" unit="M">   <!-- ref = wing aerodynamic centre -->
+    <x> 0.0 </x> <y> 0.0 </y> <z> 0.0 </z>
+  </location>
+  <location name="EYEPOINT" unit="M">
+    <x> -0.15 </x> <y> 0.0 </y> <z> -0.05 </z>
+  </location>
+  <location name="VRP" unit="M">
+    <x> 0.0 </x> <y> 0.0 </y> <z> 0.0 </z>
+  </location>
+</metrics>
+
+<mass_balance>
+  <!-- 1.4 kg AUW; inertias are engineering estimates for a 1.3 m foam UAV -->
+  <ixx unit="KG*M2">  0.045 </ixx>
+  <iyy unit="KG*M2">  0.030 </iyy>
+  <izz unit="KG*M2">  0.070 </izz>
+  <emptywt unit="KG"> 1.10  </emptywt>   <!-- + 0.30 kg pack tank = 1.40 AUW -->
+  <location name="CG" unit="M">
+    <!-- 33% MAC aft of wing-LE-MAC; wing AC (ref) is at 25% MAC -->
+    <x> 0.0189 </x> <y> 0.0 </y> <z> 0.0 </z>
+  </location>
+</mass_balance>
+
+<ground_reactions>
+  <!-- four VTOL landing legs in a rectangle straddling the CG (struct x ~ 0.02).
+       Soft springs — this is a 1.4 kg foam UAV. Previous 3-point layout
+       (single fwd point) tipped the model over on the ground. -->
+  <contact type="BOGEY" name="LEG_FL">
+    <location unit="M"> <x>-0.22</x> <y>-0.26</y> <z>-0.13</z> </location>
+    <static_friction>0.9</static_friction><dynamic_friction>0.6</dynamic_friction>
+    <rolling_friction>0.5</rolling_friction>
+    <spring_coeff unit="N/M">700</spring_coeff>
+    <damping_coeff unit="N/M/SEC">90</damping_coeff>
+    <max_steer unit="DEG">0.0</max_steer><brake_group>NONE</brake_group><retractable>0</retractable>
+  </contact>
+  <contact type="BOGEY" name="LEG_FR">
+    <location unit="M"> <x>-0.22</x> <y> 0.26</y> <z>-0.13</z> </location>
+    <static_friction>0.9</static_friction><dynamic_friction>0.6</dynamic_friction>
+    <rolling_friction>0.5</rolling_friction>
+    <spring_coeff unit="N/M">700</spring_coeff>
+    <damping_coeff unit="N/M/SEC">90</damping_coeff>
+    <max_steer unit="DEG">0.0</max_steer><brake_group>NONE</brake_group><retractable>0</retractable>
+  </contact>
+  <contact type="BOGEY" name="LEG_RL">
+    <location unit="M"> <x> 0.28</x> <y>-0.26</y> <z>-0.13</z> </location>
+    <static_friction>0.9</static_friction><dynamic_friction>0.6</dynamic_friction>
+    <rolling_friction>0.5</rolling_friction>
+    <spring_coeff unit="N/M">700</spring_coeff>
+    <damping_coeff unit="N/M/SEC">90</damping_coeff>
+    <max_steer unit="DEG">0.0</max_steer><brake_group>NONE</brake_group><retractable>0</retractable>
+  </contact>
+  <contact type="BOGEY" name="LEG_RR">
+    <location unit="M"> <x> 0.28</x> <y> 0.26</y> <z>-0.13</z> </location>
+    <static_friction>0.9</static_friction><dynamic_friction>0.6</dynamic_friction>
+    <rolling_friction>0.5</rolling_friction>
+    <spring_coeff unit="N/M">700</spring_coeff>
+    <damping_coeff unit="N/M/SEC">90</damping_coeff>
+    <max_steer unit="DEG">0.0</max_steer><brake_group>NONE</brake_group><retractable>0</retractable>
+  </contact>
+</ground_reactions>
+
+<propulsion>
+  <!-- forward/cruise motor = the airframe's actual choice: A2212 2200KV + 1045.
+       (The DJI E305/9450 stand-in undersized the static thrust and its 960 Kv
+        motor sat at near-zero thrust across most of the throttle band at
+        cruise speed — see aero/RESULTS.md propulsion note.) -->
+  <engine file="A2212_2200KV">
+    <location unit="M"> <x>0.20</x> <y>0.0</y> <z>0.0</z> </location>
+    <orient unit="DEG"> <roll>0</roll><pitch>0</pitch><yaw>0</yaw> </orient>
+    <feed>0</feed>
+    <thruster file="APC_1045">
+      <location unit="M"> <x>0.25</x> <y>0.0</y> <z>0.0</z> </location>
+      <orient unit="DEG"> <roll>0</roll><pitch>0</pitch><yaw>0</yaw> </orient>
+    </thruster>
+  </engine>
+  <tank type="FUEL" number="0">   <!-- stand-in for the LiPo pack -->
+    <location unit="M"> <x>0.0</x> <y>0.0</y> <z>0.0</z> </location>
+    <capacity unit="KG"> 0.30 </capacity>
+    <contents unit="KG"> 0.30 </contents>
+  </tank>
+</propulsion>
+
+<!-- ============================================================
+     VTOL + forward thrust for the ArduPilot SITL bridge.
+     The bridge (flight_software/jsbsim/jsbsim_bridge.py) sets each
+     external_reactions/*/magnitude (in LBF) every frame from the PWM
+     ArduPilot sends. The <propulsion> engine above is NOT started by the
+     bridge — all thrust comes from here. Thrust models are SIMPLE
+     (calibrated, not measured — see PROPULSION_NOTES.md): trust the
+     fixed-wing cruise/aero, treat hover/transition thrust as indicative.
+       location = structural frame (X aft+, Y right+, Z up+)
+       direction = body frame (X fwd+, Y right+, Z down+)
+     Lift-motor order follows ArduPilot quad-X: M1 FR, M2 RL, M3 FL, M4 RR.
+     ============================================================ -->
+<external_reactions>
+  <force name="liftM1" frame="BODY">   <!-- front-right -->
+    <location unit="M"><x>-0.13</x><y> 0.42</y><z>0.03</z></location>
+    <direction><x>0</x><y>0</y><z>-1</z></direction>
+  </force>
+  <force name="liftM2" frame="BODY">   <!-- rear-left -->
+    <location unit="M"><x> 0.17</x><y>-0.42</y><z>0.03</z></location>
+    <direction><x>0</x><y>0</y><z>-1</z></direction>
+  </force>
+  <force name="liftM3" frame="BODY">   <!-- front-left -->
+    <location unit="M"><x>-0.13</x><y>-0.42</y><z>0.03</z></location>
+    <direction><x>0</x><y>0</y><z>-1</z></direction>
+  </force>
+  <force name="liftM4" frame="BODY">   <!-- rear-right -->
+    <location unit="M"><x> 0.17</x><y> 0.42</y><z>0.03</z></location>
+    <direction><x>0</x><y>0</y><z>-1</z></direction>
+  </force>
+  <force name="fwdMotor" frame="BODY">   <!-- rear pusher -->
+    <location unit="M"><x>0.50</x><y>0</y><z>0.02</z></location>
+    <direction><x>1</x><y>0</y><z>0</z></direction>
+  </force>
+  <!-- yaw-reaction couple: two opposed side forces fore/aft => pure M_z.
+       bridge sets both magnitudes equal (may be negative). -->
+  <force name="yawTorqueF" frame="BODY">
+    <location unit="M"><x>-0.80</x><y>0</y><z>0</z></location>
+    <direction><x>0</x><y>1</y><z>0</z></direction>
+  </force>
+  <force name="yawTorqueA" frame="BODY">
+    <location unit="M"><x> 0.80</x><y>0</y><z>0</z></location>
+    <direction><x>0</x><y>-1</y><z>0</z></direction>
+  </force>
+</external_reactions>
+
+<flight_control name="FCS: CoconutQuadplane">
+  <!-- real airframe uses 2 wing elevons; here elevator = symmetric elevon,
+       aileron = differential elevon (JSBSim standard split). -->
+  <channel name="Pitch">
+    <aerosurface_scale name="Elevator Control">
+      <input>fcs/elevator-cmd-norm</input>
+      <range><min>-0.35</min><max>0.35</max></range>
+      <output>fcs/elevator-pos-rad</output>
+    </aerosurface_scale>
+  </channel>
+  <channel name="Roll">
+    <aerosurface_scale name="Aileron Control">
+      <input>fcs/aileron-cmd-norm</input>
+      <range><min>-0.30</min><max>0.30</max></range>
+      <output>fcs/aileron-pos-rad</output>
+    </aerosurface_scale>
+  </channel>
+  <channel name="Yaw">
+    <!-- no rudder on this airframe; channel kept zeroed for completeness -->
+    <aerosurface_scale name="Rudder Control">
+      <input>fcs/rudder-cmd-norm</input>
+      <gain>0.0</gain>
+      <range><min>-0.01</min><max>0.01</max></range>
+      <output>fcs/rudder-pos-rad</output>
+    </aerosurface_scale>
+  </channel>
+</flight_control>
+
+<aerodynamics>
+
+  <!-- alpha / beta limited to +-25 deg for the derivative terms. This model
+       is a CRUISE fit (valid ~ -8..16 deg); during VTOL hover/transition the
+       real AoA/sideslip briefly leave that range and a linear extrapolation
+       would blow up. Clamping keeps the bridge stable; hover/transition aero
+       is therefore only indicative. -->
+  <function name="aero/alpha-rad-lim">
+    <table>
+      <independentVar>aero/alpha-rad</independentVar>
+      <tableData>
+        -3.15  -0.436
+        -0.436 -0.436
+         0.436  0.436
+         3.15   0.436
+      </tableData>
+    </table>
+  </function>
+  <function name="aero/beta-rad-lim">
+    <table>
+      <independentVar>aero/beta-rad</independentVar>
+      <tableData>
+        -3.15  -0.436
+        -0.436 -0.436
+         0.436  0.436
+         3.15   0.436
+      </tableData>
+    </table>
+  </function>
+
+  <!-- ================= LIFT ================= -->
+  <axis name="LIFT">
+    <function name="aero/coefficient/CL_alpha">
+      <description>C_L vs alpha, whole aircraft (AeroBuildup, V=12 m/s),
+                   wing incidence 1 deg baked in; stall knee tabulated</description>
+      <product>
+        <property>aero/qbar-area</property>
+        <table>
+          <independentVar>aero/alpha-deg</independentVar>
+          <tableData>
+            -8.0   -0.239
+            -6.0   -0.055
+            -4.0    0.128
+            -2.0    0.310
+             0.0    0.430
+             2.0    0.612
+             4.0    0.792
+             6.0    0.968
+             8.0    1.138
+            10.0    1.261
+            12.0    1.330
+            14.0    1.301
+            16.0    1.180
+          </tableData>
+        </table>
+      </product>
+    </function>
+    <function name="aero/coefficient/CLq">
+      <description>Lift due to pitch rate</description>
+      <product>
+        <property>aero/qbar-area</property>
+        <property>aero/ci2vel</property>
+        <property>velocities/q-aero-rad_sec</property>
+        <value> 4.52 </value>
+      </product>
+    </function>
+    <function name="aero/coefficient/CLde">
+      <description>Lift from symmetric elevon — large (full-span 28%c flap),
+                   CL_de ~ 3.16 /rad (aero/control_authority.py)</description>
+      <product>
+        <property>aero/qbar-area</property>
+        <property>fcs/elevator-pos-rad</property>
+        <value> 3.16 </value>
+      </product>
+    </function>
+  </axis>
+
+  <!-- ================= DRAG ================= -->
+  <axis name="DRAG">
+    <function name="aero/coefficient/CD0">
+      <description>Parasite drag (wing+tail+pod+booms buildup)</description>
+      <product>
+        <property>aero/qbar-area</property>
+        <value> 0.0196 </value>
+      </product>
+    </function>
+    <function name="aero/coefficient/CDi">
+      <description>Induced drag, k = 1/(pi e AR), e ~ 0.79</description>
+      <product>
+        <property>aero/qbar-area</property>
+        <property>aero/cl-squared</property>
+        <value> 0.0713 </value>
+      </product>
+    </function>
+    <function name="aero/coefficient/CDde">
+      <description>Drag due to elevon deflection</description>
+      <product>
+        <property>aero/qbar-area</property>
+        <abs><property>fcs/elevator-pos-rad</property></abs>
+        <value> 0.10 </value>
+      </product>
+    </function>
+  </axis>
+
+  <!-- ================= SIDE ================= -->
+  <axis name="SIDE">
+    <function name="aero/coefficient/CYb">
+      <description>Side force due to sideslip (enlarged twin fins)</description>
+      <product>
+        <property>aero/qbar-area</property>
+        <property>aero/beta-rad-lim</property>
+        <value> -0.242 </value>
+      </product>
+    </function>
+    <function name="aero/coefficient/CYr">
+      <product>
+        <property>aero/qbar-area</property>
+        <property>aero/bi2vel</property>
+        <property>velocities/r-aero-rad_sec</property>
+        <value> 0.15 </value>
+      </product>
+    </function>
+  </axis>
+
+  <!-- ================= PITCH ================ -->
+  <axis name="PITCH">
+    <function name="aero/coefficient/Cm0">
+      <description>Zero-alpha pitching moment</description>
+      <product>
+        <property>aero/qbar-area</property>
+        <property>metrics/cbarw-ft</property>
+        <value> -0.068 </value>
+      </product>
+    </function>
+    <function name="aero/coefficient/Cmalpha">
+      <description>Pitch stiffness about the wing-AC ref (CG offset via mass_balance)</description>
+      <product>
+        <property>aero/qbar-area</property>
+        <property>metrics/cbarw-ft</property>
+        <property>aero/alpha-rad-lim</property>
+        <value> -1.671 </value>
+      </product>
+    </function>
+    <function name="aero/coefficient/Cmq">
+      <description>Pitch damping</description>
+      <product>
+        <property>aero/qbar-area</property>
+        <property>metrics/cbarw-ft</property>
+        <property>aero/ci2vel</property>
+        <property>velocities/q-aero-rad_sec</property>
+        <value> -10.13 </value>
+      </product>
+    </function>
+    <function name="aero/coefficient/Cmde">
+      <description>Pitch control power (symmetric elevon) — |Cm_de| = 0.38 /rad
+                   about CG 33% MAC (aero/control_authority.py). Sign is JSBSim
+                   convention (TE-down elevator -> nose down); confirm against
+                   the ArduPilot elevon mixing at the SITL-bridge step.</description>
+      <product>
+        <property>aero/qbar-area</property>
+        <property>metrics/cbarw-ft</property>
+        <property>fcs/elevator-pos-rad</property>
+        <value> -0.38 </value>
+      </product>
+    </function>
+  </axis>
+
+  <!-- ================= ROLL ================= -->
+  <axis name="ROLL">
+    <function name="aero/coefficient/Clb">
+      <description>Dihedral effect (assumes ~3 deg wing dihedral)</description>
+      <product>
+        <property>aero/qbar-area</property>
+        <property>metrics/bw-ft</property>
+        <property>aero/beta-rad-lim</property>
+        <value> -0.040 </value>
+      </product>
+    </function>
+    <function name="aero/coefficient/Clp">
+      <description>Roll damping</description>
+      <product>
+        <property>aero/qbar-area</property>
+        <property>metrics/bw-ft</property>
+        <property>aero/bi2vel</property>
+        <property>velocities/p-aero-rad_sec</property>
+        <value> -0.443 </value>
+      </product>
+    </function>
+    <function name="aero/coefficient/Clr">
+      <description>Roll due to yaw rate</description>
+      <product>
+        <property>aero/qbar-area</property>
+        <property>metrics/bw-ft</property>
+        <property>aero/bi2vel</property>
+        <property>velocities/r-aero-rad_sec</property>
+        <value> 0.124 </value>
+      </product>
+    </function>
+    <function name="aero/coefficient/Clda">
+      <description>Roll control power (differential elevon) — |Cl_da| = 0.72 /rad
+                   (full-span elevons, aero/control_authority.py). Roll authority
+                   is very high (~650 deg/s at full throw); ArduPilot rate/expo
+                   limiting expected. Confirm sign at the SITL-bridge step.</description>
+      <product>
+        <property>aero/qbar-area</property>
+        <property>metrics/bw-ft</property>
+        <property>fcs/aileron-pos-rad</property>
+        <value> 0.72 </value>
+      </product>
+    </function>
+  </axis>
+
+  <!-- ================= YAW ================== -->
+  <axis name="YAW">
+    <function name="aero/coefficient/Cnb">
+      <description>Weathercock stability — ENLARGED fins, target met (~0.071/rad)</description>
+      <product>
+        <property>aero/qbar-area</property>
+        <property>metrics/bw-ft</property>
+        <property>aero/beta-rad-lim</property>
+        <value> 0.071 </value>
+      </product>
+    </function>
+    <function name="aero/coefficient/Cnr">
+      <description>Yaw damping</description>
+      <product>
+        <property>aero/qbar-area</property>
+        <property>metrics/bw-ft</property>
+        <property>aero/bi2vel</property>
+        <property>velocities/r-aero-rad_sec</property>
+        <value> -0.080 </value>
+      </product>
+    </function>
+    <function name="aero/coefficient/Cnp">
+      <description>Yaw due to roll rate</description>
+      <product>
+        <property>aero/qbar-area</property>
+        <property>metrics/bw-ft</property>
+        <property>aero/bi2vel</property>
+        <property>velocities/p-aero-rad_sec</property>
+        <value> -0.060 </value>
+      </product>
+    </function>
+    <function name="aero/coefficient/Cnda">
+      <description>Adverse yaw from differential elevon</description>
+      <product>
+        <property>aero/qbar-area</property>
+        <property>metrics/bw-ft</property>
+        <property>fcs/aileron-pos-rad</property>
+        <value> -0.006 </value>
+      </product>
+    </function>
+  </axis>
+
+</aerodynamics>
+
+</fdm_config>

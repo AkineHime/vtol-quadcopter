@@ -1,0 +1,22 @@
+{
+  "param_mismatches": [],
+  "flight": {
+    "ok": true,
+    "crashed": false,
+    "phases": {
+      "vtol_takeoff": true,
+      "transition_fw": true,
+      "waypoints_done": true,
+      "vtol_land": true,
+      "disarmed": true
+    },
+    "home": [
+      -35.3632622,
+      149.1652376
+    ],
+    "max_alt_m": 37.8,
+    "max_airspeed_ms": 18.3,
+    "flight_time_s": 61.8
+  },
+  "mission_roundtrip_ok": true
+}

@@ -1,0 +1,19 @@
+{
+  "check23_mission": {
+    "passed": true,
+    "mission_roundtrip": true,
+    "phases": {
+      "vtol_takeoff": true,
+      "transition_fw": true,
+      "waypoints_done": true,
+      "vtol_land": true,
+      "disarmed": true
+    },
+    "bridge_nan_free": true,
+    "anomalies": [],
+    "max_alt_m": 33.0,
+    "max_airspeed_ms": 24.9,
+    "max_tilt_in_hover_deg": 13.6,
+    "flight_time_s": 131.5
+  }
+}

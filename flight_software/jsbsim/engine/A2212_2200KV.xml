@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!--
+  A2212 2200KV brushless outrunner — the forward/cruise motor actually chosen
+  for this airframe (roadmap spec), replacing the DJI E305 stand-in.
+  Typical published / measured values for this ~$3 class of motor:
+    Kv                2200 rpm/V
+    winding R         ~0.10 ohm
+    no-load current   ~0.6 A
+    weight            ~52 g,  max ~150 W (~13 A) burst
+  On 3S: ~11-12 A and ~750-850 g static thrust with a 10x4.5 prop.
+-->
+<brushless_dc_motor name="A2212 2200KV">
+  <velocityconstant> 2200 </velocityconstant>
+  <!-- coilresistance is a *lumped* value (motor winding + ESC + wiring).
+       Bare winding is ~0.10 ohm; raised here as a compromise between modelled
+       static thrust and current draw (JSBSim's brushless_dc_motor + a
+       fixed-pitch internal-table prop cannot match both at this size — see
+       aero/RESULTS.md propulsion note). With 0.14 ohm the cruise throttle is
+       ~0.32 for ~1 N at 12 m/s; peak thrust is modelled a bit low (~5 N vs
+       ~7-8 N real) and current a bit high, so treat endurance/climb from this
+       model as conservative. -->
+  <coilresistance> 0.14 </coilresistance>
+  <noloadcurrent> 0.60 </noloadcurrent>
+  <maxvolts> 12.6 </maxvolts>
+</brushless_dc_motor>

@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "freecad": {
+      "command": "uvx",
+      "args": ["freecad-mcp"],
+      "comment": "Talks to the FreeCADMCP addon's RPC server (localhost). Requires: (1) `uv`/`uvx` on PATH, or swap to `python -m freecad_mcp` after `pip install freecad-mcp`; (2) FreeCAD running with the MCP RPC server started (Tools > Start MCP Server, or auto_start_rpc in freecad_mcp_settings.json); (3) a Claude Code restart so this server loads."
+    }
+  }
+}
