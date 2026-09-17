@@ -1,0 +1,220 @@
+<title>Quadplane Drawing Sheet</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root{
+    --paper:#f6f7f4; --ink:#1b1f1d; --ink-soft:#4d534e;
+    --line:#c9cdc4; --line-soft:#dde0d9;
+    --panel:#ffffff;
+    --blue:#2a5ca6; --blue-soft:#e8eef8;
+    --amber:#a5631a; --amber-soft:#f7ecdd;
+    --radius:3px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#14181a; --ink:#e8eae5; --ink-soft:#a9b0a8;
+      --line:#333a35; --line-soft:#242a26;
+      --panel:#1b201d;
+      --blue:#7ea6e0; --blue-soft:#1c2735;
+      --amber:#e0a05c; --amber-soft:#2c2216;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#14181a; --ink:#e8eae5; --ink-soft:#a9b0a8;
+    --line:#333a35; --line-soft:#242a26;
+    --panel:#1b201d;
+    --blue:#7ea6e0; --blue-soft:#1c2735;
+    --amber:#e0a05c; --amber-soft:#2c2216;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+    padding-inline:20px; padding-block:36px 64px;
+    line-height:1.55;
+  }
+  .wrap{max-width:1040px; margin-inline:auto}
+
+  h1,h2{font-family:'Source Serif 4', Georgia, serif; font-weight:600;
+        text-wrap:balance; margin:0}
+  .kicker{
+    font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:12px;
+    letter-spacing:.08em; text-transform:uppercase; color:var(--blue);
+    margin:0 0 10px;
+  }
+  h1{font-size:clamp(28px,4.2vw,40px); letter-spacing:-.01em}
+  .sub{color:var(--ink-soft); font-size:16px; max-width:62ch; margin:14px 0 0}
+
+  .titleblock{
+    display:flex; flex-wrap:wrap; gap:10px 28px;
+    border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+    padding-block:14px; margin-top:26px;
+    font-family:'IBM Plex Mono', monospace; font-size:12.5px; color:var(--ink-soft);
+  }
+  .titleblock b{color:var(--ink); font-weight:500}
+
+  section{margin-top:56px}
+  h2{font-size:22px; margin-bottom:14px}
+  p{margin:0 0 12px}
+
+  .legend{display:flex; flex-wrap:wrap; gap:10px; margin:18px 0 26px}
+  .tag{
+    display:inline-flex; align-items:center; gap:7px;
+    font-family:'IBM Plex Mono', monospace; font-size:12px;
+    padding:6px 11px; border-radius:999px; border:1px solid transparent;
+  }
+  .tag.real{background:var(--blue-soft); color:var(--blue); border-color:color-mix(in srgb, var(--blue) 35%, transparent)}
+  .tag.schem{background:var(--amber-soft); color:var(--amber); border-color:color-mix(in srgb, var(--amber) 35%, transparent)}
+  .tag .dot{width:7px; height:7px; border-radius:50%; background:currentColor; flex:none}
+
+  .grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr));
+    gap:22px;
+  }
+  .sheet{
+    position:relative; background:var(--panel); border:1px solid var(--line);
+    border-radius:var(--radius); padding:14px; margin:0;
+  }
+  .sheet-reg{position:absolute; width:12px; height:12px; border:var(--line) solid; opacity:.7}
+  .sheet-reg.tl{top:6px; left:6px; border-width:1.5px 0 0 1.5px}
+  .sheet-reg.tr{top:6px; right:6px; border-width:1.5px 1.5px 0 0}
+  .sheet-reg.bl{bottom:6px; left:6px; border-width:0 0 1.5px 1.5px}
+  .sheet-reg.br{bottom:6px; right:6px; border-width:0 1.5px 1.5px 0}
+  .sheet img{width:100%; height:auto; display:block; background:#fff; border-radius:2px}
+  .sheet figcaption{margin-top:10px}
+  .fig-no{
+    font-family:'IBM Plex Mono', monospace; font-weight:500; font-size:12px;
+    color:var(--blue); letter-spacing:.03em;
+  }
+  .fig-title{display:block; font-family:'Source Serif 4', Georgia, serif;
+             font-size:17px; margin-top:2px}
+  .fig-note{display:block; font-size:13px; color:var(--ink-soft); margin-top:4px}
+
+  .callout{
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+    padding:18px 20px;
+  }
+  .callout + .callout{margin-top:14px}
+  .callout h3{
+    font-family:'IBM Plex Mono', monospace; font-size:12px; letter-spacing:.06em;
+    text-transform:uppercase; margin:0 0 10px; color:var(--ink-soft);
+  }
+  .callout.need h3{color:var(--amber)}
+  .callout.ok h3{color:var(--blue)}
+  ul.plain{margin:0; padding-left:18px}
+  ul.plain li{margin-bottom:7px}
+  ul.plain li:last-child{margin-bottom:0}
+
+  table.legend-tbl{width:100%; border-collapse:collapse; font-size:14px; margin-top:10px}
+  table.legend-tbl th, table.legend-tbl td{
+    text-align:left; padding:8px 10px; border-bottom:1px solid var(--line-soft);
+  }
+  table.legend-tbl th{
+    font-family:'IBM Plex Mono', monospace; font-size:11.5px; letter-spacing:.05em;
+    text-transform:uppercase; color:var(--ink-soft); font-weight:500;
+  }
+  table.legend-tbl td.num{font-family:'IBM Plex Mono', monospace; color:var(--blue)}
+  .tbl-wrap{overflow-x:auto}
+
+  footer{
+    margin-top:56px; padding-top:18px; border-top:1px solid var(--line);
+    font-size:13px; color:var(--ink-soft);
+  }
+</style>
+
+<div class="wrap">
+  <p class="kicker">Schematic drawing set &middot; not for filing</p>
+  <h1>Autonomous Quadplane UAV &mdash; Patent Drawing Preview</h1>
+  <p class="sub">Seven views generated from one consistent parametric model, in the
+    format a utility-patent filing needs: perspective, top, bottom, front, rear,
+    and both sides. Built to check the approach before committing to a final set.</p>
+
+  <div class="titleblock">
+    <span>APPLICATION&nbsp; <b>Coconut&#8209;plantation disease/pest survey UAV</b></span>
+    <span>SHEETS&nbsp; <b>1&ndash;7 of 7</b></span>
+    <span>STATUS&nbsp; <b>Preview / schematic</b></span>
+  </div>
+
+  <section>
+    <h2>Reading these drawings</h2>
+    <p>Every figure comes from the same 3D point set, so all seven are mutually
+      consistent &mdash; a part in the same place across figures, as an examiner
+      expects. Two kinds of dimension went into it:</p>
+    <div class="legend">
+      <span class="tag real"><span class="dot"></span>Confirmed dimension</span>
+      <span class="tag schem"><span class="dot"></span>Schematic placeholder</span>
+    </div>
+    <p>Confirmed: 1.3&nbsp;m wing span, 288/173&nbsp;mm root/tip chord, 0.30&nbsp;m&sup2;
+      wing area, unswept leading edge, 28%-chord elevon hinge, 170&nbsp;cm&sup2;
+      per vertical fin, 254&nbsp;mm (10&times;4.5&Prime;) propellers &mdash; all
+      pulled directly from the aerodynamic analysis and control-authority study.
+      Schematic: fuselage pod shape, tail-boom length and placement, horizontal-tail
+      span/chord, lift-motor mount points, and camera/sensor placement &mdash; proportioned
+      to be plausible, not yet engineered. None of this is a manufacturing CAD
+      model; it's a drafting-accurate placeholder for the parts that were never
+      designed in detail.</p>
+  </section>
+
+  <section>
+    <h2>The seven views</h2>
+    <div class="grid">
+__CARDS__
+    </div>
+  </section>
+
+  <section>
+    <h2>Reference numerals</h2>
+    <div class="tbl-wrap">
+      <table class="legend-tbl">
+        <thead><tr><th>No.</th><th>Part</th><th>Basis</th></tr></thead>
+        <tbody>
+          <tr><td class="num">100</td><td>Fuselage pod</td><td>Schematic</td></tr>
+          <tr><td class="num">110</td><td>Main wing</td><td>Confirmed dimension</td></tr>
+          <tr><td class="num">112</td><td>Elevon (pitch + roll control surface)</td><td>Confirmed dimension</td></tr>
+          <tr><td class="num">120</td><td>Horizontal tail</td><td>Schematic</td></tr>
+          <tr><td class="num">130</td><td>Vertical fin (twin)</td><td>Confirmed dimension</td></tr>
+          <tr><td class="num">140</td><td>Tail boom (twin)</td><td>Schematic</td></tr>
+          <tr><td class="num">150</td><td>Lift rotor, quad&#8209;X (&times;4)</td><td>Schematic mount / confirmed prop size</td></tr>
+          <tr><td class="num">160</td><td>Forward propulsion unit</td><td>Confirmed dimension</td></tr>
+          <tr><td class="num">170</td><td>RGB camera</td><td>Schematic placement</td></tr>
+          <tr><td class="num">180</td><td>Time-of-flight ranging sensor</td><td>Schematic placement</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Viability &amp; what's still needed</h2>
+    <div class="callout ok">
+      <h3>Viable now</h3>
+      <ul class="plain">
+        <li>All seven standard views, mutually consistent, from one model &mdash; achievable
+          entirely from data already on hand, no new engineering required.</li>
+        <li>Reference numerals and leader lines matching a specification's part list.</li>
+        <li>Re-rendering at any camera angle or with different callouts in minutes,
+          since the whole set is generated from one parametric script.</li>
+      </ul>
+    </div>
+    <div class="callout need">
+      <h3>Needed before a final filing</h3>
+      <ul class="plain">
+        <li><b>Engineer the schematic parts</b> &mdash; pod shape, boom length/placement,
+          horizontal-tail sizing, motor mounts &mdash; so every dimension in the
+          drawings is confirmed, not placeholder.</li>
+        <li><b>A true hidden-line CAD render</b> once those parts are engineered, for
+          exact occlusion between parts (this set approximates it).</li>
+        <li><b>Formal sheet formatting</b> &mdash; India Patent Rules margins, sheet
+          numbering, one figure per sheet or a fixed layout &mdash; applied once the
+          content is final, not before.</li>
+        <li><b>Sign-off from whoever drafts the claims</b> on which features the
+          drawings must show, since claim language usually drives what gets drawn
+          and how it's labelled.</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>Generated from the project's real aerodynamic and control-authority data
+    plus reasoned placeholder geometry for unengineered parts &mdash; see the
+    reference-numeral table above for which is which.</footer>
+</div>
