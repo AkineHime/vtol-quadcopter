@@ -112,6 +112,40 @@ KCL — each has a reason, not just a preference):
    legs — a narrow, centered stance on the body, not a wide one on the
    booms.
 
+8. **Tail moved down to boom height; brace and pusher mast eliminated.**
+   The tail was at Z=88.8mm while the boom sits at Z=18.8mm — that 70mm
+   gap is exactly why a diagonal brace was needed to connect them (item
+   3). Team's call: instead of bridging the gap, remove it — move the
+   tail down to the boom's own height so the boom runs straight into
+   the tail's root, no brace required. Ripple effects, each checked:
+   - **Fin is now two pieces per side**, not one: a dorsal piece
+     reaching 90mm up and a ventral piece reaching 60mm down from the
+     shared boom/tail waterline ("a vertical stabilizer on both ends,
+     one facing up, one facing down"). Combined span (150mm) exceeds
+     the old single fin's height (120.8mm), so yaw authority isn't
+     reduced. The crown-arc taper from the KCL fin is simplified to a
+     straight taper here — a modeling simplification, not a dimension
+     change (real root chord, 138.2mm, kept).
+   - **Boom extended aft** from 330mm to 555mm to reach the relocated
+     tail (560mm) directly. Checked clear of the rear rotor disc
+     (aft edge 451.8mm) by 103mm.
+   - **Pusher mast removed.** The pusher previously needed a mast
+     because it was offset from the tail's mount point. With the tail
+     now at boom height and the pusher mounted flush at the fuselage's
+     own tail tip (Y=0, Z=0 — the fuselage's own centerline height
+     there), no offset exists to bridge. Checked clear of the fin
+     (aft edge 698.2mm) by 56mm.
+   - **Fuselage lengthened** from 1081mm to 1445mm (the "increase the
+     fuselage size" the team authorized) — the last two loft stations
+     are now a computed stretch, not real KCL numbers, specifically
+     sized to fit the relocated tail and pusher with real clearance
+     margins rather than crowding them. Flagged as SCHEMATIC (stretched)
+     in the fuselage section, same as the original last-two stations
+     were real.
+   - Re-verified the wing/rotor clearance fix from item 5 still holds
+     (40mm each side, unaffected by any of this — the wing and front
+     boom half didn't move).
+
 **Explicitly not modeled** (placeholder, flagged so it's never mistaken
 for finished): propeller blades are flat rectangular silhouettes, not
 real airfoil-twisted blades; joints (boom-to-pod, brace-to-fin) are
@@ -133,6 +167,10 @@ number changed:
 | Fuselage max radius | ~98mm (196mm dia) | `fuselage.kcl` mid-body station |
 | Front/rear rotor-to-wing clearance | +40.0mm each | script-computed, printed every run |
 | Fin/keel Y | 246.7mm | must equal tailplane half-span (also printed) |
+| Boom-aft-tip to rear-rotor clearance | +103.2mm | script-computed, printed every run |
+| Pusher-to-fin clearance | +56.2mm | script-computed, printed every run |
+| Fuselage length | 1444.9mm | was 1081.2mm before the tail relocation (sec. 8) |
+| Overall height (ground to highest point) | 342.9mm | ground line (−197.4) to pusher disc top (+145.6) |
 
 ## Housekeeping
 
