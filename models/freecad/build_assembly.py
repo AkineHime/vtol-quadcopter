@@ -91,6 +91,17 @@ def cylinder_between(p1, p2, radius, name, doc):
     return obj
 
 
+def cone_between(p1, p2, r1, r2, name, doc):
+    """Like cylinder_between but tapers from r1 (at p1) to r2 (at p2) --
+    for a joint between two differently-sized members that should read
+    as one continuous piece instead of an abrupt step."""
+    p1, p2 = V(*p1), V(*p2)
+    vec = p2 - p1
+    obj = doc.addObject("Part::Feature", name)
+    obj.Shape = Part.makeCone(r1, r2, vec.Length, p1, vec)
+    return obj
+
+
 def round_edges(obj, radius):
     """Best-effort fillet of every edge on a part -- softens the sharp
     mitred corners flat_panel/loft leave behind. Wrapped because OCC's
@@ -228,9 +239,19 @@ def main():
     LIFT_BELL_R, LIFT_BELL_H = 18.0, 10.0
     LIFT_SHAFT_R, LIFT_SHAFT_H = 8.0, 8.0
 
-    # STRUT: thinner secondary member (6mm vs the boom's 11mm) bridging
-    # the now-shortened boom to the tail -- see BOOM_AFT_X comment above.
+    # STRUT: bridges the now-shortened boom to the tail -- see BOOM_AFT_X
+    # comment above. Built as a CONE (BOOM_R at the boom end, tapering to
+    # the thinner STRUT_R) instead of a constant-radius cylinder: a
+    # cylinder starting at STRUT_R left an abrupt step where it met the
+    # boom's larger 11mm face, which read as "not attached" even though
+    # the two were numerically touching. TAIL_EMBED pushes the strut's
+    # far end 3mm past the tail's nominal edge so it still overlaps the
+    # tail's solid even after round_edges' fillet rounds that corner
+    # back slightly (confirmed: the fillet was pulling TailR's own edge
+    # in by ~0.5mm, leaving a hairline real gap there).
+    BOOM_R = 11.0
     STRUT_R = 6.0
+    TAIL_EMBED = 3.0
 
     # Landing legs SPLAYED this pass -- were plumb-vertical, which looks
     # (and structurally is) less stable than a splayed stance. Real
@@ -340,23 +361,24 @@ def main():
     for ysign in (1, -1):
         y = BOOM_Y * ysign
         cylinder_between((-340.0, y, BOOM_Z), (BOOM_AFT_X, y, BOOM_Z),
-                         11.0, f"Boom{'R' if ysign > 0 else 'L'}", doc)
+                         BOOM_R, f"Boom{'R' if ysign > 0 else 'L'}", doc)
 
-    # ==== 6b. TAIL STRUTS x2 -- NEW this pass ==============================
-    #    Bridges the real gap left by shortening the boom (above): a
-    #    thinner (STRUT_R=6mm vs the boom's 11mm), visually distinct
-    #    secondary member running from the boom's new tip straight to the
-    #    tail root, at the same Y and Z (both already share BOOM_Z, so
-    #    this is a straight strut, not a height-bridging brace like the
-    #    one removed in sec. 8). Stud rings at both ends -- boom-to-strut
-    #    and strut-to-tail -- so each is a visible joint, not another bare
-    #    abutment.
+    # ==== 6b. TAIL STRUTS x2 =================================================
+    #    FIXED this pass: was a constant-6mm cylinder, which stepped down
+    #    abruptly from the boom's 11mm face and stopped exactly at TAIL_X
+    #    -- both read as "not attached" (the step looked disconnected,
+    #    and the tail's own fillet had quietly pulled its edge back
+    #    ~0.5mm, leaving an actual gap there). Now a tapered cone
+    #    (BOOM_R at the boom, narrowing to STRUT_R) that starts flush
+    #    with the boom's own face and ends TAIL_EMBED past the tail's
+    #    nominal edge, so it visibly overlaps the tail's solid with
+    #    margin. Stud rings at both ends.
     for ysign in (1, -1):
         y = BOOM_Y * ysign
         side = "R" if ysign > 0 else "L"
-        cylinder_between((BOOM_AFT_X, y, BOOM_Z), (TAIL_X, y, BOOM_Z),
-                         STRUT_R, f"Strut{side}", doc)
-        stud_ring((BOOM_AFT_X, y, BOOM_Z), "x", 11.0, f"StudBoomStrut{side}", doc,
+        cone_between((BOOM_AFT_X, y, BOOM_Z), (TAIL_X + TAIL_EMBED, y, BOOM_Z),
+                    BOOM_R, STRUT_R, f"Strut{side}", doc)
+        stud_ring((BOOM_AFT_X, y, BOOM_Z), "x", BOOM_R, f"StudBoomStrut{side}", doc,
                  n=4, stud_r=1.2, stud_h=2.2)
         stud_ring((TAIL_X, y, BOOM_Z), "x", STRUT_R, f"StudStrutTail{side}", doc,
                  n=4, stud_r=1.2, stud_h=2.2)

@@ -283,6 +283,27 @@ KCL — each has a reason, not just a preference):
       with no distinct edges to round in the first place, so this
       isn't a defect, just nothing to do there.
 
+13. **Strut was still reading as "not attached."** Checked with
+    `Shape.BoundBox` and found two separate real issues on the strut
+    built in item 12:
+    - It was a constant `STRUT_R=6mm` cylinder starting flush against
+      the boom's `11mm` face -- a real radius step, not a gap, but a
+      visible discontinuity that reads the same way.
+    - It stopped exactly at `TAIL_X` (560mm), but `round_edges`'
+      fillet on `TailR` pulls that corner back by about 0.5mm
+      (confirmed: `TailR`'s actual solid starts at X=560.54, not
+      560.0) -- so there was a genuine, if hairline, physical gap
+      there too.
+    Fixed both: the strut is now built with `cone_between()` (tapers
+    from `BOOM_R=11mm` at the boom down to `STRUT_R=6mm`), so it starts
+    with the exact same cross-section as the boom (flush, no step), and
+    it now ends at `TAIL_X + TAIL_EMBED` (3mm past the tail's nominal
+    edge) so it physically overlaps `TailR`'s solid with margin,
+    regardless of the fillet. Re-verified via `Shape.BoundBox`:
+    `StrutR` now spans the identical Y/Z envelope as `BoomR` at their
+    shared X=330, and ends at X=563, safely past `TailR`'s actual start
+    (560.54).
+
 **Explicitly not modeled** (placeholder, flagged so it's never mistaken
 for finished): propeller blades are flat (tapered, but untwisted)
 silhouettes, not real airfoil blades. Fine for a patent reference and
@@ -313,7 +334,7 @@ number changed:
 | Fuselage cross-section at rod start | Y ±14.5mm, Z ±18.15mm, centered Z=0 | verified via `Shape.slice()` — rod now concentric with this, sec. 11 |
 | Boom length (each side) | 330.0mm (was 555.0mm) | shortened, sec. 12 |
 | Boom overhang past its own rotor mount | +23.8mm | script-computed, printed every run |
-| Tail strut length | 230.0mm, radius 6mm | boom tip (330) to tail root (560), sec. 12 |
+| Tail strut | 233mm, tapers 11mm→6mm, ends at X=563 | flush with boom, 3mm into the tail's solid — sec. 13 |
 | Leg ground half-width | 101.6mm (was 66.6mm plumb) | splayed stance, sec. 12 |
 | Overall height (ground to highest point) | 361.7mm | ground line (−197.4) to pusher disc top (+164.3) |
 
