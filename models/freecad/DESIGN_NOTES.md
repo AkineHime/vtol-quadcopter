@@ -304,11 +304,36 @@ KCL — each has a reason, not just a preference):
     shared X=330, and ends at X=563, safely past `TailR`'s actual start
     (560.54).
 
+14. **Boom-to-tail strut removed outright; boom attached to the MAIN
+    wing instead.** The team's read, after seeing items 12-13: the boom
+    was never structurally attached to anything real -- items 12/13
+    were chasing a connection to the tail that shouldn't have existed
+    in the first place. Explicit decision: **the boom does not connect
+    to the tail at all.** `Strut{R,L}` and its two stud rings
+    (`StudBoomStrut`, `StudStrutTail`) are gone; `BOOM_AFT_X` (330mm)
+    is now a genuine free end.
+    In their place: a **`WingPillar{R,L}`**, a vertical member from the
+    boom's own centerline up to the **main wing's** underside, at the
+    boom's spanwise station (`BOOM_Y`) and roughly the wing's mid-chord
+    (`PILLAR_X=0`; the wing's chord there runs -117 to +121mm). The
+    real problem this solves: the boom sits at a fixed `BOOM_Z=18.8mm`
+    along its whole length, but the main wing has a 2-degree dihedral
+    rooted at `Z=155*S` -- at the boom's own station that works out to
+    an underside of **~76.6mm**, a ~58mm vertical gap with nothing
+    bridging it. `wing_underside_z(y)` computes this by replaying the
+    exact rotate-then-translate transform `place()` applies to the wing
+    (verified against the built shape: `Shape.distToShape()` between
+    `WingPillarR` and both `BoomR` and `WingR` returns exactly 0.0,
+    i.e. real contact, not just close bounding boxes). The pillar
+    embeds 2mm into each solid at both ends (`PILLAR_EMBED`, same
+    fillet-inset lesson as item 13) and has a stud ring at each end.
+
 **Explicitly not modeled** (placeholder, flagged so it's never mistaken
 for finished): propeller blades are flat (tapered, but untwisted)
-silhouettes, not real airfoil blades. Fine for a patent reference and
-for aero work; would need real surfacing before anything
-manufacturing-facing.
+silhouettes, not real airfoil blades; the lift-rotor boom's aft end
+(330mm) is a genuine free end, not connected to the tail (item 14 --
+explicit team decision). Fine for a patent reference and for aero
+work; would need real surfacing before anything manufacturing-facing.
 
 ## 4. Verified numbers (check these after any edit)
 
@@ -334,7 +359,8 @@ number changed:
 | Fuselage cross-section at rod start | Y ±14.5mm, Z ±18.15mm, centered Z=0 | verified via `Shape.slice()` — rod now concentric with this, sec. 11 |
 | Boom length (each side) | 330.0mm (was 555.0mm) | shortened, sec. 12 |
 | Boom overhang past its own rotor mount | +23.8mm | script-computed, printed every run |
-| Tail strut | 233mm, tapers 11mm→6mm, ends at X=563 | flush with boom, 3mm into the tail's solid — sec. 13 |
+| Wing pillar | 61.8mm, boom Z=18.8 to wing underside Z=76.6 | boom no longer connects toward the tail at all — sec. 14 |
+| Pillar-to-wing / pillar-to-boom contact | distToShape() = 0.0mm both | verified geometrically, not just by bounding box — sec. 14 |
 | Leg ground half-width | 101.6mm (was 66.6mm plumb) | splayed stance, sec. 12 |
 | Overall height (ground to highest point) | 361.7mm | ground line (−197.4) to pusher disc top (+164.3) |
 

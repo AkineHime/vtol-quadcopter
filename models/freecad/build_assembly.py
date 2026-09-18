@@ -195,10 +195,13 @@ def main():
     # tube ends floating apart. Team's call: stop trying to make the
     # boom itself reach the tail -- shorten it back to just past its own
     # rotor mount (REAR_ROTOR_X=306.2, +24mm of overhang, matching the
-    # boom's original real length before that extension), and bridge the
-    # real gap with an explicit, visually distinct STRUT (thinner,
-    # secondary member -- see section 6b) instead of stretching the main
-    # spar to do a job it was never sized for.
+    # boom's original real length before that extension).
+    #
+    # REVERSED this pass: a tapered strut connecting the boom to the tail
+    # (sec. 12-13) was built, then explicitly rejected -- "do not connect
+    # it to the back wings." The boom does not reach toward the tail at
+    # all any more; see sec. 14 for what replaced it (a pillar up to the
+    # MAIN wing instead).
     BOOM_AFT_X = 330.0
     TAIL_X = 560.0             # tail root LE mount, on the tailboom rod
     TAIL_ROOT_CHORD = 340 * S  # 167.8mm -- real tail root chord (KCL)
@@ -239,19 +242,27 @@ def main():
     LIFT_BELL_R, LIFT_BELL_H = 18.0, 10.0
     LIFT_SHAFT_R, LIFT_SHAFT_H = 8.0, 8.0
 
-    # STRUT: bridges the now-shortened boom to the tail -- see BOOM_AFT_X
-    # comment above. Built as a CONE (BOOM_R at the boom end, tapering to
-    # the thinner STRUT_R) instead of a constant-radius cylinder: a
-    # cylinder starting at STRUT_R left an abrupt step where it met the
-    # boom's larger 11mm face, which read as "not attached" even though
-    # the two were numerically touching. TAIL_EMBED pushes the strut's
-    # far end 3mm past the tail's nominal edge so it still overlaps the
-    # tail's solid even after round_edges' fillet rounds that corner
-    # back slightly (confirmed: the fillet was pulling TailR's own edge
-    # in by ~0.5mm, leaving a hairline real gap there).
     BOOM_R = 11.0
-    STRUT_R = 6.0
-    TAIL_EMBED = 3.0
+
+    # WING PILLAR -- NEW this pass, replaces the (removed) tail strut.
+    # The boom sits at a fixed BOOM_Z=18.8mm along its whole length, but
+    # the MAIN wing (2-degree dihedral, root at Z=155*S) is nowhere near
+    # that height -- at the boom's own spanwise station (BOOM_Y) the
+    # wing's underside works out to ~76.6mm, verified below by computing
+    # the exact same rotate-then-translate transform place() applies to
+    # the wing. That ~58mm vertical gap is why the boom read as
+    # "floating in midair": nothing ever connected it to anything.
+    # PILLAR_X=0 sits near the wing's mid-chord at that station (chord
+    # there runs -117 to +121mm) and well within the boom's own span
+    # (-340 to 330mm).
+    def wing_underside_z(y):
+        th = math.radians(2.0)               # wing's own dihedral angle
+        cy = y / math.cos(th)                # inverse of place()'s rotation
+        return cy * math.sin(th) - (15.0 / 2.0) * math.cos(th) + 155 * S
+
+    PILLAR_R = 7.0
+    PILLAR_X = 0.0
+    PILLAR_TOP_Z = wing_underside_z(BOOM_Y)
 
     # Landing legs SPLAYED this pass -- were plumb-vertical, which looks
     # (and structurally is) less stable than a splayed stance. Real
@@ -363,25 +374,28 @@ def main():
         cylinder_between((-340.0, y, BOOM_Z), (BOOM_AFT_X, y, BOOM_Z),
                          BOOM_R, f"Boom{'R' if ysign > 0 else 'L'}", doc)
 
-    # ==== 6b. TAIL STRUTS x2 =================================================
-    #    FIXED this pass: was a constant-6mm cylinder, which stepped down
-    #    abruptly from the boom's 11mm face and stopped exactly at TAIL_X
-    #    -- both read as "not attached" (the step looked disconnected,
-    #    and the tail's own fillet had quietly pulled its edge back
-    #    ~0.5mm, leaving an actual gap there). Now a tapered cone
-    #    (BOOM_R at the boom, narrowing to STRUT_R) that starts flush
-    #    with the boom's own face and ends TAIL_EMBED past the tail's
-    #    nominal edge, so it visibly overlaps the tail's solid with
-    #    margin. Stud rings at both ends.
+    # ==== 6b. WING PILLARS x2 -- REPLACES the tail strut this pass ========
+    #    The team rejected the boom-to-tail strut outright ("do not
+    #    connect it to the back wings") once they realized the boom was
+    #    never attached to anything real in the first place -- it needs
+    #    to pick up load from the MAIN wing, not reach aft to the tail.
+    #    A vertical pillar from the boom's own centerline (BOOM_Z) up to
+    #    the main wing's underside (PILLAR_TOP_Z, computed above) at the
+    #    boom's own spanwise station and roughly the wing's mid-chord
+    #    (PILLAR_X=0). Embeds 2mm into the wing's solid at the top (same
+    #    fillet-inset lesson as sec. 13) and 2mm into the boom at the
+    #    bottom, with a stud ring at each end.
+    PILLAR_EMBED = 2.0
     for ysign in (1, -1):
         y = BOOM_Y * ysign
         side = "R" if ysign > 0 else "L"
-        cone_between((BOOM_AFT_X, y, BOOM_Z), (TAIL_X + TAIL_EMBED, y, BOOM_Z),
-                    BOOM_R, STRUT_R, f"Strut{side}", doc)
-        stud_ring((BOOM_AFT_X, y, BOOM_Z), "x", BOOM_R, f"StudBoomStrut{side}", doc,
-                 n=4, stud_r=1.2, stud_h=2.2)
-        stud_ring((TAIL_X, y, BOOM_Z), "x", STRUT_R, f"StudStrutTail{side}", doc,
-                 n=4, stud_r=1.2, stud_h=2.2)
+        bot = (PILLAR_X, y, BOOM_Z - PILLAR_EMBED)
+        top = (PILLAR_X, y, PILLAR_TOP_Z + PILLAR_EMBED)
+        cylinder_between(bot, top, PILLAR_R, f"WingPillar{side}", doc)
+        stud_ring((PILLAR_X, y, BOOM_Z), "z", PILLAR_R, f"StudPillarBoom{side}",
+                 doc, n=4, stud_r=1.2, stud_h=2.2)
+        stud_ring((PILLAR_X, y, PILLAR_TOP_Z), "z", PILLAR_R, f"StudPillarWing{side}",
+                 doc, n=4, stud_r=1.2, stud_h=2.2)
 
     # ==== 7. LANDING LEGS x4 -- SPLAYED this pass ==========================
     #    Ground-contact points moved outward (Y) and fore/aft (X) from
@@ -486,7 +500,7 @@ def main():
     # boom was never a blade-strike risk; this just checks the boom
     # still physically supports its pylon with some overhang.
     boom_overhang = BOOM_AFT_X - REAR_ROTOR_X
-    strut_len = TAIL_X - BOOM_AFT_X
+    pillar_len = (PILLAR_TOP_Z + PILLAR_EMBED) - (BOOM_Z - PILLAR_EMBED)
     fin_aft_edge = FIN_X + FIN_CHORD
     prop_wing_clear = PUSH_X - WING_TE_X
     pusher_fin_clear = ROD_TIP_X - fin_aft_edge
@@ -498,8 +512,11 @@ def main():
          f"+-{LEG_SPLAY_Y:.0f}mm Y / {LEG_SPLAY_X:.0f}mm X at the ground)")
     print(f"Leg ground half-width = {front_stance_y:.1f} mm (was {135*S:.1f} mm plumb)")
     print(f"Boom overhang past its own rotor mount = {boom_overhang:.1f} mm")
-    print(f"Tail strut length    = {strut_len:.1f} mm (boom tip {BOOM_AFT_X:.1f} "
-         f"to tail root {TAIL_X:.1f}, radius {STRUT_R:.1f}mm vs boom's 11mm)")
+    print(f"Boom is NOT connected toward the tail this pass (strut removed "
+         f"on request) -- boom's aft tip ({BOOM_AFT_X:.1f}mm) is a free end")
+    print(f"Wing pillar length   = {pillar_len:.1f} mm (boom Z={BOOM_Z:.1f} "
+         f"to wing underside Z={PILLAR_TOP_Z:.1f}, at wing chord "
+         f"x={PILLAR_X:.1f}, y={BOOM_Y:.1f})")
     print(f"Fin X (chordwise)    = {FIN_X:.1f} mm (tail LE={TAIL_X:.1f}, "
          f"TE={WING_TE_X:.1f}, fin TE={fin_aft_edge:.1f})")
     print(f"Fin/keel Y           = {FIN_Y:.1f} mm (tailplane tip = {500*S:.1f} mm)")
