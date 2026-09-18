@@ -328,6 +328,20 @@ KCL — each has a reason, not just a preference):
     embeds 2mm into each solid at both ends (`PILLAR_EMBED`, same
     fillet-inset lesson as item 13) and has a stud ring at each end.
 
+15. **Wing pillar's stud rings changed from a 4-stud decorative
+    bolt-circle to 2 larger studs, front and back.** This joint carries
+    real fore-aft rocking load from rotor-induced vibration transmitted
+    through the boom -- it needs actual bracing there, not a fastener
+    pattern. `stud_ring(..., n=2, stud_r=3.0, stud_h=5.0)` at both the
+    boom end and the wing end: `n=2` places the pair at local angle
+    0/180, which for this "z"-axis ring lands exactly on +-X (fore/aft)
+    with no extra angle math needed. Sized up from the 1.2mm/2.2mm
+    fastener studs elsewhere to read as a real gusset. Only applied to
+    the wing pillar joints (`StudPillarBoom{R,L}`, `StudPillarWing{R,L}`)
+    -- the other stud rings (motor, rod, boom-pylon, pylon-pod, leg
+    tops) are unchanged 4-stud fastener circles; flag it if you want
+    this pattern carried to any of those too.
+
 **Explicitly not modeled** (placeholder, flagged so it's never mistaken
 for finished): propeller blades are flat (tapered, but untwisted)
 silhouettes, not real airfoil blades; the lift-rotor boom's aft end

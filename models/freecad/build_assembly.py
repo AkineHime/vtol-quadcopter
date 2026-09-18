@@ -384,7 +384,15 @@ def main():
     #    boom's own spanwise station and roughly the wing's mid-chord
     #    (PILLAR_X=0). Embeds 2mm into the wing's solid at the top (same
     #    fillet-inset lesson as sec. 13) and 2mm into the boom at the
-    #    bottom, with a stud ring at each end.
+    #    bottom, with a stud pair at each end.
+    #
+    #    CHANGED this pass: each joint had 4 small studs evenly spaced
+    #    around the ring (a decorative bolt-circle). Team's call: this
+    #    joint takes real fore-aft rocking from rotor-induced vibration
+    #    transmitted through the boom, so it needs actual bracing there,
+    #    not a fastener pattern -- 2 larger studs, front and back (n=2
+    #    puts them at local angle 0/180, which for this "z"-axis ring is
+    #    exactly +-X, i.e. fore/aft), sized up to read as a real gusset.
     PILLAR_EMBED = 2.0
     for ysign in (1, -1):
         y = BOOM_Y * ysign
@@ -393,9 +401,9 @@ def main():
         top = (PILLAR_X, y, PILLAR_TOP_Z + PILLAR_EMBED)
         cylinder_between(bot, top, PILLAR_R, f"WingPillar{side}", doc)
         stud_ring((PILLAR_X, y, BOOM_Z), "z", PILLAR_R, f"StudPillarBoom{side}",
-                 doc, n=4, stud_r=1.2, stud_h=2.2)
+                 doc, n=2, stud_r=3.0, stud_h=5.0)
         stud_ring((PILLAR_X, y, PILLAR_TOP_Z), "z", PILLAR_R, f"StudPillarWing{side}",
-                 doc, n=4, stud_r=1.2, stud_h=2.2)
+                 doc, n=2, stud_r=3.0, stud_h=5.0)
 
     # ==== 7. LANDING LEGS x4 -- SPLAYED this pass ==========================
     #    Ground-contact points moved outward (Y) and fore/aft (X) from
