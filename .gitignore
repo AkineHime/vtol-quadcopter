@@ -4,4 +4,6 @@ __pycache__/
 Thumbs.db
 3d model files/_extract/
 report/page-*.jpg
+models/freecad/*.stl
+models/freecad/*.FCBak
 
