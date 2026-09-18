@@ -174,13 +174,23 @@ def main():
     # Pusher pulled way in this pass -- was 900mm (172mm clear of the tail),
     # now just past the tail's real trailing edge with a small motor+shaft
     # in between. See DESIGN_NOTES.md sec 10.2.
+    #
+    # ROD_R fixed this pass: the rod itself is 14mm, but the motor bell
+    # that continues it was 13mm -- a millimeter NARROWER, so the rod
+    # stepped IN right where the motor began instead of running straight
+    # into it. That's what read as "not aligned" -- the centerline was
+    # always correct (verified: rod/motor/prop share Y=0, Z=18.75mm
+    # exactly), but the visible radius made the joint look like a kink.
+    # Bell now matches the rod's own radius exactly (flush, no step);
+    # only the shaft narrows down from there, as a real motor shaft would.
+    ROD_R = 14.0
     PUSH_GAP = 2.0                              # rod-to-wing clearance
-    PUSH_BELL_R, PUSH_BELL_H = 13.0, 5.0
-    PUSH_SHAFT_R, PUSH_SHAFT_H = 6.0, 4.0
-    PUSH_MOTOR_LEN = PUSH_BELL_H + PUSH_SHAFT_H  # 9.0mm
+    PUSH_BELL_R, PUSH_BELL_H = ROD_R, 6.0
+    PUSH_SHAFT_R, PUSH_SHAFT_H = 7.0, 4.0
+    PUSH_MOTOR_LEN = PUSH_BELL_H + PUSH_SHAFT_H  # 10.0mm
     ROD_TIP_X = WING_TE_X + PUSH_GAP             # 729.8mm
     PUSH_MOTOR_X = ROD_TIP_X + PUSH_MOTOR_LEN / 2.0
-    PUSH_X = ROD_TIP_X + PUSH_MOTOR_LEN          # 738.8mm -- propeller hub
+    PUSH_X = ROD_TIP_X + PUSH_MOTOR_LEN          # 739.8mm -- propeller hub
 
     LIFT_BELL_R, LIFT_BELL_H = 18.0, 10.0
     LIFT_SHAFT_R, LIFT_SHAFT_H = 8.0, 8.0
@@ -203,7 +213,7 @@ def main():
     #    leaving it 172mm clear -- see DESIGN_NOTES.md sec 10.2. Radius
     #    (14mm) unchanged -- still real relative to the lift-booms (11mm)
     #    and the fuselage tip it springs from (20.7mm).
-    cylinder_between((FUSE_TIP_X, 0, BOOM_Z), (ROD_TIP_X, 0, BOOM_Z), 14.0,
+    cylinder_between((FUSE_TIP_X, 0, BOOM_Z), (ROD_TIP_X, 0, BOOM_Z), ROD_R,
                      "TailBoomRod", doc)
 
     # ==== 2. NOSE PROBE -- sensorProbe.kcl (global-X convention) ===========

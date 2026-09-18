@@ -194,6 +194,21 @@ KCL — each has a reason, not just a preference):
       as one straight line rather than offset pieces — this is also
       the fix for "the hole [motor/prop] should be concentric with the
       tail boom's center... in one single line."
+      **Follow-up (still reported "not aligned" after the above):**
+      checked the actual coordinates (`Shape.BoundBox` on the saved
+      `.FCStd`) and confirmed the rod/motor/prop centerline really was
+      exact (Y=0.000, Z=18.750mm, all the way from `BoomR`/`BoomL`
+      through `TailR` to `Pusher`) — the axis was never the problem.
+      The real issue: the motor bell was **13mm**, a millimeter
+      *narrower* than the **14mm** rod (`ROD_R`), so the rod visibly
+      stepped inward right where the motor began instead of running
+      straight into it — that's what read as "not aligned" in the GUI.
+      Fixed by setting `PUSH_BELL_R = ROD_R` exactly, so the rod flows
+      flush into the bell with no radius jump; only the shaft narrows
+      from there, as a real motor shaft would. Axial numbers barely
+      moved (motor now 10mm long instead of 9mm; prop 12mm behind the
+      wing instead of 11mm) — this was a radius fix, not a position
+      fix.
     - **`round_edges()` fillets applied** to the wings, tail, both fin
       pieces (2mm radius), the lift-rotor pods and fuselage (2.5-3mm),
       and the propellers/motors (1-1.5mm) — softens the sharp mitred
@@ -231,9 +246,10 @@ number changed:
 | Fin X (chordwise) | 579.6mm | tail LE 560, TE 727.8 — fin sits in the aft ~58% of chord (sec. 10) |
 | Boom-aft-tip to rear-rotor clearance | +103.2mm | script-computed, printed every run |
 | Rod-tip/motor-start to fin-aft-edge clearance | +12.0mm | script-computed, printed every run |
-| Pusher prop to tail wing TE clearance | +11.0mm | target ~5mm; actual reflects real motor+shaft length (sec. 10) |
+| Pusher prop to tail wing TE clearance | +12.0mm | target ~5mm; actual reflects real motor+shaft length (sec. 10) |
 | Fuselage length (real, unstretched) | 1036.2mm | back to real KCL stations (sec. 9) |
 | Tailboom rod length | 226.5mm | fuselage tip (503.4) to rod tip (729.8) — shortened, sec. 10 |
+| Rod/motor/prop centerline | Y=0.000, Z=18.750mm | verified via `Shape.BoundBox` on every part from `BoomR` to `Pusher` |
 | Overall height (ground to highest point) | 361.7mm | ground line (−197.4) to pusher disc top (+164.3) |
 
 ## Housekeeping
