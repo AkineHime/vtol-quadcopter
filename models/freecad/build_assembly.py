@@ -115,22 +115,38 @@ def main():
     BOOM_Y = 440 * S           # 217.1mm -- boom spanwise position, unchanged
     PROP_R = 295 * S           # 145.6mm -- uniform prop radius, all 5 rotors
     REAR_ROTOR_X = 306.2       # from the wing-clearance fix, previous pass
-    BOOM_AFT_X = 555.0         # boom's new aft tip -- meets the tail directly
-    TAIL_X = 560.0             # tail root mount -- just past the boom tip
+    BOOM_AFT_X = 555.0         # lift-rotor boom's aft tip -- unchanged
+    TAIL_X = 560.0             # tail root mount, on the tailboom rod below
     FIN_Y = 500 * S            # 246.7mm -- tailplane's real tip (unchanged)
-    PUSH_X = 900.0             # fuselage tail-tip mount, no offset mast
+    PUSH_X = 900.0             # tailboom-rod-tip mount, no offset mast
+    FUSE_TIP_X = 1020 * S      # 503.4mm -- the REAL fuselage's own tail tip
 
     # ==== 1. FUSELAGE -- fuselage.kcl loft stations (global-X convention) ==
-    #    CHANGED this pass: the last two stations are STRETCHED (not real
-    #    KCL numbers) to give the relocated tail/fin and pusher (sections
-    #    4/5/9 below) enough room to clear each other and the rear rotors
-    #    -- this is the "increase the fuselage size" the team asked for,
-    #    done to a computed length, not a guess. See DESIGN_NOTES.md sec 8.
+    #    REVERTED this pass: back to the real KCL stations end-to-end, no
+    #    stretch. Stretching the whole lofted body to reach the tail/pusher
+    #    (previous pass) distorted its real aerodynamic proportions -- the
+    #    team's call was right: keep the body's real shape, and instead
+    #    carry the tail/pusher out on a separate thin rod (section 1b) the
+    #    way real pusher aircraft do, rather than fairing the whole body
+    #    out to that length.
     fuse_stations = [(x * S, r * S) for x, r in
                      [(-1080, 12), (-900, 112), (-560, 188), (0, 198),
-                      (500, 140)]]                       # real, unchanged
-    fuse_stations += [(650, 45), (900, 12)]              # STRETCHED tail cone
+                      (500, 140), (820, 78), (1020, 42)]]     # all real, KCL
     loft_body(fuse_stations, "Fuselage", doc, squash=0.82)
+
+    # ==== 1b. TAILBOOM ROD -- NEW this pass, replaces the fuselage stretch =
+    #    A simple constant-radius rod from the real fuselage's own tail tip
+    #    out to the pusher mount, carrying the tail/fin (section 4/5) partway
+    #    along it and the pusher (section 9) at its tip. Radius (14mm) sits
+    #    between the lift-rotor booms (11mm) and the fuselage tip they
+    #    spring from (20.7mm) -- thicker than the lift booms since it
+    #    carries the tail surfaces' loads too, not just one motor.
+    #    Riding at BOOM_Z (the same waterline as the tail/lift-booms, not
+    #    the fuselage's own Z=0 centerline) -- a ~19mm rise over the
+    #    fuselage's tip radius (~17mm at that station), i.e. it leaves
+    #    the fuselage right at its surface, not floating above it.
+    cylinder_between((FUSE_TIP_X, 0, BOOM_Z), (PUSH_X + 20, 0, BOOM_Z), 14.0,
+                     "TailBoomRod", doc)
 
     # ==== 2. NOSE PROBE -- sensorProbe.kcl (global-X convention) ===========
     loft_body([(-1150 * S, 1.5 * S), (70 * S, 5 * S), (120 * S, 8 * S)],
@@ -245,12 +261,11 @@ def main():
         blade_pair((x, y, z), PROP_R, "z", f"Rotor{k}", doc)
 
     # ==== 9. PUSHER -- same size as the lift rotors (uniform hardware) ====
-    #    CHANGED this pass: no more offset mast. Mounted flush at the
-    #    fuselage's own (now-extended) tail tip, Y=0, Z=0 (the fuselage's
-    #    own centerline height there) -- "we don't need [the mast]," the
-    #    motor just bolts to the tail cone end directly. Checked clear
-    #    of the fin (aft edge 698.2mm) by 56mm -- see DESIGN_NOTES.md.
-    blade_pair((PUSH_X, 0, 0), PROP_R, "x", "Pusher", doc)
+    #    Still no offset mast: mounted flush at the tailboom rod's own tip
+    #    (Y=0, Z=BOOM_Z -- the rod's own height, not the fuselage's), so
+    #    the motor bolts straight onto the rod end. Checked clear of the
+    #    fin (aft edge 698.2mm) by 56mm -- see DESIGN_NOTES.md.
+    blade_pair((PUSH_X, 0, BOOM_Z), PROP_R, "x", "Pusher", doc)
 
     doc.recompute()
 
@@ -292,7 +307,9 @@ def main():
     print(f"Rear rotor->wing clearance  = {rear_clear:.1f} mm")
     print(f"Boom-aft-tip->rear-rotor clearance = {boom_rotor_clear:.1f} mm")
     print(f"Pusher->fin clearance       = {pusher_fin_clear:.1f} mm")
-    print(f"Fuselage length      = {900+12-(-1080*S):.1f} mm (was 1081.2mm)")
+    print(f"Fuselage length (real, unstretched) = {FUSE_TIP_X-(-1080*S):.1f} mm")
+    print(f"Tailboom rod length  = {(PUSH_X+20)-FUSE_TIP_X:.1f} mm "
+         f"(fuselage tip {FUSE_TIP_X:.1f} to pusher {PUSH_X:.1f})")
     print(f"Objects              = {len(all_objs)}")
     print(f"Saved: {base}.FCStd / .step / .stl")
 

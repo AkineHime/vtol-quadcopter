@@ -131,20 +131,30 @@ KCL — each has a reason, not just a preference):
      (aft edge 451.8mm) by 103mm.
    - **Pusher mast removed.** The pusher previously needed a mast
      because it was offset from the tail's mount point. With the tail
-     now at boom height and the pusher mounted flush at the fuselage's
-     own tail tip (Y=0, Z=0 — the fuselage's own centerline height
-     there), no offset exists to bridge. Checked clear of the fin
-     (aft edge 698.2mm) by 56mm.
-   - **Fuselage lengthened** from 1081mm to 1445mm (the "increase the
-     fuselage size" the team authorized) — the last two loft stations
-     are now a computed stretch, not real KCL numbers, specifically
-     sized to fit the relocated tail and pusher with real clearance
-     margins rather than crowding them. Flagged as SCHEMATIC (stretched)
-     in the fuselage section, same as the original last-two stations
-     were real.
+     now at boom height and the pusher mounted flush at the end of the
+     tailboom rod (item 9 below), at the rod's own height, no offset
+     exists to bridge. Checked clear of the fin (aft edge 698.2mm) by
+     56mm.
    - Re-verified the wing/rotor clearance fix from item 5 still holds
      (40mm each side, unaffected by any of this — the wing and front
      boom half didn't move).
+
+9. **Tailboom rod, replacing a stretched fuselage.** The first attempt
+   at fitting the relocated tail/pusher lengthened the fuselage itself
+   (1081mm to 1445mm, stretching its last two loft stations). The team
+   correctly called this out as distorting the fuselage's real
+   aerodynamic proportions for no good reason — a stretched *lofted body*
+   was the wrong tool. Reverted the fuselage to its exact original real
+   KCL stations (all 7, no stretch), and instead added a simple
+   constant-radius rod (14mm — between the lift-booms' 11mm and the
+   fuselage tip's own 20.7mm, since it carries the tail surfaces' loads
+   too) running from the real fuselage's own tail tip (503.4mm) out to
+   the pusher mount (920mm, a 416.7mm rod) — exactly how real pusher
+   aircraft carry a tail assembly aft of a compact fuselage. The tail
+   and fin (item 8) mount partway along this rod at TAIL_X; the pusher
+   mounts at its tip. All the clearance numbers from item 8 are
+   unaffected, since none of TAIL_X, FIN_Y, or PUSH_X moved — only what
+   physically carries them out there changed.
 
 **Explicitly not modeled** (placeholder, flagged so it's never mistaken
 for finished): propeller blades are flat rectangular silhouettes, not
@@ -169,8 +179,9 @@ number changed:
 | Fin/keel Y | 246.7mm | must equal tailplane half-span (also printed) |
 | Boom-aft-tip to rear-rotor clearance | +103.2mm | script-computed, printed every run |
 | Pusher-to-fin clearance | +56.2mm | script-computed, printed every run |
-| Fuselage length | 1444.9mm | was 1081.2mm before the tail relocation (sec. 8) |
-| Overall height (ground to highest point) | 342.9mm | ground line (−197.4) to pusher disc top (+145.6) |
+| Fuselage length (real, unstretched) | 1036.2mm | back to real KCL stations (sec. 9) |
+| Tailboom rod length | 416.7mm | fuselage tip (503.4) to pusher (920) |
+| Overall height (ground to highest point) | 361.7mm | ground line (−197.4) to pusher disc top (+164.3) |
 
 ## Housekeeping
 
