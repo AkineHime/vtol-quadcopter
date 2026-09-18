@@ -119,7 +119,7 @@ def propeller(center, radius, axis, name, doc):
 
     both = blade(1).fuse(blade(-1))
     hub = Part.makeCylinder(hub_r, hub_h, V(0, 0, -hub_h / 2.0), V(0, 0, 1))
-    both = both.fuse(hub).copy()
+    both = both.fuse(hub).removeSplitter().copy()
     both.translate(V(0, 0, -thick / 2.0))
     if axis == "x":
         both.rotate(V(0, 0, 0), V(0, 1, 0), 90)
@@ -158,7 +158,7 @@ def motor_can(center, axis, bell_r, bell_h, shaft_r, shaft_h, name, doc):
     total = bell_h + shaft_h
     bell = Part.makeCylinder(bell_r, bell_h, V(0, 0, -total / 2.0), V(0, 0, 1))
     shaft = Part.makeCylinder(shaft_r, shaft_h, V(0, 0, -total / 2.0 + bell_h), V(0, 0, 1))
-    both = bell.fuse(shaft).copy()
+    both = bell.fuse(shaft).removeSplitter().copy()
     if axis == "x":
         both.rotate(V(0, 0, 0), V(0, 1, 0), 90)
     both.translate(V(*center))
@@ -177,7 +177,18 @@ def main():
     BOOM_Y = 440 * S           # 217.1mm -- boom spanwise position, unchanged
     PROP_R = 295 * S           # 145.6mm -- uniform prop radius, all 5 rotors
     REAR_ROTOR_X = 306.2       # from the wing-clearance fix, previous pass
-    BOOM_AFT_X = 555.0         # lift-rotor boom's aft tip -- unchanged
+    # BOOM_AFT_X SHORTENED this pass: it used to reach 555mm specifically
+    # to run straight into the tail (560mm) -- but the boom and the tail
+    # never actually touched (only a 5mm gap, and the tail's mounting
+    # geometry doesn't reach back to meet it), so it read as two bare
+    # tube ends floating apart. Team's call: stop trying to make the
+    # boom itself reach the tail -- shorten it back to just past its own
+    # rotor mount (REAR_ROTOR_X=306.2, +24mm of overhang, matching the
+    # boom's original real length before that extension), and bridge the
+    # real gap with an explicit, visually distinct STRUT (thinner,
+    # secondary member -- see section 6b) instead of stretching the main
+    # spar to do a job it was never sized for.
+    BOOM_AFT_X = 330.0
     TAIL_X = 560.0             # tail root LE mount, on the tailboom rod
     TAIL_ROOT_CHORD = 340 * S  # 167.8mm -- real tail root chord (KCL)
     WING_TE_X = TAIL_X + TAIL_ROOT_CHORD   # 727.8mm -- tail trailing edge;
@@ -216,6 +227,22 @@ def main():
 
     LIFT_BELL_R, LIFT_BELL_H = 18.0, 10.0
     LIFT_SHAFT_R, LIFT_SHAFT_H = 8.0, 8.0
+
+    # STRUT: thinner secondary member (6mm vs the boom's 11mm) bridging
+    # the now-shortened boom to the tail -- see BOOM_AFT_X comment above.
+    STRUT_R = 6.0
+
+    # Landing legs SPLAYED this pass -- were plumb-vertical, which looks
+    # (and structurally is) less stable than a splayed stance. Real
+    # landing gear typically splays outward from the mount so the
+    # ground-contact points sit wider than the airframe attachment,
+    # spreading side-load better. LEG_SPLAY is the extra outward (Y) and
+    # fore/aft (X) offset at the ground relative to the top mount --
+    # front legs splay forward+outward, rear legs splay aft+outward, so
+    # all four points push away from the CG in both directions (a true
+    # four-point stable stance, not just parallel posts).
+    LEG_SPLAY_Y = 35.0
+    LEG_SPLAY_X = 25.0
 
     # ==== 1. FUSELAGE -- fuselage.kcl loft stations (global-X convention) ==
     #    Real KCL stations end-to-end, no stretch (kept from the previous
@@ -307,28 +334,55 @@ def main():
     mirror_y(fin_dn_R, "FinDownL", doc)
 
     # ==== 6. ROTOR-MOUNT BOOMS x2 (global convention) ======================
-    #    Unchanged this pass -- the fin/pusher move was along the tail's
-    #    own chord and past it, not along the boom.
-    #    NEW this pass: a stud ring at each boom's aft tip, right where it
-    #    meets the tail root -- previously just a 5mm gap between two bare
-    #    tube ends with nothing visually joining them.
+    #    SHORTENED this pass, back to just past the rear rotor's own mount
+    #    (BOOM_AFT_X, see the constant's comment above) -- it no longer
+    #    reaches anywhere near the tail on its own.
     for ysign in (1, -1):
         y = BOOM_Y * ysign
         cylinder_between((-340.0, y, BOOM_Z), (BOOM_AFT_X, y, BOOM_Z),
                          11.0, f"Boom{'R' if ysign > 0 else 'L'}", doc)
-        stud_ring((BOOM_AFT_X, y, BOOM_Z), "x", 11.0,
-                 f"StudBoomTail{'R' if ysign > 0 else 'L'}", doc)
 
-    # ==== 7. LANDING LEGS x4 (unchanged this pass) =========================
+    # ==== 6b. TAIL STRUTS x2 -- NEW this pass ==============================
+    #    Bridges the real gap left by shortening the boom (above): a
+    #    thinner (STRUT_R=6mm vs the boom's 11mm), visually distinct
+    #    secondary member running from the boom's new tip straight to the
+    #    tail root, at the same Y and Z (both already share BOOM_Z, so
+    #    this is a straight strut, not a height-bridging brace like the
+    #    one removed in sec. 8). Stud rings at both ends -- boom-to-strut
+    #    and strut-to-tail -- so each is a visible joint, not another bare
+    #    abutment.
+    for ysign in (1, -1):
+        y = BOOM_Y * ysign
+        side = "R" if ysign > 0 else "L"
+        cylinder_between((BOOM_AFT_X, y, BOOM_Z), (TAIL_X, y, BOOM_Z),
+                         STRUT_R, f"Strut{side}", doc)
+        stud_ring((BOOM_AFT_X, y, BOOM_Z), "x", 11.0, f"StudBoomStrut{side}", doc,
+                 n=4, stud_r=1.2, stud_h=2.2)
+        stud_ring((TAIL_X, y, BOOM_Z), "x", STRUT_R, f"StudStrutTail{side}", doc,
+                 n=4, stud_r=1.2, stud_h=2.2)
+
+    # ==== 7. LANDING LEGS x4 -- SPLAYED this pass ==========================
+    #    Ground-contact points moved outward (Y) and fore/aft (X) from
+    #    their top mounts -- front legs splay forward+outward, rear legs
+    #    splay aft+outward -- so the footprint is a stable four-point
+    #    stance instead of four parallel vertical posts. Stud rings added
+    #    at each top mount (fuselage joint).
     GROUND_Z = -400 * S     # -197.4mm, from the front legs (unchanged)
     REAR_LEG_X = 200.0
     for ysign in (1, -1):
-        cylinder_between((-170 * S, 135 * S * ysign, -130 * S),
-                         (-170 * S, 135 * S * ysign, GROUND_Z), 4.0,
+        front_top = (-170 * S, 135 * S * ysign, -130 * S)
+        front_gnd = (front_top[0] - LEG_SPLAY_X, front_top[1] + LEG_SPLAY_Y * ysign, GROUND_Z)
+        cylinder_between(front_top, front_gnd, 4.0,
                          f"LegFront{'R' if ysign > 0 else 'L'}", doc)
-        cylinder_between((REAR_LEG_X, 135 * S * ysign, -20.0),
-                         (REAR_LEG_X, 135 * S * ysign, GROUND_Z), 4.0,
+        stud_ring(front_top, "z", 4.0, f"StudLegFront{'R' if ysign > 0 else 'L'}",
+                 doc, n=4, stud_r=1.0, stud_h=1.8)
+
+        rear_top = (REAR_LEG_X, 135 * S * ysign, -20.0)
+        rear_gnd = (rear_top[0] + LEG_SPLAY_X, rear_top[1] + LEG_SPLAY_Y * ysign, GROUND_Z)
+        cylinder_between(rear_top, rear_gnd, 4.0,
                          f"LegRear{'R' if ysign > 0 else 'L'}", doc)
+        stud_ring(rear_top, "z", 4.0, f"StudLegRear{'R' if ysign > 0 else 'L'}",
+                 doc, n=4, stud_r=1.0, stud_h=1.8)
 
     # ==== 8. LIFT ROTORS x4, staggered front-low/rear-high (global) =======
     #    X positions (wing-clearance fix) and Z stagger unchanged this
@@ -339,12 +393,17 @@ def main():
                  "FL": (-302.7, -BOOM_Y, BOOM_Z - 70 * S),
                  "RR": (REAR_ROTOR_X, BOOM_Y, BOOM_Z + 70 * S),
                  "RL": (REAR_ROTOR_X, -BOOM_Y, BOOM_Z + 70 * S)}
-    #    NEW this pass: a stud ring where each pylon meets its boom --
-    #    previously the two tubes just crossed with nothing joining them.
+    #    Stud rings at BOTH of each pylon's joints this pass: where it
+    #    meets its boom (was already added) and, NEW, where it meets its
+    #    pod (previously the two tubes just crossed with nothing joining
+    #    them -- flagged as skipped last pass for being too small a
+    #    scale, added now on request with a smaller stud size to match).
     for k, (x, y, z) in lift_specs.items():
         cylinder_between((x, y, BOOM_Z), (x, y, z), 6.0, f"Pylon{k}", doc)
         stud_ring((x, y, BOOM_Z), "z", 6.0, f"StudBoomPylon{k}", doc,
                  n=4, stud_r=1.2, stud_h=2.0)
+        stud_ring((x, y, z), "z", 6.0, f"StudPylonPod{k}", doc,
+                 n=4, stud_r=1.0, stud_h=1.6)
         pod = loft_body([(-90 * S, 0), (-60 * S, 26 * S), (0, 26 * S),
                         (60 * S, 26 * S), (90 * S, 0)], f"Pod{k}", doc)
         pod_shape = pod.Shape.copy()
@@ -399,20 +458,32 @@ def main():
     le, te = wing_chord_at_y(BOOM_Y)
     front_clear = le - (lift_specs["FR"][0] + PROP_R)
     rear_clear = (lift_specs["RR"][0] - PROP_R) - te
-    boom_rotor_clear = BOOM_AFT_X - (REAR_ROTOR_X + PROP_R)
+    # NOTE: this is boom-tip past its OWN rotor mount, not past the full
+    # blade sweep -- the rotor's blade plane (BOOM_Z+-70*S) sits 34.8mm
+    # clear of the boom's own surface in Z regardless of X, so a shorter
+    # boom was never a blade-strike risk; this just checks the boom
+    # still physically supports its pylon with some overhang.
+    boom_overhang = BOOM_AFT_X - REAR_ROTOR_X
+    strut_len = TAIL_X - BOOM_AFT_X
     fin_aft_edge = FIN_X + FIN_CHORD
     prop_wing_clear = PUSH_X - WING_TE_X
     pusher_fin_clear = ROD_TIP_X - fin_aft_edge
+    front_stance_y = 135 * S + LEG_SPLAY_Y
+    rear_stance_y = 135 * S + LEG_SPLAY_Y
     print(f"Scale factor S       = {S:.6f}")
     print(f"Ground line Z        = {GROUND_Z:.1f} mm")
-    print(f"Legs                 = 4 (2 front + 2 rear, both on the fuselage)")
+    print(f"Legs                 = 4 (2 front + 2 rear, splayed outward "
+         f"+-{LEG_SPLAY_Y:.0f}mm Y / {LEG_SPLAY_X:.0f}mm X at the ground)")
+    print(f"Leg ground half-width = {front_stance_y:.1f} mm (was {135*S:.1f} mm plumb)")
+    print(f"Boom overhang past its own rotor mount = {boom_overhang:.1f} mm")
+    print(f"Tail strut length    = {strut_len:.1f} mm (boom tip {BOOM_AFT_X:.1f} "
+         f"to tail root {TAIL_X:.1f}, radius {STRUT_R:.1f}mm vs boom's 11mm)")
     print(f"Fin X (chordwise)    = {FIN_X:.1f} mm (tail LE={TAIL_X:.1f}, "
          f"TE={WING_TE_X:.1f}, fin TE={fin_aft_edge:.1f})")
     print(f"Fin/keel Y           = {FIN_Y:.1f} mm (tailplane tip = {500*S:.1f} mm)")
     print(f"Tail/boom mount Z    = {BOOM_Z:.1f} mm (same height -- no brace needed)")
     print(f"Front rotor->wing clearance = {front_clear:.1f} mm")
     print(f"Rear rotor->wing clearance  = {rear_clear:.1f} mm")
-    print(f"Boom-aft-tip->rear-rotor clearance = {boom_rotor_clear:.1f} mm")
     print(f"Rod-tip/motor-start->fin-aft-edge clearance = {pusher_fin_clear:.1f} mm")
     print(f"Pusher prop -> tail wing TE clearance = {prop_wing_clear:.1f} mm "
          f"(target ~5mm; actual reflects a real motor+shaft length in between)")

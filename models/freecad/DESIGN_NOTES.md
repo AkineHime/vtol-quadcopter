@@ -244,12 +244,50 @@ KCL — each has a reason, not just a preference):
     tiny cylinders to look like anything but noise) -- flag this if you
     want those covered too.
 
+12. **Boom shortened, tail strut added, legs splayed, remaining stud
+    rings added, fillets fixed on the propellers/motors.** From direct
+    screenshots again:
+
+    - **Boom and tail were never actually touching** (only the 5mm gap
+      from item 8, with a stud ring added in item 11 that couldn't
+      fix a real physical gap, only decorate a joint). Team's call:
+      stop trying to make the main boom itself reach the tail --
+      `BOOM_AFT_X` shortened from 555mm back to **330mm** (just 24mm
+      past its own rotor mount at 306.2mm, matching the boom's
+      original real length before it was ever stretched to 555mm).
+    - **New `Strut{R,L}`** bridges the resulting gap: a thinner, visibly
+      secondary member (`STRUT_R=6mm` vs the boom's 11mm) running
+      straight from the boom's new tip to the tail root -- both already
+      share `BOOM_Z`, so this is a straight connector, not a
+      height-bridging brace like the one removed in item 8. Stud rings
+      at both of its own joints (boom-to-strut, strut-to-tail).
+    - **Landing legs splayed.** Were plumb-vertical cylinders; real
+      gear typically splays outward from the mount for a wider, more
+      stable ground stance. Front legs now splay forward+outward, rear
+      legs splay aft+outward (`LEG_SPLAY_X=25mm`, `LEG_SPLAY_Y=35mm`),
+      widening the ground half-width from 66.6mm to 101.6mm. Stud rings
+      added at each leg's top (fuselage) mount.
+    - **Stud rings added at the two joints flagged as skipped in item
+      11** (too small a scale at the time): pylon-to-pod (all 4 rotors)
+      and the leg-top mounts (all 4 legs) -- sized down (`stud_r`
+      1.0-1.2mm) to fit those smaller members without looking like
+      noise.
+    - **Fillets on the propellers and motor cans now succeed** (were
+      failing with `ChFi3d_Builder: only 2 faces` in items 10-11).
+      Root cause: after `.fuse()`, the boolean leaves redundant
+      coincident faces that confuse OCC's fillet face-counting. Fixed
+      by calling `.removeSplitter()` right after each fuse (before any
+      further transform) -- a standard OCC cleanup that merges those
+      redundant faces back down. The 4 lift-rotor pods still can't be
+      filleted (`no suitable edges`) -- they're a single smooth loft
+      with no distinct edges to round in the first place, so this
+      isn't a defect, just nothing to do there.
+
 **Explicitly not modeled** (placeholder, flagged so it's never mistaken
 for finished): propeller blades are flat (tapered, but untwisted)
-silhouettes, not real airfoil blades; the pylon-to-pod and
-leg-to-fuselage joints are still bare cylinders (see item 11). Fine for
-a patent reference and for aero work; would need real surfacing before
-anything manufacturing-facing.
+silhouettes, not real airfoil blades. Fine for a patent reference and
+for aero work; would need real surfacing before anything
+manufacturing-facing.
 
 ## 4. Verified numbers (check these after any edit)
 
@@ -273,6 +311,10 @@ number changed:
 | Tailboom rod length | 227.2mm, 4.7° rise | fuselage axis (Z=0) to tail height (Z=18.8) — angled, sec. 11 |
 | Rod-to-motor / motor-to-prop centerline | Y=0.000, Z=18.750mm | verified via `Shape.BoundBox`, unchanged by the rod-angle fix |
 | Fuselage cross-section at rod start | Y ±14.5mm, Z ±18.15mm, centered Z=0 | verified via `Shape.slice()` — rod now concentric with this, sec. 11 |
+| Boom length (each side) | 330.0mm (was 555.0mm) | shortened, sec. 12 |
+| Boom overhang past its own rotor mount | +23.8mm | script-computed, printed every run |
+| Tail strut length | 230.0mm, radius 6mm | boom tip (330) to tail root (560), sec. 12 |
+| Leg ground half-width | 101.6mm (was 66.6mm plumb) | splayed stance, sec. 12 |
 | Overall height (ground to highest point) | 361.7mm | ground line (−197.4) to pusher disc top (+164.3) |
 
 ## Housekeeping
