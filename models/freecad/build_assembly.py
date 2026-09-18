@@ -90,19 +90,59 @@ def cylinder_between(p1, p2, radius, name, doc):
     return obj
 
 
-def blade_pair(center, radius, axis, name, doc):
-    """Two flat rectangular blades through `center`, normal to `axis` --
-    a recognisable propeller silhouette, not an aerodynamic prop."""
-    length, width, thick = radius * 2, radius * 0.16, 2.0
-    box = Part.makeBox(length, width, thick, V(-length / 2, -width / 2, -thick / 2))
-    b2 = box.copy()
-    b2.rotate(V(0, 0, 0), V(0, 0, 1), 90)
-    both = box.fuse(b2).copy()
+def round_edges(obj, radius):
+    """Best-effort fillet of every edge on a part -- softens the sharp
+    mitred corners flat_panel/loft leave behind. Wrapped because OCC's
+    fillet can refuse a radius that's too large for some short edge on
+    a tapered tip; skipping there is fine (that part just stays sharp),
+    it should never abort the whole build."""
+    try:
+        obj.Shape = obj.Shape.makeFillet(radius, obj.Shape.Edges)
+    except Exception as e:
+        print(f"  (fillet skipped on {obj.Name}: {e})")
+
+
+def propeller(center, radius, axis, name, doc):
+    """Two tapered blades (root wider than tip) plus a real hub mass --
+    a recognisable 2-blade prop silhouette, replacing the bare
+    rectangular cross this used to be. Still schematic: flat blades,
+    no aerodynamic twist -- flagged in DESIGN_NOTES.md."""
+    hub_r, hub_h = radius * 0.11, 10.0
+    root_w, tip_w, thick = radius * 0.16, radius * 0.05, 2.5
+
+    def blade(sign):
+        pts = [V(sign * hub_r, -root_w / 2, 0), V(sign * radius, -tip_w / 2, 0),
+               V(sign * radius, tip_w / 2, 0), V(sign * hub_r, root_w / 2, 0)]
+        face = Part.Face(Part.makePolygon(pts + [pts[0]]))
+        return face.extrude(V(0, 0, thick)).copy()
+
+    both = blade(1).fuse(blade(-1))
+    hub = Part.makeCylinder(hub_r, hub_h, V(0, 0, -hub_h / 2.0), V(0, 0, 1))
+    both = both.fuse(hub).copy()
+    both.translate(V(0, 0, -thick / 2.0))
     if axis == "x":
         both.rotate(V(0, 0, 0), V(0, 1, 0), 90)
     both.translate(V(*center))
     obj = doc.addObject("Part::Feature", name)
     obj.Shape = both
+    round_edges(obj, 1.5)
+    return obj
+
+
+def motor_can(center, axis, bell_r, bell_h, shaft_r, shaft_h, name, doc):
+    """A stepped two-diameter cylinder (motor bell + shaft) standing in
+    for a real motor -- schematic, but a visibly distinct mounted
+    component instead of the bare round shape it replaces."""
+    total = bell_h + shaft_h
+    bell = Part.makeCylinder(bell_r, bell_h, V(0, 0, -total / 2.0), V(0, 0, 1))
+    shaft = Part.makeCylinder(shaft_r, shaft_h, V(0, 0, -total / 2.0 + bell_h), V(0, 0, 1))
+    both = bell.fuse(shaft).copy()
+    if axis == "x":
+        both.rotate(V(0, 0, 0), V(0, 1, 0), 90)
+    both.translate(V(*center))
+    obj = doc.addObject("Part::Feature", name)
+    obj.Shape = both
+    round_edges(obj, 1.0)
     return obj
 
 
@@ -110,45 +150,65 @@ def main():
     doc = App.newDocument("CoconutQuadplane")
 
     # ---- shared layout constants (computed once, used by several parts
-    #      below -- see DESIGN_NOTES.md sec 8 for how each was chosen) ----
+    #      below -- see DESIGN_NOTES.md sec 8-10 for how each was chosen) --
     BOOM_Z = 38 * S            # 18.8mm -- boom height, unchanged from KCL
     BOOM_Y = 440 * S           # 217.1mm -- boom spanwise position, unchanged
     PROP_R = 295 * S           # 145.6mm -- uniform prop radius, all 5 rotors
     REAR_ROTOR_X = 306.2       # from the wing-clearance fix, previous pass
     BOOM_AFT_X = 555.0         # lift-rotor boom's aft tip -- unchanged
-    TAIL_X = 560.0             # tail root mount, on the tailboom rod below
+    TAIL_X = 560.0             # tail root LE mount, on the tailboom rod
+    TAIL_ROOT_CHORD = 340 * S  # 167.8mm -- real tail root chord (KCL)
+    WING_TE_X = TAIL_X + TAIL_ROOT_CHORD   # 727.8mm -- tail trailing edge;
+    #    unswept (KCL's TE is a straight line across the whole span), so
+    #    this one X value is the tail's aft-most point at every span station.
     FIN_Y = 500 * S            # 246.7mm -- tailplane's real tip (unchanged)
-    PUSH_X = 900.0             # tailboom-rod-tip mount, no offset mast
     FUSE_TIP_X = 1020 * S      # 503.4mm -- the REAL fuselage's own tail tip
 
+    # Fin moved AFT along the tail's own chord this pass (was flush with
+    # the tail's leading edge) -- see DESIGN_NOTES.md sec 10.1.
+    FIN_CHORD = 138.2          # real KCL fin root chord, unchanged
+    FIN_MARGIN = 10.0          # fin's aft edge stays this far short of the
+    #    tail's own trailing edge -- "at the back, not completely at the end"
+    FIN_X = TAIL_X + TAIL_ROOT_CHORD - FIN_CHORD - FIN_MARGIN   # 579.6mm
+
+    # Pusher pulled way in this pass -- was 900mm (172mm clear of the tail),
+    # now just past the tail's real trailing edge with a small motor+shaft
+    # in between. See DESIGN_NOTES.md sec 10.2.
+    PUSH_GAP = 2.0                              # rod-to-wing clearance
+    PUSH_BELL_R, PUSH_BELL_H = 13.0, 5.0
+    PUSH_SHAFT_R, PUSH_SHAFT_H = 6.0, 4.0
+    PUSH_MOTOR_LEN = PUSH_BELL_H + PUSH_SHAFT_H  # 9.0mm
+    ROD_TIP_X = WING_TE_X + PUSH_GAP             # 729.8mm
+    PUSH_MOTOR_X = ROD_TIP_X + PUSH_MOTOR_LEN / 2.0
+    PUSH_X = ROD_TIP_X + PUSH_MOTOR_LEN          # 738.8mm -- propeller hub
+
+    LIFT_BELL_R, LIFT_BELL_H = 18.0, 10.0
+    LIFT_SHAFT_R, LIFT_SHAFT_H = 8.0, 8.0
+
     # ==== 1. FUSELAGE -- fuselage.kcl loft stations (global-X convention) ==
-    #    REVERTED this pass: back to the real KCL stations end-to-end, no
-    #    stretch. Stretching the whole lofted body to reach the tail/pusher
-    #    (previous pass) distorted its real aerodynamic proportions -- the
-    #    team's call was right: keep the body's real shape, and instead
-    #    carry the tail/pusher out on a separate thin rod (section 1b) the
-    #    way real pusher aircraft do, rather than fairing the whole body
-    #    out to that length.
+    #    Real KCL stations end-to-end, no stretch (kept from the previous
+    #    pass -- the team confirmed this is right: the fuselage's own
+    #    aerodynamic shape stays untouched, everything aft rides a separate
+    #    rod). round_edges softens the loft's end-cap seams -- the "rounded"
+    #    look this pass, see sec 10.4.
     fuse_stations = [(x * S, r * S) for x, r in
                      [(-1080, 12), (-900, 112), (-560, 188), (0, 198),
                       (500, 140), (820, 78), (1020, 42)]]     # all real, KCL
-    loft_body(fuse_stations, "Fuselage", doc, squash=0.82)
+    fuselage = loft_body(fuse_stations, "Fuselage", doc, squash=0.82)
+    round_edges(fuselage, 3.0)
 
-    # ==== 1b. TAILBOOM ROD -- NEW this pass, replaces the fuselage stretch =
-    #    A simple constant-radius rod from the real fuselage's own tail tip
-    #    out to the pusher mount, carrying the tail/fin (section 4/5) partway
-    #    along it and the pusher (section 9) at its tip. Radius (14mm) sits
-    #    between the lift-rotor booms (11mm) and the fuselage tip they
-    #    spring from (20.7mm) -- thicker than the lift booms since it
-    #    carries the tail surfaces' loads too, not just one motor.
-    #    Riding at BOOM_Z (the same waterline as the tail/lift-booms, not
-    #    the fuselage's own Z=0 centerline) -- a ~19mm rise over the
-    #    fuselage's tip radius (~17mm at that station), i.e. it leaves
-    #    the fuselage right at its surface, not floating above it.
-    cylinder_between((FUSE_TIP_X, 0, BOOM_Z), (PUSH_X + 20, 0, BOOM_Z), 14.0,
+    # ==== 1b. TAILBOOM ROD -- now ends at ROD_TIP_X, not a fixed +20mm past
+    #    the old pusher mount. Shortened from 416.7mm to ~226mm this pass
+    #    by bringing the pusher assembly up against the tail instead of
+    #    leaving it 172mm clear -- see DESIGN_NOTES.md sec 10.2. Radius
+    #    (14mm) unchanged -- still real relative to the lift-booms (11mm)
+    #    and the fuselage tip it springs from (20.7mm).
+    cylinder_between((FUSE_TIP_X, 0, BOOM_Z), (ROD_TIP_X, 0, BOOM_Z), 14.0,
                      "TailBoomRod", doc)
 
     # ==== 2. NOSE PROBE -- sensorProbe.kcl (global-X convention) ===========
+    #    No fillet here -- its own nose-tip radius (0.74mm) is smaller than
+    #    any fillet worth applying.
     loft_body([(-1150 * S, 1.5 * S), (70 * S, 5 * S), (120 * S, 8 * S)],
              "NoseProbe", doc)
 
@@ -161,51 +221,40 @@ def main():
     wing_R = flat_panel(wing_profile, 15.0, "WingR", doc)
     place(wing_R, rot_axis=(1, 0, 0), rot_deg=2.0,
          translate=(-330 * S, 0, 155 * S))
+    round_edges(wing_R, 2.0)
     mirror_y(wing_R, "WingL", doc)
 
     # ==== 4. HORIZONTAL TAIL -- tailHalf.kcl profile, same XY-sketch =======
-    #    convention as the wing (chord, span). CHANGED this pass: mount
-    #    point moved from (650*S, 0, 180*S) = (320.7, 0, 88.8) down to
-    #    (TAIL_X, 0, BOOM_Z) -- boom height, not a separate elevated
-    #    mount -- so the boom can run straight into the tail's root with
-    #    no height-bridging brace. TAIL_X (560mm) is set with the booms
-    #    and rotors below, not independently -- see the boom section.
+    #    convention as the wing (chord, span). Mount point (TAIL_X, 0,
+    #    BOOM_Z) unchanged this pass -- only the fin and pusher moved
+    #    relative to it, not the tail itself.
     tail_profile = [(0, 0), (340 * S, 0), (340 * S, 500 * S), (120 * S, 500 * S)]
     tail_R = flat_panel(tail_profile, 10.0, "TailR", doc)
     place(tail_R, translate=(TAIL_X, 0, BOOM_Z))
+    round_edges(tail_R, 2.0)
     mirror_y(tail_R, "TailL", doc)
 
     # ==== 5. VERTICAL FINS -- verticalFin.kcl: sketch is "on XZ" => local ==
     #    (x,y) fed into flat_panel means (chord, HEIGHT), not (chord, span)
-    #    like the wing/tail above. That's the bug from last time: this
-    #    panel was placed with translate() only, so its "height" axis
-    #    stayed as global Y (spanwise) instead of becoming global Z (up).
-    #    Fix: rotate +90deg about X first. That maps local Y (height) onto
-    #    global Z (up) and local Z (the thin extrusion) onto global Y
-    #    (spanwise-thin) -- verify: Ry'=Y*cos90-Z*sin90=-Z (small, correct,
-    #    spanwise-thin); Z'=Y*sin90+Z*cos90=Y (height -> up, correct).
-    #    No fin-base landing skid in this version -- see DESIGN_NOTES.md,
-    #    gear is 4 legs instead (section 7 below). Fin Y is the tailplane's
-    #    real tip (246.7mm), unchanged from the previous pass.
+    #    like the wing/tail above. Fix (from the earlier orientation bug):
+    #    rotate +90deg about X first, mapping local Y (height) onto global
+    #    Z (up) and local Z (the thin extrusion) onto global Y
+    #    (spanwise-thin).
     #
-    #    CHANGED this pass: rather than one fin reaching up from an
-    #    elevated tail, the tail is now AT boom height, so the fin is
-    #    built as two pieces from that same waterline (BOOM_Z) -- one
-    #    reaching up (dorsal, 90mm), one reaching down (ventral, 60mm,
-    #    less than the dorsal piece for ground clearance) -- "a vertical
-    #    stabilizer on both ends, one facing up, one facing down." Total
-    #    span (150mm) is comparable to the old single fin's height
-    #    (120.8mm), so directional-stability area isn't reduced.
-    #    Chord kept at the real KCL fin root chord (280*S=138.2mm); the
-    #    crown-arc taper is simplified to a straight taper here (not
-    #    reproduced) -- flagged in DESIGN_NOTES.md as a simplification,
-    #    not a dimension.
+    #    CHANGED this pass: mounted at FIN_X (579.6mm), not TAIL_X (560mm)
+    #    -- moved aft along the tail's own chord so the fin sits toward the
+    #    tail's trailing edge ("at the back of the wing... not completely
+    #    at the end, like their planes") instead of flush with its leading
+    #    edge. See DESIGN_NOTES.md sec 10.1. FIN_Y (tailplane's real tip)
+    #    unchanged -- this is a chordwise move only.
     def fin_piece(height, name):
         frac = abs(height) / 90.0     # tip-chord taper scales with |height|,
         pts = [(0, 0), (138.2, 0), (100 * frac, height), (40 * frac, height)]
         panel = flat_panel(pts, 9.0, name, doc)
-        return place(panel, rot_axis=(1, 0, 0), rot_deg=90.0,
-                    translate=(TAIL_X, FIN_Y, BOOM_Z))
+        place(panel, rot_axis=(1, 0, 0), rot_deg=90.0,
+             translate=(FIN_X, FIN_Y, BOOM_Z))
+        round_edges(panel, 1.5)
+        return panel
 
     fin_up_R = fin_piece(90.0, "FinUpR")
     mirror_y(fin_up_R, "FinUpL", doc)
@@ -213,25 +262,14 @@ def main():
     mirror_y(fin_dn_R, "FinDownL", doc)
 
     # ==== 6. ROTOR-MOUNT BOOMS x2 (global convention) ======================
-    #    CHANGED this pass: boom's aft tip extended from 330mm to
-    #    BOOM_AFT_X (555mm) so it runs directly into the tail's root
-    #    (TAIL_X=560mm) -- no more height-bridging brace (removed; boom
-    #    and tail are now at the same Z, so they simply meet). Checked
-    #    clear of the rear rotor disc (aft edge 451.8mm) by 103mm.
-    #    Front tip (-340mm) is unchanged from the wing-clearance fix.
+    #    Unchanged this pass -- the fin/pusher move was along the tail's
+    #    own chord and past it, not along the boom.
     for ysign in (1, -1):
         y = BOOM_Y * ysign
         cylinder_between((-340.0, y, BOOM_Z), (BOOM_AFT_X, y, BOOM_Z),
                          11.0, f"Boom{'R' if ysign > 0 else 'L'}", doc)
 
-    # ==== 7. LANDING LEGS x4 -- CHANGED this pass: rear legs now mount ====
-    #    on the main fuselage body (not the booms). Front legs are the
-    #    real landingStrut.kcl/main.kcl position, unchanged. Rear legs
-    #    are at fuselage station x=200mm (real local fuselage radius
-    #    there, interpolated from the loft stations, is 74.5mm -- wider
-    #    than the leg's 66.6mm spanwise offset, so it mounts flush on
-    #    the fuselage belly, same spanwise spacing as the front legs,
-    #    not out at the boom).
+    # ==== 7. LANDING LEGS x4 (unchanged this pass) =========================
     GROUND_Z = -400 * S     # -197.4mm, from the front legs (unchanged)
     REAR_LEG_X = 200.0
     for ysign in (1, -1):
@@ -243,10 +281,10 @@ def main():
                          f"LegRear{'R' if ysign > 0 else 'L'}", doc)
 
     # ==== 8. LIFT ROTORS x4, staggered front-low/rear-high (global) =======
-    #    CHANGED this pass: X positions moved out to -302.7 / +306.2mm
-    #    (from -217.1 / +212.2mm) so the rotor discs (radius 145.6mm)
-    #    clear the wing chord (LE=-117.1, TE=120.6mm at this boom Y)
-    #    with a 40mm margin instead of overlapping it by 46-54mm.
+    #    X positions (wing-clearance fix) and Z stagger unchanged this
+    #    pass. NEW: a motor_can at each mount point (was a bare pod +
+    #    propeller meeting with nothing between them) and the propeller
+    #    itself rebuilt with a real hub -- see DESIGN_NOTES.md sec 10.3.
     lift_specs = {"FR": (-302.7, BOOM_Y, BOOM_Z - 70 * S),
                  "FL": (-302.7, -BOOM_Y, BOOM_Z - 70 * S),
                  "RR": (REAR_ROTOR_X, BOOM_Y, BOOM_Z + 70 * S),
@@ -258,14 +296,21 @@ def main():
         pod_shape = pod.Shape.copy()
         pod_shape.translate(V(x, y, z))
         pod.Shape = pod_shape
-        blade_pair((x, y, z), PROP_R, "z", f"Rotor{k}", doc)
+        round_edges(pod, 2.5)
+        motor_can((x, y, z), "z", LIFT_BELL_R, LIFT_BELL_H,
+                 LIFT_SHAFT_R, LIFT_SHAFT_H, f"Motor{k}", doc)
+        propeller((x, y, z), PROP_R, "z", f"Rotor{k}", doc)
 
-    # ==== 9. PUSHER -- same size as the lift rotors (uniform hardware) ====
-    #    Still no offset mast: mounted flush at the tailboom rod's own tip
-    #    (Y=0, Z=BOOM_Z -- the rod's own height, not the fuselage's), so
-    #    the motor bolts straight onto the rod end. Checked clear of the
-    #    fin (aft edge 698.2mm) by 56mm -- see DESIGN_NOTES.md.
-    blade_pair((PUSH_X, 0, BOOM_Z), PROP_R, "x", "Pusher", doc)
+    # ==== 9. PUSHER -- same prop size as the lift rotors (uniform hardware)
+    #    CHANGED this pass: mounted right behind the tail's own trailing
+    #    edge (PUSH_X, derived above) instead of 172mm clear of it, with a
+    #    motor_can in between -- both built coaxial with the tailboom rod
+    #    (same Y=0, Z=BOOM_Z line, same rotate-about-Y "x"-axis convention)
+    #    so the rod, motor and prop hub sit on a single straight line, not
+    #    offset from each other. See DESIGN_NOTES.md sec 10.2.
+    motor_can((PUSH_MOTOR_X, 0, BOOM_Z), "x", PUSH_BELL_R, PUSH_BELL_H,
+             PUSH_SHAFT_R, PUSH_SHAFT_H, "PusherMotor", doc)
+    propeller((PUSH_X, 0, BOOM_Z), PROP_R, "x", "Pusher", doc)
 
     doc.recompute()
 
@@ -296,20 +341,25 @@ def main():
     front_clear = le - (lift_specs["FR"][0] + PROP_R)
     rear_clear = (lift_specs["RR"][0] - PROP_R) - te
     boom_rotor_clear = BOOM_AFT_X - (REAR_ROTOR_X + PROP_R)
-    fin_aft_edge = TAIL_X + 138.2
-    pusher_fin_clear = (PUSH_X - PROP_R) - fin_aft_edge
+    fin_aft_edge = FIN_X + FIN_CHORD
+    prop_wing_clear = PUSH_X - WING_TE_X
+    pusher_fin_clear = ROD_TIP_X - fin_aft_edge
     print(f"Scale factor S       = {S:.6f}")
     print(f"Ground line Z        = {GROUND_Z:.1f} mm")
     print(f"Legs                 = 4 (2 front + 2 rear, both on the fuselage)")
+    print(f"Fin X (chordwise)    = {FIN_X:.1f} mm (tail LE={TAIL_X:.1f}, "
+         f"TE={WING_TE_X:.1f}, fin TE={fin_aft_edge:.1f})")
     print(f"Fin/keel Y           = {FIN_Y:.1f} mm (tailplane tip = {500*S:.1f} mm)")
     print(f"Tail/boom mount Z    = {BOOM_Z:.1f} mm (same height -- no brace needed)")
     print(f"Front rotor->wing clearance = {front_clear:.1f} mm")
     print(f"Rear rotor->wing clearance  = {rear_clear:.1f} mm")
     print(f"Boom-aft-tip->rear-rotor clearance = {boom_rotor_clear:.1f} mm")
-    print(f"Pusher->fin clearance       = {pusher_fin_clear:.1f} mm")
+    print(f"Rod-tip/motor-start->fin-aft-edge clearance = {pusher_fin_clear:.1f} mm")
+    print(f"Pusher prop -> tail wing TE clearance = {prop_wing_clear:.1f} mm "
+         f"(target ~5mm; actual reflects a real motor+shaft length in between)")
     print(f"Fuselage length (real, unstretched) = {FUSE_TIP_X-(-1080*S):.1f} mm")
-    print(f"Tailboom rod length  = {(PUSH_X+20)-FUSE_TIP_X:.1f} mm "
-         f"(fuselage tip {FUSE_TIP_X:.1f} to pusher {PUSH_X:.1f})")
+    print(f"Tailboom rod length  = {ROD_TIP_X-FUSE_TIP_X:.1f} mm "
+         f"(fuselage tip {FUSE_TIP_X:.1f} to rod tip {ROD_TIP_X:.1f})")
     print(f"Objects              = {len(all_objs)}")
     print(f"Saved: {base}.FCStd / .step / .stl")
 

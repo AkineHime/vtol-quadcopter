@@ -156,12 +156,63 @@ KCL — each has a reason, not just a preference):
    unaffected, since none of TAIL_X, FIN_Y, or PUSH_X moved — only what
    physically carries them out there changed.
 
+10. **Fin moved aft, pusher pulled in against the tail, real
+    propeller + motor detail, rounded edges.** Four related fixes from
+    direct FreeCAD-GUI review, all touching the same rear section:
+
+    - **Fin moved from `TAIL_X` (flush with the tail's leading edge) to
+      a new `FIN_X` (579.6mm), aft along the tail's own chord.** The
+      fin's aft edge now sits 10mm short of the tail's real trailing
+      edge (`FIN_MARGIN`) — "at the back of the wing... not completely
+      at the end, like their planes" — instead of occupying mostly the
+      front of the chord as before. `FIN_Y` (tailplane's real tip,
+      246.7mm) is unchanged; this was a chordwise move only.
+    - **Pusher pulled in from 900mm to 738.8mm.** The tailboom rod used
+      to run 172mm past the tail before reaching the pusher (rod length
+      416.7mm) — visibly too long. The tail's real trailing edge is a
+      fixed `WING_TE_X = TAIL_X + 340*S = 727.8mm` (unswept — the KCL's
+      tail TE is a straight line across the whole span, so this one X
+      value holds at every span station). The rod now ends 2mm past
+      that (`ROD_TIP_X`), followed by a motor+shaft (9mm) to the
+      propeller hub — so the prop sits **11mm** behind the wing, not
+      the requested "roughly half a centimeter" exactly, because a
+      real two-diameter motor+shaft needs some physical length; 11mm
+      was the closest fit without asking the motor to overlap the
+      tail's own structure. Rod length dropped from 416.7mm to 226.5mm.
+    - **Real propeller (`propeller()`) replacing the bare rectangular
+      cross (`blade_pair`).** Each blade now tapers root-to-tip (root
+      width 16% of radius, tip 5%) and there's an actual hub cylinder
+      at the center, instead of two flat rectangles crossing at a
+      point. Applied to all 5 rotor positions (4 lift + pusher). Still
+      schematic — flat blades, no aerodynamic twist.
+    - **Motor housings (`motor_can()`) added at all 5 rotor
+      positions** — a stepped two-diameter cylinder (bell + shaft)
+      standing in for a real motor, replacing "just a round shape"
+      where the pod/rod met the propeller directly. The pusher's motor
+      is built coaxial with the tailboom rod itself (same Y=0, Z=BOOM_Z
+      line, same axis convention) so the rod, motor and prop hub read
+      as one straight line rather than offset pieces — this is also
+      the fix for "the hole [motor/prop] should be concentric with the
+      tail boom's center... in one single line."
+    - **`round_edges()` fillets applied** to the wings, tail, both fin
+      pieces (2mm radius), the lift-rotor pods and fuselage (2.5-3mm),
+      and the propellers/motors (1-1.5mm) — softens the sharp mitred
+      corners flat_panel/loft leave behind ("everything has sharp
+      lines now"). Wrapped in try/except per part since OCC's fillet
+      can refuse a radius that doesn't fit some short edge; on this
+      build it succeeded on every panel, the fuselage, and every motor,
+      but failed on the 4 lift-rotor pods and all 5 propeller/motor
+      fused shapes (`ChFi3d_Builder: only 2 faces` / `no suitable
+      edges`) — those stay sharp-edged. Not worth chasing further for
+      a schematic-level model; flagged here rather than silently
+      dropped.
+
 **Explicitly not modeled** (placeholder, flagged so it's never mistaken
-for finished): propeller blades are flat rectangular silhouettes, not
-real airfoil-twisted blades; joints (boom-to-pod, brace-to-fin) are
-simple cylinders, not filleted/blended. Fine for a patent reference and
-for aero work; would need real surfacing before anything manufacturing-
-facing.
+for finished): propeller blades are flat (tapered, but untwisted)
+silhouettes, not real airfoil blades; most joints (boom-to-pod) are
+simple cylinders, not filleted/blended (see item 10's partial fillet
+coverage above). Fine for a patent reference and for aero work; would
+need real surfacing before anything manufacturing-facing.
 
 ## 4. Verified numbers (check these after any edit)
 
@@ -177,10 +228,12 @@ number changed:
 | Fuselage max radius | ~98mm (196mm dia) | `fuselage.kcl` mid-body station |
 | Front/rear rotor-to-wing clearance | +40.0mm each | script-computed, printed every run |
 | Fin/keel Y | 246.7mm | must equal tailplane half-span (also printed) |
+| Fin X (chordwise) | 579.6mm | tail LE 560, TE 727.8 — fin sits in the aft ~58% of chord (sec. 10) |
 | Boom-aft-tip to rear-rotor clearance | +103.2mm | script-computed, printed every run |
-| Pusher-to-fin clearance | +56.2mm | script-computed, printed every run |
+| Rod-tip/motor-start to fin-aft-edge clearance | +12.0mm | script-computed, printed every run |
+| Pusher prop to tail wing TE clearance | +11.0mm | target ~5mm; actual reflects real motor+shaft length (sec. 10) |
 | Fuselage length (real, unstretched) | 1036.2mm | back to real KCL stations (sec. 9) |
-| Tailboom rod length | 416.7mm | fuselage tip (503.4) to pusher (920) |
+| Tailboom rod length | 226.5mm | fuselage tip (503.4) to rod tip (729.8) — shortened, sec. 10 |
 | Overall height (ground to highest point) | 361.7mm | ground line (−197.4) to pusher disc top (+164.3) |
 
 ## Housekeeping
