@@ -244,16 +244,18 @@ def main():
 
     BOOM_R = 11.0
 
-    # WING PILLAR -- NEW this pass, replaces the (removed) tail strut.
-    # The boom sits at a fixed BOOM_Z=18.8mm along its whole length, but
-    # the MAIN wing (2-degree dihedral, root at Z=155*S) is nowhere near
-    # that height -- at the boom's own spanwise station (BOOM_Y) the
-    # wing's underside works out to ~76.6mm, verified below by computing
-    # the exact same rotate-then-translate transform place() applies to
-    # the wing. That ~58mm vertical gap is why the boom read as
-    # "floating in midair": nothing ever connected it to anything.
-    # PILLAR_X=0 sits near the wing's mid-chord at that station (chord
-    # there runs -117 to +121mm) and well within the boom's own span
+    # WING PILLARS -- one per boom at first, now TWO per boom (front +
+    # back) for a proper two-point mount instead of a single pivot that
+    # could still rock. The boom sits at a fixed BOOM_Z=18.8mm along its
+    # whole length, but the MAIN wing (2-degree dihedral, root at
+    # Z=155*S) is nowhere near that height -- at the boom's own spanwise
+    # station (BOOM_Y) the wing's underside works out to ~76.6mm,
+    # verified below by computing the exact same rotate-then-translate
+    # transform place() applies to the wing. That ~58mm vertical gap is
+    # why the boom originally read as "floating in midair".
+    # PILLAR_X_FRONT/BACK sit inside the wing's chord at that station
+    # (-117.2mm LE to +121.1mm TE), spaced well apart from each other
+    # and from either edge, and both well within the boom's own span
     # (-340 to 330mm).
     def wing_underside_z(y):
         th = math.radians(2.0)               # wing's own dihedral angle
@@ -261,7 +263,8 @@ def main():
         return cy * math.sin(th) - (15.0 / 2.0) * math.cos(th) + 155 * S
 
     PILLAR_R = 7.0
-    PILLAR_X = 0.0
+    PILLAR_X_FRONT = -70.0
+    PILLAR_X_BACK = 70.0
     PILLAR_TOP_Z = wing_underside_z(BOOM_Y)
 
     # Landing legs SPLAYED this pass -- were plumb-vertical, which looks
@@ -374,36 +377,31 @@ def main():
         cylinder_between((-340.0, y, BOOM_Z), (BOOM_AFT_X, y, BOOM_Z),
                          BOOM_R, f"Boom{'R' if ysign > 0 else 'L'}", doc)
 
-    # ==== 6b. WING PILLARS x2 -- REPLACES the tail strut this pass ========
+    # ==== 6b. WING PILLARS x4 -- TWO per boom this pass ====================
     #    The team rejected the boom-to-tail strut outright ("do not
     #    connect it to the back wings") once they realized the boom was
     #    never attached to anything real in the first place -- it needs
     #    to pick up load from the MAIN wing, not reach aft to the tail.
-    #    A vertical pillar from the boom's own centerline (BOOM_Z) up to
-    #    the main wing's underside (PILLAR_TOP_Z, computed above) at the
-    #    boom's own spanwise station and roughly the wing's mid-chord
-    #    (PILLAR_X=0). Embeds 2mm into the wing's solid at the top (same
-    #    fillet-inset lesson as sec. 13) and 2mm into the boom at the
-    #    bottom, with a stud pair at each end.
-    #
-    #    CHANGED this pass: each joint had 4 small studs evenly spaced
-    #    around the ring (a decorative bolt-circle). Team's call: this
-    #    joint takes real fore-aft rocking from rotor-induced vibration
-    #    transmitted through the boom, so it needs actual bracing there,
-    #    not a fastener pattern -- 2 larger studs, front and back (n=2
-    #    puts them at local angle 0/180, which for this "z"-axis ring is
-    #    exactly +-X, i.e. fore/aft), sized up to read as a real gusset.
+    #    A single pillar (previous pass) was still just one pivot point --
+    #    CHANGED this pass to two per boom, one at the wing's front
+    #    (PILLAR_X_FRONT) and one at its back (PILLAR_X_BACK), for a real
+    #    two-point mount that resists fore-aft rocking on its own instead
+    #    of relying on the stud bracing at a single joint. Each embeds
+    #    2mm into the wing's solid at the top (same fillet-inset lesson
+    #    as sec. 13) and 2mm into the boom at the bottom, with a stud
+    #    pair (front/back, sec. 15's fix) at each end.
     PILLAR_EMBED = 2.0
     for ysign in (1, -1):
         y = BOOM_Y * ysign
         side = "R" if ysign > 0 else "L"
-        bot = (PILLAR_X, y, BOOM_Z - PILLAR_EMBED)
-        top = (PILLAR_X, y, PILLAR_TOP_Z + PILLAR_EMBED)
-        cylinder_between(bot, top, PILLAR_R, f"WingPillar{side}", doc)
-        stud_ring((PILLAR_X, y, BOOM_Z), "z", PILLAR_R, f"StudPillarBoom{side}",
-                 doc, n=2, stud_r=3.0, stud_h=5.0)
-        stud_ring((PILLAR_X, y, PILLAR_TOP_Z), "z", PILLAR_R, f"StudPillarWing{side}",
-                 doc, n=2, stud_r=3.0, stud_h=5.0)
+        for px, tag in ((PILLAR_X_FRONT, "Front"), (PILLAR_X_BACK, "Back")):
+            bot = (px, y, BOOM_Z - PILLAR_EMBED)
+            top = (px, y, PILLAR_TOP_Z + PILLAR_EMBED)
+            cylinder_between(bot, top, PILLAR_R, f"WingPillar{tag}{side}", doc)
+            stud_ring((px, y, BOOM_Z), "z", PILLAR_R, f"StudPillar{tag}Boom{side}",
+                     doc, n=2, stud_r=3.0, stud_h=5.0)
+            stud_ring((px, y, PILLAR_TOP_Z), "z", PILLAR_R, f"StudPillar{tag}Wing{side}",
+                     doc, n=2, stud_r=3.0, stud_h=5.0)
 
     # ==== 7. LANDING LEGS x4 -- SPLAYED this pass ==========================
     #    Ground-contact points moved outward (Y) and fore/aft (X) from
@@ -522,9 +520,10 @@ def main():
     print(f"Boom overhang past its own rotor mount = {boom_overhang:.1f} mm")
     print(f"Boom is NOT connected toward the tail this pass (strut removed "
          f"on request) -- boom's aft tip ({BOOM_AFT_X:.1f}mm) is a free end")
-    print(f"Wing pillar length   = {pillar_len:.1f} mm (boom Z={BOOM_Z:.1f} "
-         f"to wing underside Z={PILLAR_TOP_Z:.1f}, at wing chord "
-         f"x={PILLAR_X:.1f}, y={BOOM_Y:.1f})")
+    print(f"Wing pillars (x4)    = {pillar_len:.1f} mm each (boom Z={BOOM_Z:.1f} "
+         f"to wing underside Z={PILLAR_TOP_Z:.1f}), at chord x="
+         f"{PILLAR_X_FRONT:.1f}mm (front) / {PILLAR_X_BACK:.1f}mm (back), "
+         f"y={BOOM_Y:.1f} -- wing chord there spans -117.2 to 121.1mm")
     print(f"Fin X (chordwise)    = {FIN_X:.1f} mm (tail LE={TAIL_X:.1f}, "
          f"TE={WING_TE_X:.1f}, fin TE={fin_aft_edge:.1f})")
     print(f"Fin/keel Y           = {FIN_Y:.1f} mm (tailplane tip = {500*S:.1f} mm)")

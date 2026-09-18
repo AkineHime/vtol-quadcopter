@@ -342,6 +342,17 @@ KCL — each has a reason, not just a preference):
     tops) are unchanged 4-stud fastener circles; flag it if you want
     this pattern carried to any of those too.
 
+16. **Two wing pillars per boom, not one.** A single pillar (item 14)
+    was still only one pivot point -- team wanted a proper two-point
+    mount. Added a second pillar per side: `PILLAR_X_FRONT=-70mm` and
+    `PILLAR_X_BACK=+70mm` (the wing chord at `BOOM_Y` runs -117.2 to
+    +121.1mm, so both sit with healthy margin from either edge and from
+    each other). 4 pillars total (`WingPillarFrontR/L`,
+    `WingPillarBackR/L`), each with its own front/back stud pair at
+    both ends (item 15's fix, now applied per-pillar). Re-verified with
+    `Shape.distToShape()`: both the front and back pillar report 0.0mm
+    to the wing and to the boom on both sides.
+
 **Explicitly not modeled** (placeholder, flagged so it's never mistaken
 for finished): propeller blades are flat (tapered, but untwisted)
 silhouettes, not real airfoil blades; the lift-rotor boom's aft end
@@ -373,8 +384,8 @@ number changed:
 | Fuselage cross-section at rod start | Y ±14.5mm, Z ±18.15mm, centered Z=0 | verified via `Shape.slice()` — rod now concentric with this, sec. 11 |
 | Boom length (each side) | 330.0mm (was 555.0mm) | shortened, sec. 12 |
 | Boom overhang past its own rotor mount | +23.8mm | script-computed, printed every run |
-| Wing pillar | 61.8mm, boom Z=18.8 to wing underside Z=76.6 | boom no longer connects toward the tail at all — sec. 14 |
-| Pillar-to-wing / pillar-to-boom contact | distToShape() = 0.0mm both | verified geometrically, not just by bounding box — sec. 14 |
+| Wing pillars (x4) | 61.8mm each, boom Z=18.8 to wing underside Z=76.6 | 2 per boom, front (x=-70) + back (x=+70) — sec. 16 |
+| Pillar-to-wing / pillar-to-boom contact | distToShape() = 0.0mm, all 4 pillars | verified geometrically, not just by bounding box — sec. 14/16 |
 | Leg ground half-width | 101.6mm (was 66.6mm plumb) | splayed stance, sec. 12 |
 | Overall height (ground to highest point) | 361.7mm | ground line (−197.4) to pusher disc top (+164.3) |
 
