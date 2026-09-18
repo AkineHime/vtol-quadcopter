@@ -43,8 +43,11 @@ AVL 3.36's plot library won't build headless, so this uses **NeuralFoil**
 - **Wing incidence 2° → 1°**, cruise **16 → 12 m/s** (2° trimmed at negative α).
 - **Tail incidence −1.8°** vs fuselage (was a −1.5° guess), CG 33% MAC, SM ~27%.
 - **Vertical fins undersized** — current V_V 0.027 gives C_nβ ≈ +0.02; need
-  **340 cm² total (V_V 0.044)** for C_nβ ≥ 0.07. New fin built in
-  `models/freecad/vertical_fin.FCStd`.
+  **340 cm² total (V_V 0.044)** for C_nβ ≥ 0.07. The fin geometry in the
+  current full-airframe model (`models/freecad/build_assembly.py`, dorsal +
+  ventral split, see `models/freecad/DESIGN_NOTES.md` §3 item 8) should be
+  checked against this target — it was sized from the KCL reference
+  geometry, not re-derived from this V_V requirement.
 - **Elevon authority is abundant** (not marginal): trim uses 1–8% of travel,
   roll ~650 °/s at full throw, pull-up 2.6 g (stall-limited). No tail elevator
   needed; ArduPilot rate/throw limiting expected. (`control_authority.py`)
