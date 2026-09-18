@@ -148,45 +148,65 @@ def main():
     #    spanwise-thin); Z'=Y*sin90+Z*cos90=Y (height -> up, correct).
     #    No fin-base landing skid in this version -- see DESIGN_NOTES.md,
     #    gear is 4 legs instead (section 6 below).
+    #    CHANGED this pass: Y moved from 230*S (113.5mm, inboard -- read
+    #    as "fins at the center") out to the tailplane's own half-span,
+    #    500*S (246.7mm) -- so the keel sits at the tailplane's tip, not
+    #    partway in. See DESIGN_NOTES.md sec 3 for the verification.
+    FIN_Y = 500 * S   # 246.7mm -- the tailplane's real tip, not 230*S
     fin_profile = [(0, 0), (280 * S, 0), (265 * S, 160 * S), (70 * S, 245 * S)]
     fin_R = flat_panel(fin_profile, 9.0, "FinR", doc)
     place(fin_R, rot_axis=(1, 0, 0), rot_deg=90.0,
-         translate=(690 * S, 230 * S, 190 * S))
+         translate=(690 * S, FIN_Y, 190 * S))
     mirror_y(fin_R, "FinL", doc)
 
     # ==== 6. ROTOR-MOUNT BOOMS x2 + boom-to-fin brace (global convention) ==
+    #    CHANGED this pass: the boom's Y (spanwise position, 440*S) is
+    #    unchanged from the real KCL, but the rotor mount points along
+    #    it are pushed further fore/aft -- at the old +-217/212mm they
+    #    overlapped the wing chord by 46-54mm (verified: at Y=217mm the
+    #    wing spans LE=-117 to TE=121, but the old rotor discs, radius
+    #    145.6mm, reached to -71 and +67 -- inside the wing). New
+    #    positions clear the wing chord by a 40mm margin on each side
+    #    (see LIFT dict below); the boom itself is lengthened to match.
     BOOM_Z = 38 * S
-    BOOM_TIP_X = 660 * S
+    BOOM_Y = 440 * S
+    BOOM_TIP_X = 330.0
     for ysign in (1, -1):
-        y = 440 * S * ysign
-        cylinder_between((-660 * S, y, BOOM_Z), (BOOM_TIP_X, y, BOOM_Z), 11.0,
-                         f"Boom{'R' if ysign > 0 else 'L'}", doc)
+        y = BOOM_Y * ysign
+        cylinder_between((-BOOM_TIP_X, y, BOOM_Z), (BOOM_TIP_X, y, BOOM_Z),
+                         11.0, f"Boom{'R' if ysign > 0 else 'L'}", doc)
         cylinder_between((BOOM_TIP_X, y, BOOM_Z),
-                         (690 * S, 230 * S * ysign, 190 * S), 6.0,
+                         (690 * S, FIN_Y * ysign, 190 * S), 6.0,
                          f"Brace{'R' if ysign > 0 else 'L'}", doc)
 
-    # ==== 7. LANDING LEGS x4 (CHANGED this pass: 2 front + 2 rear, no ======
-    #    fin-skid) -- front legs from landingStrut.kcl / main.kcl's real
-    #    position; rear legs are NEW, mounted from each boom's aft tip
-    #    down to the SAME ground line, clear of the pusher (y=0, so the
-    #    +-217mm leg position doesn't intersect its ~146mm-radius disc)
-    #    and clear of the rear rotors (rotors sit ABOVE the boom, legs
-    #    only run below it -- no Z-overlap). See DESIGN_NOTES.md sec. 3.
+    # ==== 7. LANDING LEGS x4 -- CHANGED this pass: rear legs now mount ====
+    #    on the main fuselage body (not the booms). Front legs are the
+    #    real landingStrut.kcl/main.kcl position, unchanged. Rear legs
+    #    are at fuselage station x=200mm (real local fuselage radius
+    #    there, interpolated from the loft stations, is 74.5mm -- wider
+    #    than the leg's 66.6mm spanwise offset, so it mounts flush on
+    #    the fuselage belly, same spanwise spacing as the front legs,
+    #    not out at the boom).
     GROUND_Z = -400 * S     # -197.4mm, from the front legs (unchanged)
+    REAR_LEG_X = 200.0
     for ysign in (1, -1):
         cylinder_between((-170 * S, 135 * S * ysign, -130 * S),
                          (-170 * S, 135 * S * ysign, GROUND_Z), 4.0,
                          f"LegFront{'R' if ysign > 0 else 'L'}", doc)
-        cylinder_between((BOOM_TIP_X, 440 * S * ysign, BOOM_Z),
-                         (BOOM_TIP_X, 440 * S * ysign, GROUND_Z), 4.0,
+        cylinder_between((REAR_LEG_X, 135 * S * ysign, -20.0),
+                         (REAR_LEG_X, 135 * S * ysign, GROUND_Z), 4.0,
                          f"LegRear{'R' if ysign > 0 else 'L'}", doc)
 
     # ==== 8. LIFT ROTORS x4, staggered front-low/rear-high (global) =======
+    #    CHANGED this pass: X positions moved out to -302.7 / +306.2mm
+    #    (from -217.1 / +212.2mm) so the rotor discs (radius 145.6mm)
+    #    clear the wing chord (LE=-117.1, TE=120.6mm at this boom Y)
+    #    with a 40mm margin instead of overlapping it by 46-54mm.
     PROP_R = 295 * S
-    lift_specs = {"FR": (-440 * S, 440 * S, BOOM_Z - 70 * S),
-                 "FL": (-440 * S, -440 * S, BOOM_Z - 70 * S),
-                 "RR": (430 * S, 440 * S, BOOM_Z + 70 * S),
-                 "RL": (430 * S, -440 * S, BOOM_Z + 70 * S)}
+    lift_specs = {"FR": (-302.7, BOOM_Y, BOOM_Z - 70 * S),
+                 "FL": (-302.7, -BOOM_Y, BOOM_Z - 70 * S),
+                 "RR": (306.2, BOOM_Y, BOOM_Z + 70 * S),
+                 "RL": (306.2, -BOOM_Y, BOOM_Z + 70 * S)}
     for k, (x, y, z) in lift_specs.items():
         cylinder_between((x, y, BOOM_Z), (x, y, z), 6.0, f"Pylon{k}", doc)
         pod = loft_body([(-90 * S, 0), (-60 * S, 26 * S), (0, 26 * S),
@@ -220,10 +240,24 @@ def main():
     except Exception as e:
         print("stl export skipped:", e)
 
-    print(f"Scale factor S   = {S:.6f}")
-    print(f"Ground line Z    = {GROUND_Z:.1f} mm")
-    print(f"Legs             = 4 (2 front + 2 rear, no fin-skid)")
-    print(f"Objects          = {len(all_objs)}")
+    def wing_chord_at_y(y):
+        le_root, le_tip = -330 * S, -330 * S + 320 * S
+        te_root, te_tip = -330 * S + 560 * S, -330 * S + 610 * S
+        frac = y / (1520 * S)
+        return (le_root + frac * (le_tip - le_root),
+               te_root + frac * (te_tip - te_root))
+
+    le, te = wing_chord_at_y(BOOM_Y)
+    front_clear = (le) - (lift_specs["FR"][0] + PROP_R)
+    rear_clear = (lift_specs["RR"][0] - PROP_R) - te
+    print(f"Scale factor S     = {S:.6f}")
+    print(f"Ground line Z      = {GROUND_Z:.1f} mm")
+    print(f"Legs               = 4 (2 front on fuselage, 2 rear on fuselage)")
+    print(f"Fin/keel Y         = {FIN_Y:.1f} mm (tailplane tip = {500*S:.1f} mm)")
+    print(f"Wing chord at boom Y={BOOM_Y:.1f}: LE={le:.1f} TE={te:.1f}")
+    print(f"Front rotor->wing clearance = {front_clear:.1f} mm (was -45.6, i.e. overlapping)")
+    print(f"Rear rotor->wing clearance  = {rear_clear:.1f} mm (was -54.0, i.e. overlapping)")
+    print(f"Objects            = {len(all_objs)}")
     print(f"Saved: {base}.FCStd / .step / .stl")
 
 

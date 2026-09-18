@@ -85,6 +85,33 @@ KCL — each has a reason, not just a preference):
    (`documents/vtol_project_summary.md`) specs one part, a 1045
    (10×4.5in, ≈254mm), for all five positions. Corrected here.
 
+5. **Rotor mount points moved along the boom, away from the wing.** At
+   the boom's Y (217.1mm), the wing chord runs LE=−117.1mm to TE=120.6mm.
+   The original front/rear rotor X positions (−217.1 / +212.2mm, straight
+   from the KCL) put the rotor discs (145.6mm radius) 45.6mm and 54.0mm
+   *inside* that chord band — the props swept directly under the wing.
+   Moved to −302.7 / +306.2mm, which clears the chord by 40mm on each
+   side (verified by the script's own printed output every run — check
+   "Front/Rear rotor->wing clearance" is positive, not just present).
+   Boom length increased to match (now ±330mm, was ±660mm pre-scale
+   ≈±325.7mm — barely changed, since the fix is about *where* the rotor
+   sits on the boom, not a much longer boom).
+6. **Fin/keel moved to the tailplane's actual tip.** The original KCL
+   places the fin at Y=230mm pre-scale (113.5mm post-scale) while the
+   tailplane's own half-span is 500mm pre-scale (246.7mm post-scale) —
+   the fin sits at only 46% of the way out, reading as "at the center"
+   rather than at the tail's edge. Moved to Y=246.7mm exactly (the
+   tailplane's real tip), which also shortens the boom-to-fin brace
+   from item 3 since the boom and fin are now much closer in Y.
+7. **Rear legs moved from the booms to the main fuselage.** Item 2's
+   rear legs were originally mounted from each boom's aft tip (y=±217mm,
+   wide stance). Moved to the fuselage body itself, at x=200mm (real
+   fuselage radius there, interpolated from the loft stations, is
+   74.5mm — wider than the leg's 66.6mm spanwise offset, so it mounts
+   flush on the fuselage belly), same spanwise spacing as the front
+   legs — a narrow, centered stance on the body, not a wide one on the
+   booms.
+
 **Explicitly not modeled** (placeholder, flagged so it's never mistaken
 for finished): propeller blades are flat rectangular silhouettes, not
 real airfoil-twisted blades; joints (boom-to-pod, brace-to-fin) are
@@ -104,6 +131,8 @@ number changed:
 | Overall length | ~1081mm | nose tip to pusher disc |
 | Ground line Z | −197.4mm | front leg length (`landingStrut.kcl`) |
 | Fuselage max radius | ~98mm (196mm dia) | `fuselage.kcl` mid-body station |
+| Front/rear rotor-to-wing clearance | +40.0mm each | script-computed, printed every run |
+| Fin/keel Y | 246.7mm | must equal tailplane half-span (also printed) |
 
 ## Housekeeping
 
