@@ -222,12 +222,34 @@ KCL — each has a reason, not just a preference):
       a schematic-level model; flagged here rather than silently
       dropped.
 
+11. **Real fuselage/rod misalignment fixed, stud rings added at every
+    major tube joint.** Direct screenshots from the FreeCAD GUI showed
+    the rod visibly off-center where it left the fuselage -- checked
+    with `Shape.slice()` and confirmed: the fuselage's own centerline
+    at that station is Z=0 with a +-18.15mm cross-section, but the rod
+    started at Z=BOOM_Z (18.8mm), so 14.6mm of the rod stuck out past
+    the fuselage's surface on top while the rest sat buried inside --
+    a real bug, not the radius-step issue fixed in item 10. Fixed by
+    starting the rod at (FUSE_TIP_X, 0, **0**) -- concentric with the
+    fuselage's own axis -- and angling it up to the tail's mount height
+    (BOOM_Z) at its far end: a shallow ~4.7-degree rise over ~227mm,
+    not a visible kink. Also added `stud_ring()` -- a small ring of
+    bolt-like cylinders -- at every major tube-to-tube joint that was
+    previously just two bare surfaces touching: fuselage-to-rod,
+    rod-to-motor-bell, motor-shaft-to-prop-hub, both boom-to-tail
+    junctions, and all four boom-to-pylon junctions. Schematic (studs
+    aren't sized to a real bolt spec), but reads as an actual joined
+    assembly instead of intersecting tubes. Not added at the
+    pylon-to-pod or leg-to-fuselage joints (too small a scale for six
+    tiny cylinders to look like anything but noise) -- flag this if you
+    want those covered too.
+
 **Explicitly not modeled** (placeholder, flagged so it's never mistaken
 for finished): propeller blades are flat (tapered, but untwisted)
-silhouettes, not real airfoil blades; most joints (boom-to-pod) are
-simple cylinders, not filleted/blended (see item 10's partial fillet
-coverage above). Fine for a patent reference and for aero work; would
-need real surfacing before anything manufacturing-facing.
+silhouettes, not real airfoil blades; the pylon-to-pod and
+leg-to-fuselage joints are still bare cylinders (see item 11). Fine for
+a patent reference and for aero work; would need real surfacing before
+anything manufacturing-facing.
 
 ## 4. Verified numbers (check these after any edit)
 
@@ -248,8 +270,9 @@ number changed:
 | Rod-tip/motor-start to fin-aft-edge clearance | +12.0mm | script-computed, printed every run |
 | Pusher prop to tail wing TE clearance | +12.0mm | target ~5mm; actual reflects real motor+shaft length (sec. 10) |
 | Fuselage length (real, unstretched) | 1036.2mm | back to real KCL stations (sec. 9) |
-| Tailboom rod length | 226.5mm | fuselage tip (503.4) to rod tip (729.8) — shortened, sec. 10 |
-| Rod/motor/prop centerline | Y=0.000, Z=18.750mm | verified via `Shape.BoundBox` on every part from `BoomR` to `Pusher` |
+| Tailboom rod length | 227.2mm, 4.7° rise | fuselage axis (Z=0) to tail height (Z=18.8) — angled, sec. 11 |
+| Rod-to-motor / motor-to-prop centerline | Y=0.000, Z=18.750mm | verified via `Shape.BoundBox`, unchanged by the rod-angle fix |
+| Fuselage cross-section at rod start | Y ±14.5mm, Z ±18.15mm, centered Z=0 | verified via `Shape.slice()` — rod now concentric with this, sec. 11 |
 | Overall height (ground to highest point) | 361.7mm | ground line (−197.4) to pusher disc top (+164.3) |
 
 ## Housekeeping

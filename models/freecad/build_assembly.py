@@ -18,6 +18,7 @@ sketch plane right is the one thing that broke last time (the fin was
 built like a wing and never rotated upright); every part below states
 its local-axis convention in a comment so that mistake is checkable.
 """
+import math
 import FreeCAD as App
 import Part
 
@@ -129,6 +130,27 @@ def propeller(center, radius, axis, name, doc):
     return obj
 
 
+def stud_ring(center, axis, ring_r, name, doc, n=6, stud_r=1.6, stud_h=3.0):
+    """A ring of small cylindrical studs around a tube-to-tube joint --
+    a visible fastener detail so two tubes read as bolted together
+    instead of just touching. `axis` follows the same convention as
+    motor_can/propeller: "x" rotates the ring (built flat in local XY)
+    so it faces along global X; anything else leaves it facing Z."""
+    studs = None
+    for i in range(n):
+        ang = math.radians(360.0 * i / n)
+        px, py = ring_r * math.cos(ang), ring_r * math.sin(ang)
+        c = Part.makeCylinder(stud_r, stud_h, V(px, py, -stud_h / 2.0), V(0, 0, 1))
+        studs = c if studs is None else studs.fuse(c)
+    shp = studs.copy()
+    if axis == "x":
+        shp.rotate(V(0, 0, 0), V(0, 1, 0), 90)
+    shp.translate(V(*center))
+    obj = doc.addObject("Part::Feature", name)
+    obj.Shape = shp
+    return obj
+
+
 def motor_can(center, axis, bell_r, bell_h, shaft_r, shaft_h, name, doc):
     """A stepped two-diameter cylinder (motor bell + shaft) standing in
     for a real motor -- schematic, but a visibly distinct mounted
@@ -213,8 +235,21 @@ def main():
     #    leaving it 172mm clear -- see DESIGN_NOTES.md sec 10.2. Radius
     #    (14mm) unchanged -- still real relative to the lift-booms (11mm)
     #    and the fuselage tip it springs from (20.7mm).
-    cylinder_between((FUSE_TIP_X, 0, BOOM_Z), (ROD_TIP_X, 0, BOOM_Z), ROD_R,
+    #
+    #    FIXED this pass (real bug, not the earlier radius issue): the rod
+    #    started at (FUSE_TIP_X, 0, BOOM_Z=18.8mm) -- but the fuselage's
+    #    own centerline there is Z=0, and its cross-section at that X is
+    #    only +-18.15mm (checked via Shape.slice), so the rod's top edge
+    #    stuck out 14.6mm past the fuselage's own surface while its
+    #    bottom half was buried inside -- a visibly lopsided joint (this
+    #    is what the screenshots showed as "not aligned"). Fixed by
+    #    starting the rod AT the fuselage's real axis (Z=0, concentric
+    #    with its taper) and angling it gently up to the tail's mount
+    #    height (BOOM_Z) at the far end -- a shallow ~4.8-degree rise
+    #    over its ~227mm length, not a kink.
+    cylinder_between((FUSE_TIP_X, 0, 0), (ROD_TIP_X, 0, BOOM_Z), ROD_R,
                      "TailBoomRod", doc)
+    stud_ring((FUSE_TIP_X, 0, 0), "x", ROD_R, "StudFuseRod", doc)
 
     # ==== 2. NOSE PROBE -- sensorProbe.kcl (global-X convention) ===========
     #    No fillet here -- its own nose-tip radius (0.74mm) is smaller than
@@ -274,10 +309,15 @@ def main():
     # ==== 6. ROTOR-MOUNT BOOMS x2 (global convention) ======================
     #    Unchanged this pass -- the fin/pusher move was along the tail's
     #    own chord and past it, not along the boom.
+    #    NEW this pass: a stud ring at each boom's aft tip, right where it
+    #    meets the tail root -- previously just a 5mm gap between two bare
+    #    tube ends with nothing visually joining them.
     for ysign in (1, -1):
         y = BOOM_Y * ysign
         cylinder_between((-340.0, y, BOOM_Z), (BOOM_AFT_X, y, BOOM_Z),
                          11.0, f"Boom{'R' if ysign > 0 else 'L'}", doc)
+        stud_ring((BOOM_AFT_X, y, BOOM_Z), "x", 11.0,
+                 f"StudBoomTail{'R' if ysign > 0 else 'L'}", doc)
 
     # ==== 7. LANDING LEGS x4 (unchanged this pass) =========================
     GROUND_Z = -400 * S     # -197.4mm, from the front legs (unchanged)
@@ -299,8 +339,12 @@ def main():
                  "FL": (-302.7, -BOOM_Y, BOOM_Z - 70 * S),
                  "RR": (REAR_ROTOR_X, BOOM_Y, BOOM_Z + 70 * S),
                  "RL": (REAR_ROTOR_X, -BOOM_Y, BOOM_Z + 70 * S)}
+    #    NEW this pass: a stud ring where each pylon meets its boom --
+    #    previously the two tubes just crossed with nothing joining them.
     for k, (x, y, z) in lift_specs.items():
         cylinder_between((x, y, BOOM_Z), (x, y, z), 6.0, f"Pylon{k}", doc)
+        stud_ring((x, y, BOOM_Z), "z", 6.0, f"StudBoomPylon{k}", doc,
+                 n=4, stud_r=1.2, stud_h=2.0)
         pod = loft_body([(-90 * S, 0), (-60 * S, 26 * S), (0, 26 * S),
                         (60 * S, 26 * S), (90 * S, 0)], f"Pod{k}", doc)
         pod_shape = pod.Shape.copy()
@@ -318,8 +362,13 @@ def main():
     #    (same Y=0, Z=BOOM_Z line, same rotate-about-Y "x"-axis convention)
     #    so the rod, motor and prop hub sit on a single straight line, not
     #    offset from each other. See DESIGN_NOTES.md sec 10.2.
+    #    Stud rings at both of the motor's own joints: rod-to-bell (flush,
+    #    ROD_R) and shaft-to-hub (narrower, PUSH_SHAFT_R).
+    stud_ring((ROD_TIP_X, 0, BOOM_Z), "x", ROD_R, "StudRodMotor", doc)
     motor_can((PUSH_MOTOR_X, 0, BOOM_Z), "x", PUSH_BELL_R, PUSH_BELL_H,
              PUSH_SHAFT_R, PUSH_SHAFT_H, "PusherMotor", doc)
+    stud_ring((PUSH_X, 0, BOOM_Z), "x", PUSH_SHAFT_R, "StudMotorProp", doc,
+             n=4, stud_r=1.0, stud_h=1.8)
     propeller((PUSH_X, 0, BOOM_Z), PROP_R, "x", "Pusher", doc)
 
     doc.recompute()
@@ -368,8 +417,12 @@ def main():
     print(f"Pusher prop -> tail wing TE clearance = {prop_wing_clear:.1f} mm "
          f"(target ~5mm; actual reflects a real motor+shaft length in between)")
     print(f"Fuselage length (real, unstretched) = {FUSE_TIP_X-(-1080*S):.1f} mm")
-    print(f"Tailboom rod length  = {ROD_TIP_X-FUSE_TIP_X:.1f} mm "
-         f"(fuselage tip {FUSE_TIP_X:.1f} to rod tip {ROD_TIP_X:.1f})")
+    rod_len_3d = math.hypot(ROD_TIP_X - FUSE_TIP_X, BOOM_Z - 0.0)
+    rod_angle = math.degrees(math.atan2(BOOM_Z, ROD_TIP_X - FUSE_TIP_X))
+    print(f"Tailboom rod length  = {rod_len_3d:.1f} mm, rise angle {rod_angle:.1f} deg "
+         f"(fuselage axis (Z=0) at x={FUSE_TIP_X:.1f} to tail-height (Z={BOOM_Z:.1f}) "
+         f"at x={ROD_TIP_X:.1f} -- angled so it leaves the fuselage concentric with "
+         f"its own axis instead of stepping out sideways)")
     print(f"Objects              = {len(all_objs)}")
     print(f"Saved: {base}.FCStd / .step / .stl")
 
