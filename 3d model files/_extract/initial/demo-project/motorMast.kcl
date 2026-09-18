@@ -1,0 +1,16 @@
+// Lift-motor mast
+// Short vertical shaft between each nacelle and rotor hub.
+@settings(defaultLengthUnit = mm, kclVersion = 2.0)
+
+mastProfile = sketch(on = XY) {
+  shaftCircle = circle(start = [var 11mm, var 0mm], center = [var 0mm, var 0mm])
+  coincident([shaftCircle.center, ORIGIN])
+  horizontal([shaftCircle.center, shaftCircle.start])
+  radius(shaftCircle) == 11mm
+}
+mastRegion = region(segments = [mastProfile.shaftCircle])
+motorMast = extrude(mastRegion, length = 86mm, symmetric = true)
+  |> appearance(color = "#202326", metalness = 45, roughness = 28)
+
+hide(mastProfile)
+motorMast

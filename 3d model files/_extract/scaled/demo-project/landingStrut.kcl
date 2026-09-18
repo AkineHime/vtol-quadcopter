@@ -1,0 +1,16 @@
+// Landing strut
+// Slender fixed leg for the belly landing stance.
+@settings(defaultLengthUnit = mm, kclVersion = 2.0)
+
+legProfile = sketch(on = XY) {
+  legCircle = circle(start = [var 8mm, var 0mm], center = [var 0mm, var 0mm])
+  coincident([legCircle.center, ORIGIN])
+  horizontal([legCircle.center, legCircle.start])
+  radius(legCircle) == 8mm
+}
+legRegion = region(segments = [legProfile.legCircle])
+landingStrut = extrude(legRegion, length = 270mm, symmetric = true)
+  |> appearance(color = "#E8EBEB", roughness = 34)
+
+hide(legProfile)
+landingStrut

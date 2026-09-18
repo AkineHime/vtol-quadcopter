@@ -1,0 +1,44 @@
+// Lift-boom support pylon
+// Rounded vertical fairing links each boom to the wing underside.
+@settings(defaultLengthUnit = mm, kclVersion = 2.0)
+
+pylonProfile = sketch(on = XZ) {
+  bottomEdge = line(start = [var -28mm, var 0mm], end = [var 28mm, var 0mm])
+  rearEdge = line(start = [var 28mm, var 0mm], end = [var 22mm, var 100mm])
+  topEdge = arc(
+    start = [var 22mm, var 100mm],
+    end = [var -22mm, var 100mm],
+    center = [var 0mm, var 100mm],
+    direction = CCW,
+  )
+  frontEdge = line(start = [var -22mm, var 100mm], end = [var -28mm, var 0mm])
+
+  coincident([bottomEdge.end, rearEdge.start])
+  coincident([rearEdge.end, topEdge.start])
+  coincident([topEdge.end, frontEdge.start])
+  coincident([frontEdge.end, bottomEdge.start])
+
+  horizontalDistance([ORIGIN, bottomEdge.start]) == -28mm
+  verticalDistance([ORIGIN, bottomEdge.start]) == 0mm
+  horizontalDistance([ORIGIN, bottomEdge.end]) == 28mm
+  verticalDistance([ORIGIN, bottomEdge.end]) == 0mm
+  horizontalDistance([ORIGIN, rearEdge.end]) == 22mm
+  verticalDistance([ORIGIN, rearEdge.end]) == 100mm
+  horizontalDistance([ORIGIN, topEdge.center]) == 0mm
+  verticalDistance([ORIGIN, topEdge.center]) == 100mm
+  horizontalDistance([ORIGIN, topEdge.end]) == -22mm
+  verticalDistance([ORIGIN, topEdge.end]) == 100mm
+}
+pylonRegion = region(
+  segments = [
+    pylonProfile.bottomEdge,
+    pylonProfile.rearEdge
+  ],
+  intersectionIndex = -1,
+  direction = CCW,
+)
+boomPylon = extrude(pylonRegion, length = 34mm, symmetric = true)
+  |> appearance(color = "#E6EAEB", roughness = 29)
+
+hide(pylonProfile)
+boomPylon

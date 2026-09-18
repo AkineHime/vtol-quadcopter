@@ -1,0 +1,151 @@
+// VTOL quad-plane UAV assembly
+// Reference-matched fixed-wing aircraft with four lift rotors and rear pusher.
+@settings(defaultLengthUnit = mm, kclVersion = 2.0, experimentalFeatures = allow)
+
+import "fuselage.kcl" as fuselagePart
+import "wingHalf.kcl" as wingHalfPart
+import "tailHalf.kcl" as tailHalfPart
+import "verticalFin.kcl" as verticalFinPart
+import "liftBoom.kcl" as liftBoomPart
+import "boomPylon.kcl" as boomPylonPart
+import "motorPod.kcl" as motorPodPart
+import "motorMast.kcl" as motorMastPart
+import "propeller.kcl" as propellerPart
+import "landingStrut.kcl" as landingStrutPart
+import "airframeAntenna.kcl" as antennaPart
+import "sensorProbe.kcl" as sensorProbePart
+import "avionicsPanel.kcl" as avionicsPanelPart
+
+leftWingSeed = clone(wingHalfPart)
+leftTailplaneSeed = clone(tailHalfPart)
+leftVerticalFinSeed = clone(verticalFinPart)
+leftLiftBoomSeed = clone(liftBoomPart)
+forwardLeftPylonSeed = clone(boomPylonPart)
+rearRightPylonSeed = clone(boomPylonPart)
+rearLeftPylonSeed = clone(boomPylonPart)
+frontLeftPodSeed = clone(motorPodPart)
+rearRightPodSeed = clone(motorPodPart)
+rearLeftPodSeed = clone(motorPodPart)
+frontLeftMastSeed = clone(motorMastPart)
+rearRightMastSeed = clone(motorMastPart)
+rearLeftMastSeed = clone(motorMastPart)
+frontLeftRotorSeed = clone(propellerPart)
+rearRightRotorSeed = clone(propellerPart)
+rearLeftRotorSeed = clone(propellerPart)
+rearPusherRotorSeed = clone(propellerPart)
+rearAntennaSeed = clone(antennaPart)
+leftLandingStrutSeed = clone(landingStrutPart)
+rightWingPanelSeed = clone(avionicsPanelPart)
+leftWingPanelSeed = clone(avionicsPanelPart)
+
+fuselage = fuselagePart
+
+rightWing = wingHalfPart
+  |> rotate(axis = X, angle = 2deg, global = true)
+  |> translate(xyz = [-330mm, 0mm, 155mm], global = true)
+leftWing = leftWingSeed
+  |> rotate(axis = X, angle = 178deg, global = true)
+  |> translate(xyz = [-330mm, 0mm, 155mm], global = true)
+
+rightTailplane = tailHalfPart
+  |> translate(xyz = [650mm, 0mm, 180mm], global = true)
+leftTailplane = leftTailplaneSeed
+  |> rotate(axis = X, angle = 180deg, global = true)
+  |> translate(xyz = [650mm, 0mm, 180mm], global = true)
+
+rightVerticalFin = verticalFinPart
+  |> translate(xyz = [690mm, 230mm, 190mm], global = true)
+leftVerticalFin = leftVerticalFinSeed
+  |> translate(xyz = [690mm, -230mm, 190mm], global = true)
+
+rightLiftBoom = liftBoomPart
+  |> translate(xyz = [0mm, 440mm, 38mm], global = true)
+leftLiftBoom = leftLiftBoomSeed
+  |> translate(xyz = [0mm, -440mm, 38mm], global = true)
+
+forwardRightBoomPylon = boomPylonPart
+  |> translate(xyz = [-120mm, 440mm, 50mm], global = true)
+forwardLeftBoomPylon = forwardLeftPylonSeed
+  |> translate(xyz = [-120mm, -440mm, 50mm], global = true)
+rearRightBoomPylon = rearRightPylonSeed
+  |> translate(xyz = [160mm, 440mm, 50mm], global = true)
+rearLeftBoomPylon = rearLeftPylonSeed
+  |> translate(xyz = [160mm, -440mm, 50mm], global = true)
+
+frontRightPod = motorPodPart
+  |> translate(xyz = [-440mm, 440mm, 48mm], global = true)
+frontLeftPod = frontLeftPodSeed
+  |> translate(xyz = [-440mm, -440mm, 48mm], global = true)
+rearRightPod = rearRightPodSeed
+  |> translate(xyz = [430mm, 440mm, 48mm], global = true)
+rearLeftPod = rearLeftPodSeed
+  |> translate(xyz = [430mm, -440mm, 48mm], global = true)
+
+frontRightMast = motorMastPart
+  |> translate(xyz = [-440mm, 440mm, 86mm], global = true)
+frontLeftMast = frontLeftMastSeed
+  |> translate(xyz = [-440mm, -440mm, 86mm], global = true)
+rearRightMast = rearRightMastSeed
+  |> translate(xyz = [430mm, 440mm, 86mm], global = true)
+rearLeftMast = rearLeftMastSeed
+  |> translate(xyz = [430mm, -440mm, 86mm], global = true)
+
+frontRightRotor = propellerPart
+  |> rotate(axis = Z, angle = 8deg, global = true)
+  |> translate(xyz = [-440mm, 440mm, 128mm], global = true)
+frontLeftRotor = frontLeftRotorSeed
+  |> rotate(axis = Z, angle = 72deg, global = true)
+  |> translate(xyz = [-440mm, -440mm, 128mm], global = true)
+rearRightRotor = rearRightRotorSeed
+  |> rotate(axis = Z, angle = -18deg, global = true)
+  |> translate(xyz = [430mm, 440mm, 128mm], global = true)
+rearLeftRotor = rearLeftRotorSeed
+  |> rotate(axis = Z, angle = 48deg, global = true)
+  |> translate(xyz = [430mm, -440mm, 128mm], global = true)
+
+rearPusherRotor = rearPusherRotorSeed
+  |> scale(factor = 0.72, global = false)
+  |> rotate(axis = Y, angle = 90deg, global = true)
+  |> translate(xyz = [1030mm, 0mm, 45mm], global = true)
+
+noseSensorProbe = sensorProbePart
+  |> translate(xyz = [-1150mm, 0mm, -28mm], global = true)
+
+frontAntenna = antennaPart
+  |> translate(xyz = [15mm, 0mm, 225mm], global = true)
+rearAntenna = rearAntennaSeed
+  |> scale(
+       x = 1,
+       y = 1,
+       z = 0.8,
+       global = false,
+     )
+  |> translate(xyz = [590mm, 0mm, 166mm], global = true)
+
+rightLandingStrut = landingStrutPart
+  |> rotate(axis = X, angle = -8deg, global = true)
+  |> translate(xyz = [-170mm, 135mm, -265mm], global = true)
+leftLandingStrut = leftLandingStrutSeed
+  |> rotate(axis = X, angle = 8deg, global = true)
+  |> translate(xyz = [-170mm, -135mm, -265mm], global = true)
+
+centerAccessPanel = avionicsPanelPart
+  |> translate(xyz = [-175mm, 0mm, 184mm], global = true)
+rightWingPanel = rightWingPanelSeed
+  |> scale(
+       x = 0.65,
+       y = 0.75,
+       z = 1,
+       global = false,
+     )
+  |> rotate(axis = Z, angle = 12deg, global = true)
+  |> translate(xyz = [-40mm, 92mm, 172mm], global = true)
+leftWingPanel = leftWingPanelSeed
+  |> scale(
+       x = 0.65,
+       y = 0.75,
+       z = 1,
+       global = false,
+     )
+  |> rotate(axis = Z, angle = -12deg, global = true)
+  |> translate(xyz = [-40mm, -92mm, 172mm], global = true)

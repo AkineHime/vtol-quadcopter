@@ -1,0 +1,8 @@
+title = "demo-project"
+default_file = "project.toml"
+
+[settings.app]
+[settings.meta]
+id = "f4c9e320-3b7a-426b-9b97-d62c5cb7fca9"
+
+[settings.modeling]

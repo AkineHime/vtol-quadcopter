@@ -1,0 +1,37 @@
+// Avionics access panel
+// Thin dark service cover for upper airframe details.
+@settings(defaultLengthUnit = mm, kclVersion = 2.0)
+
+panelProfile = sketch(on = XY) {
+  bottomEdge = line(start = [var -45mm, var -25mm], end = [var 45mm, var -25mm])
+  rightEdge = line(start = [var 45mm, var -25mm], end = [var 45mm, var 25mm])
+  topEdge = line(start = [var 45mm, var 25mm], end = [var -45mm, var 25mm])
+  leftEdge = line(start = [var -45mm, var 25mm], end = [var -45mm, var -25mm])
+
+  coincident([bottomEdge.end, rightEdge.start])
+  coincident([rightEdge.end, topEdge.start])
+  coincident([topEdge.end, leftEdge.start])
+  coincident([leftEdge.end, bottomEdge.start])
+
+  horizontalDistance([ORIGIN, bottomEdge.start]) == -45mm
+  verticalDistance([ORIGIN, bottomEdge.start]) == -25mm
+  horizontal(bottomEdge)
+  vertical(rightEdge)
+  horizontal(topEdge)
+  vertical(leftEdge)
+  distance([bottomEdge.start, bottomEdge.end]) == 90mm
+  distance([rightEdge.start, rightEdge.end]) == 50mm
+}
+panelRegion = region(
+  segments = [
+    panelProfile.bottomEdge,
+    panelProfile.rightEdge
+  ],
+  intersectionIndex = -1,
+  direction = CCW,
+)
+avionicsPanel = extrude(panelRegion, length = 4mm, symmetric = true)
+  |> appearance(color = "#3B4246", metalness = 18, roughness = 38)
+
+hide(panelProfile)
+avionicsPanel

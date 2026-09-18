@@ -1,0 +1,43 @@
+// Tailplane half
+// Tapered horizontal stabilizer panel with a rounded tip.
+@settings(defaultLengthUnit = mm, kclVersion = 2.0)
+
+tailProfile = sketch(on = XY) {
+  leadingEdge = line(start = [var 0mm, var 0mm], end = [var 120mm, var 500mm])
+  tipEdge = arc(
+    start = [var 120mm, var 500mm],
+    end = [var 340mm, var 500mm],
+    center = [var 230mm, var 500mm],
+    direction = CW,
+  )
+  trailingEdge = line(start = [var 340mm, var 500mm], end = [var 340mm, var 0mm])
+  rootEdge = line(start = [var 340mm, var 0mm], end = [var 0mm, var 0mm])
+
+  coincident([leadingEdge.start, ORIGIN])
+  coincident([leadingEdge.end, tipEdge.start])
+  coincident([tipEdge.end, trailingEdge.start])
+  coincident([trailingEdge.end, rootEdge.start])
+  coincident([rootEdge.end, leadingEdge.start])
+
+  horizontalDistance([ORIGIN, leadingEdge.end]) == 120mm
+  verticalDistance([ORIGIN, leadingEdge.end]) == 500mm
+  horizontalDistance([ORIGIN, tipEdge.center]) == 230mm
+  verticalDistance([ORIGIN, tipEdge.center]) == 500mm
+  horizontalDistance([ORIGIN, tipEdge.end]) == 340mm
+  verticalDistance([ORIGIN, tipEdge.end]) == 500mm
+  horizontalDistance([ORIGIN, trailingEdge.end]) == 340mm
+  verticalDistance([ORIGIN, trailingEdge.end]) == 0mm
+}
+tailRegion = region(
+  segments = [
+    tailProfile.leadingEdge,
+    tailProfile.tipEdge
+  ],
+  intersectionIndex = -1,
+  direction = CW,
+)
+tailHalf = extrude(tailRegion, length = 20mm, symmetric = true)
+  |> appearance(color = "#F4F4F1", roughness = 30)
+
+hide(tailProfile)
+tailHalf
