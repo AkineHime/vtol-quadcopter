@@ -3,3 +3,5 @@ __pycache__/
 .DS_Store
 Thumbs.db
 3d model files/_extract/
+report/page-*.jpg
+
