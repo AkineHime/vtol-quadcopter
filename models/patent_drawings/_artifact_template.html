@@ -124,36 +124,37 @@
 </style>
 
 <div class="wrap">
-  <p class="kicker">Schematic drawing set &middot; not for filing</p>
+  <p class="kicker">Draft v2 &middot; reading of the team's sketch &middot; not for filing</p>
   <h1>Autonomous Quadplane UAV &mdash; Patent Drawing Preview</h1>
-  <p class="sub">Seven views generated from one consistent parametric model, in the
-    format a utility-patent filing needs: perspective, top, bottom, front, rear,
-    and both sides. Built to check the approach before committing to a final set.</p>
+  <p class="sub">Seven views generated from one consistent parametric model, redrawn
+    to match the team's hand-sketched blended-wing-body layout: fuselage flowing
+    into the wing, twin rotor-mount beams, a swept fixed tail close to the body.
+    Confirm this reading before any aerodynamic work is redone against it.</p>
 
   <div class="titleblock">
     <span>APPLICATION&nbsp; <b>Coconut&#8209;plantation disease/pest survey UAV</b></span>
     <span>SHEETS&nbsp; <b>1&ndash;7 of 7</b></span>
-    <span>STATUS&nbsp; <b>Preview / schematic</b></span>
+    <span>STATUS&nbsp; <b>Draft v2 &mdash; pending confirmation</b></span>
   </div>
 
   <section>
     <h2>Reading these drawings</h2>
     <p>Every figure comes from the same 3D point set, so all seven are mutually
       consistent &mdash; a part in the same place across figures, as an examiner
-      expects. Two kinds of dimension went into it:</p>
+      expects. This version replaces the earlier "pod + separate wing + long
+      tail boom" draft, which the team confirmed did not match their design.</p>
     <div class="legend">
       <span class="tag real"><span class="dot"></span>Confirmed dimension</span>
-      <span class="tag schem"><span class="dot"></span>Schematic placeholder</span>
+      <span class="tag schem"><span class="dot"></span>Schematic / needs confirmation</span>
     </div>
-    <p>Confirmed: 1.3&nbsp;m wing span, 288/173&nbsp;mm root/tip chord, 0.30&nbsp;m&sup2;
-      wing area, unswept leading edge, 28%-chord elevon hinge, 170&nbsp;cm&sup2;
-      per vertical fin, 254&nbsp;mm (10&times;4.5&Prime;) propellers &mdash; all
-      pulled directly from the aerodynamic analysis and control-authority study.
-      Schematic: fuselage pod shape, tail-boom length and placement, horizontal-tail
-      span/chord, lift-motor mount points, and camera/sensor placement &mdash; proportioned
-      to be plausible, not yet engineered. None of this is a manufacturing CAD
-      model; it's a drafting-accurate placeholder for the parts that were never
-      designed in detail.</p>
+    <p>Confirmed: propeller diameter, 254&nbsp;mm (10&times;4.5&Prime;), and the
+      propulsion split &mdash; four fixed lift rotors on the beams plus a separate
+      nose-mounted cruise motor, with the tail fixed/passive and ailerons +
+      elevator doing pitch/roll on the wing/body, as the team confirmed. Schematic:
+      everything about the shape itself &mdash; the body/wing blend, tail size and
+      sweep, beam length and mount points, overall proportions &mdash; is this
+      session's reading of the hand sketch and has not been aerodynamically
+      analysed. None of this is a manufacturing CAD model.</p>
   </section>
 
   <section>
@@ -169,14 +170,14 @@ __CARDS__
       <table class="legend-tbl">
         <thead><tr><th>No.</th><th>Part</th><th>Basis</th></tr></thead>
         <tbody>
-          <tr><td class="num">100</td><td>Fuselage pod</td><td>Schematic</td></tr>
-          <tr><td class="num">110</td><td>Main wing</td><td>Confirmed dimension</td></tr>
-          <tr><td class="num">112</td><td>Elevon (pitch + roll control surface)</td><td>Confirmed dimension</td></tr>
-          <tr><td class="num">120</td><td>Horizontal tail</td><td>Schematic</td></tr>
-          <tr><td class="num">130</td><td>Vertical fin (twin)</td><td>Confirmed dimension</td></tr>
-          <tr><td class="num">140</td><td>Tail boom (twin)</td><td>Schematic</td></tr>
-          <tr><td class="num">150</td><td>Lift rotor, quad&#8209;X (&times;4)</td><td>Schematic mount / confirmed prop size</td></tr>
-          <tr><td class="num">160</td><td>Forward propulsion unit</td><td>Confirmed dimension</td></tr>
+          <tr><td class="num">100</td><td>Blended fuselage/wing body (no separate pod)</td><td>Schematic</td></tr>
+          <tr><td class="num">112</td><td>Aileron (roll control surface, outer wing)</td><td>Schematic</td></tr>
+          <tr><td class="num">114</td><td>Elevator (pitch control surface, inner body)</td><td>Schematic</td></tr>
+          <tr><td class="num">120</td><td>Horizontal tail (fixed)</td><td>Schematic</td></tr>
+          <tr><td class="num">130</td><td>Vertical fin, twin (fixed)</td><td>Schematic</td></tr>
+          <tr><td class="num">140</td><td>Rotor-mount beam (twin)</td><td>Schematic</td></tr>
+          <tr><td class="num">150</td><td>Lift rotor (&times;4, on beams)</td><td>Schematic mount / confirmed prop size</td></tr>
+          <tr><td class="num">160</td><td>Forward / cruise propulsion unit</td><td>Confirmed prop size</td></tr>
           <tr><td class="num">170</td><td>RGB camera</td><td>Schematic placement</td></tr>
           <tr><td class="num">180</td><td>Time-of-flight ranging sensor</td><td>Schematic placement</td></tr>
         </tbody>
@@ -185,31 +186,28 @@ __CARDS__
   </section>
 
   <section>
-    <h2>Viability &amp; what's still needed</h2>
-    <div class="callout ok">
-      <h3>Viable now</h3>
+    <h2>Status &amp; what's next</h2>
+    <div class="callout need">
+      <h3>Confirm first</h3>
       <ul class="plain">
-        <li>All seven standard views, mutually consistent, from one model &mdash; achievable
-          entirely from data already on hand, no new engineering required.</li>
-        <li>Reference numerals and leader lines matching a specification's part list.</li>
-        <li>Re-rendering at any camera angle or with different callouts in minutes,
-          since the whole set is generated from one parametric script.</li>
+        <li>This is this session's reading of the hand sketch &mdash; check the body/wing
+          blend, the tail's shape and how close it sits to the body, the beam
+          layout, and the aileron/elevator split against what the team actually
+          intends before anything downstream depends on it.</li>
       </ul>
     </div>
-    <div class="callout need">
-      <h3>Needed before a final filing</h3>
+    <div class="callout ok">
+      <h3>Then, in order</h3>
       <ul class="plain">
-        <li><b>Engineer the schematic parts</b> &mdash; pod shape, boom length/placement,
-          horizontal-tail sizing, motor mounts &mdash; so every dimension in the
-          drawings is confirmed, not placeholder.</li>
-        <li><b>A true hidden-line CAD render</b> once those parts are engineered, for
-          exact occlusion between parts (this set approximates it).</li>
-        <li><b>Formal sheet formatting</b> &mdash; India Patent Rules margins, sheet
-          numbering, one figure per sheet or a fixed layout &mdash; applied once the
-          content is final, not before.</li>
-        <li><b>Sign-off from whoever drafts the claims</b> on which features the
-          drawings must show, since claim language usually drives what gets drawn
-          and how it's labelled.</li>
+        <li><b>Re-run the aerodynamic analysis</b> against this shape &mdash; neutral
+          point, static margin, tail volumes, fin sizing all depend on the
+          body/tail arm, which is completely different from the earlier
+          pod-and-boom layout.</li>
+        <li><b>Rebuild the JSBSim aircraft model</b> from that analysis, and
+          re-validate through the ArduPilot&#8596;JSBSim bridge (the bridge
+          software itself doesn't need to change, only the aircraft model it flies).</li>
+        <li><b>Then</b> a true hidden-line CAD render and formal patent-sheet
+          formatting, once the shape and its numbers are both settled.</li>
       </ul>
     </div>
   </section>

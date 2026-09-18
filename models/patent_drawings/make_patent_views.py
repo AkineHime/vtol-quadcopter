@@ -2,24 +2,34 @@
 """
 Schematic patent-drawing generator for the coconut-surveillance quadplane.
 
+v2 -- rebuilt to match the team's hand-sketched blended-wing-body layout
+(fuselage blends continuously into the wing, no separate pod; twin swept
+fins + a small fixed horizontal tail mounted close to the body, not on
+long booms; ailerons outboard, a fixed elevator inboard; two rotor-mount
+beams each carrying two lift rotors; separate nose-mounted cruise motor).
+Confirmed against the team 2024-09: 4 fixed lift rotors + 1 separate
+cruise motor (same QuadPlane concept as before); tail stays fixed/passive,
+ailerons + elevator do pitch/roll on the wing/body -- so the CONTROL
+PHILOSOPHY carries over from the earlier elevon study, only the outer
+shape is new.
+
 NOT a manufacturing CAD model. This is a proportionally-representative
-wireframe (mm) built from the real, fixed dimensions where they exist
-(wing span/chord/taper, twin-fin area) and reasonable schematic placement
-for parts that have never been engineered in detail yet (pod, booms, motor
-mounts, tail size/arm). Those are flagged in OUTPUT and must be confirmed /
-refined before a final filing.
+wireframe (mm) built from the real, fixed component dimensions (prop
+diameter) plus the team's sketch proportions. The body/wing blend,
+tail size, beam placement and overall length are all still SCHEMATIC --
+nothing about this shape has been aero-analysed yet. That is the next
+step once this shape itself is confirmed.
 
 Every part is stored as a 3D point cloud. Each of the 7 standard patent
 views (isometric + top + bottom + front + rear + left + right) is produced
 by the SAME projector, so all views are guaranteed consistent with one
-underlying model -- which is what a patent examiner expects across figures.
+underlying model.
 
 Occlusion is approximate: each part's silhouette is its convex hull in the
 current view, filled opaque white, drawn back-to-front by a per-view
-"closeness to viewer" key. Good enough for a schematic/preview set; a true
-CAD-derived hidden-line render would refine this for final filing.
+"closeness to viewer" key.
 
-    uv run --with matplotlib --with numpy python make_patent_views.py
+    uv run --with matplotlib --with numpy --with scipy python make_patent_views.py
 """
 import numpy as np
 import matplotlib
@@ -32,22 +42,19 @@ from pathlib import Path
 OUT = Path(__file__).resolve().parent
 OUT.mkdir(exist_ok=True)
 
+AIRLEN = 640.0   # overall nose-to-fin-tip length used to lay out top/side views
+
 # ===========================================================================
 # 1. GEOMETRY  (all dimensions in mm; X = aft from nose, Y = right span,
-#    Z = up).  REAL where noted; SCHEMATIC (placeholder, not yet engineered)
-#    otherwise -- see REAL_DIMS / SCHEMATIC_DIMS printed at the bottom.
+#    Z = up). Prop diameter is the one REAL, fixed number here (254 mm,
+#    10x4.5in, from vtol_project_summary.md); everything else is a
+#    schematic reading of the hand sketch, pending its own analysis.
 # ===========================================================================
-
-def ring(cx, r, x, n=8, squash=1.0):
-    """n points around a circle of radius r in the Y-Z plane at station x."""
-    return [(x, r * np.cos(a), squash * r * np.sin(a))
-            for a in np.linspace(0, 2 * np.pi, n, endpoint=False)]
-
 
 def disc(center, radius, axis, n=16):
     """Circle of n points, normal to `axis` ('x' or 'z'), centred at 3D
-    `center`. Used for propellers -- projects as a true circle face-on and
-    collapses to a line edge-on, automatically, via the hull projector."""
+    `center`. Projects as a true circle face-on and collapses to a line
+    edge-on, automatically, via the hull projector."""
     cx, cy, cz = center
     pts = []
     for a in np.linspace(0, 2 * np.pi, n, endpoint=False):
@@ -60,106 +67,126 @@ def disc(center, radius, axis, n=16):
 
 PARTS = {}   # name -> {"kind": "hull"/"line", "pts": [...], "num": int/None}
 
-# ---- 100  fuselage pod (SCHEMATIC: ~46 cm pod, per the spec's 40-50 cm) --
-pod_pts = [(20, 0, 0)]                          # nose tip
-pod_pts += ring(90, 40, 60)
-pod_pts += ring(90, 45, 220)
-pod_pts += ring(90, 42, 400)
-pod_pts += [(460, 0, 0)]                        # tail tip
-PARTS["pod"] = {"kind": "hull", "pts": pod_pts, "num": 100}
-
-# ---- 110  main wing (REAL: 1.3 m span, 288/173 mm root/tip chord, ------
-#           0.30 m^2 area, unswept LE -- from aero/RESULTS.md) -----------
-wing_top = [(250, 0, 55), (538, 0, 55),
-            (250, 650, 55), (423, 650, 55),
-            (250, -650, 55), (423, -650, 55)]
-wing_bot = [(x, y, z - 15) for (x, y, z) in wing_top]
-PARTS["wing"] = {"kind": "hull", "pts": wing_top + wing_bot, "num": 110}
-
-# ---- 112  elevons (REAL: outer ~40% span, full-span-elevon aircraft; ---
-#           hinge at 28% local chord -- from aero/control_authority.py) -
-def _chord(y):
-    return 288 - (288 - 173) * (abs(y) / 650)
+# ---- 100  blended fuselage/wing body (SCHEMATIC -- reading of the sketch;
+#           no separate pod: the body thins continuously into the wingtip)
+#      stations: (y, leading_edge_x, chord, half_thickness)
+BODY_STATIONS = [
+    (0,   90, 430, 55),
+    (150, 110, 390, 45),
+    (350, 170, 300, 26),
+    (500, 230, 220, 15),
+    (650, 300, 120,  7),
+]
 
 
-def _elevon_pts(sign):
-    y0, y1 = 250 * sign, 650 * sign
-    h0 = 250 + _chord(y0) - 0.28 * _chord(y0)
-    h1 = 250 + _chord(y1) - 0.28 * _chord(y1)
-    te0 = 250 + _chord(y0)
-    te1 = 250 + _chord(y1)
-    return [(h0, y0, 55), (te0, y0, 55), (h1, y1, 55), (te1, y1, 55)]
+def _body_side_pts(sign):
+    pts = []
+    for y, le, chord, h in BODY_STATIONS:
+        yy = y * sign
+        te = le + chord
+        thick_x = le + 0.30 * chord
+        pts += [(le, yy, 0), (thick_x, yy, h), (thick_x, yy, -h), (te, yy, 0)]
+    return pts
 
 
-PARTS["elevon_R"] = {"kind": "hull", "pts": _elevon_pts(1), "num": 112}
-PARTS["elevon_L"] = {"kind": "hull", "pts": _elevon_pts(-1), "num": 112}
+body_pts = _body_side_pts(1) + _body_side_pts(-1) + [(10, 0, 8)]  # + nose tip
+PARTS["body"] = {"kind": "hull", "pts": body_pts, "num": 100}
 
-# ---- 120  horizontal tail (SCHEMATIC size -- real target is V_H~0.45; --
-#           exact span/chord not yet finalised, shown representatively) -
-tail_top = [(1080, 0, 40), (1210, 0, 40),
-            (1080, 300, 40), (1170, 300, 40),
-            (1080, -300, 40), (1170, -300, 40)]
-tail_bot = [(x, y, z - 10) for (x, y, z) in tail_top]
-PARTS["tail"] = {"kind": "hull", "pts": tail_top + tail_bot, "num": 120}
+# ---- 112  ailerons (SCHEMATIC: outer wing, hinged ~72% local chord) ------
+def _station_at(y):
+    ys = [s[0] for s in BODY_STATIONS]
+    i = np.searchsorted(ys, y)
+    i = min(max(i, 1), len(BODY_STATIONS) - 1)
+    (y0, le0, c0, _), (y1, le1, c1, _) = BODY_STATIONS[i - 1], BODY_STATIONS[i]
+    t = (y - y0) / (y1 - y0)
+    le = le0 + t * (le1 - le0)
+    chord = c0 + t * (c1 - c0)
+    return le, chord
 
-# ---- 130  twin vertical fins (REAL: 170 cm^2 each, from RESULTS.md ------
-#           fin-sizing table -- root/tip chord chosen to match that area) -
+
+def _control_pts(y0, y1, frac0, frac1, sign):
+    le0, c0 = _station_at(y0)
+    le1, c1 = _station_at(y1)
+    h0, te0 = le0 + frac0 * c0, le0 + c0
+    h1, te1 = le1 + frac1 * c1, le1 + c1
+    return [(h0, y0 * sign, 0), (te0, y0 * sign, 0),
+            (h1, y1 * sign, 0), (te1, y1 * sign, 0)]
+
+
+PARTS["aileron_R"] = {"kind": "hull",
+                      "pts": _control_pts(500, 650, 0.72, 0.72, 1), "num": 112}
+PARTS["aileron_L"] = {"kind": "hull",
+                      "pts": _control_pts(500, 650, 0.72, 0.72, -1), "num": 112}
+
+# ---- 114  elevator (SCHEMATIC: fixed centre-body trailing edge) ---------
+PARTS["elevator"] = {"kind": "hull",
+                     "pts": _control_pts(150, 150, 0.75, 0.75, 1)
+                     + _control_pts(150, 150, 0.75, 0.75, -1), "num": 114}
+
+# ---- 120  fixed horizontal tail (SCHEMATIC, small, blended near the -----
+#           fin roots -- passive, per the confirmed fixed-tail decision) --
+tail_top = [(480, 0, 20), (560, 0, 20),
+            (480, 300, 20), (555, 300, 20),
+            (480, -300, 20), (555, -300, 20)]
+PARTS["tail"] = {"kind": "hull", "pts": tail_top, "num": 120}
+
+# ---- 130  twin swept vertical fins (SCHEMATIC -- matches the swept, ------
+#           pointed "Tail" shape in the sketch) --------------------------
 def _fin_pts(y):
-    base = [(1080, y, -40), (1220, y, -40),
-            (1120, y, 110), (1200, y, 110)]
-    return [(x, y + (5 if y > 0 else -5), z) for (x, _, z) in base] + \
-           [(x, y - (5 if y > 0 else -5), z) for (x, _, z) in base]
+    return [(480, y, -20), (520, y, -20), (560, y, 140), (600, y, 140),
+            (480, y + (4 if y > 0 else -4), -20),
+            (600, y + (4 if y > 0 else -4), 140)]
 
 
-PARTS["fin_R"] = {"kind": "hull", "pts": _fin_pts(300), "num": 130}
-PARTS["fin_L"] = {"kind": "hull", "pts": _fin_pts(-300), "num": 130}
+PARTS["fin_R"] = {"kind": "hull", "pts": _fin_pts(380), "num": 130}
+PARTS["fin_L"] = {"kind": "hull", "pts": _fin_pts(-380), "num": 130}
 
-# ---- 140  twin tail booms (SCHEMATIC placement, connecting wing to tail)
-PARTS["boom_R"] = {"kind": "line",
-                    "pts": [(450, 300, 30), (1080, 300, 0)], "num": 140}
-PARTS["boom_L"] = {"kind": "line",
-                    "pts": [(450, -300, 30), (1080, -300, 0)], "num": 140}
+# ---- 140  rotor-mount beams x2 (SCHEMATIC -- each carries 2 lift rotors,
+#           matching the sketch's "beam" callout) -------------------------
+PARTS["beam_R"] = {"kind": "line",
+                   "pts": [(260, 240, 15), (330, 580, 15)], "num": 140}
+PARTS["beam_L"] = {"kind": "line",
+                   "pts": [(260, -240, 15), (330, -580, 15)], "num": 140}
 
-# ---- 150  lift rotors x4, quad-X (SCHEMATIC mount points; REAL prop -----
-#           diameter 10x4.5in = 254mm, from vtol_project_summary.md) ------
-LIFT = {"FL": (300, -300, 140), "FR": (300, 300, 140),
-        "RL": (1000, -300, 90), "RR": (1000, 300, 90)}
+# ---- 150  lift rotors x4 (SCHEMATIC mount points on the beams; REAL -----
+#           prop diameter 254mm / 10x4.5in, vtol_project_summary.md) ------
+LIFT = {"FL": (280, 300, 85), "RL": (315, 540, 85),
+        "FR": (280, -300, 85), "RR": (315, -540, 85)}
 for k, c in LIFT.items():
     PARTS[f"motor_{k}"] = {"kind": "hull", "pts": disc(c, 127, "z"), "num": 150}
-    base_z = 55 if k[0] == "F" else 0
-    PARTS[f"pylon_{k}"] = {"kind": "line",
-                           "pts": [(c[0], c[1], base_z), c], "num": None}
+    beam_pt = (c[0], c[1], 15)
+    PARTS[f"pylon_{k}"] = {"kind": "line", "pts": [beam_pt, c], "num": None}
 
-# ---- 160  forward propulsion unit (REAL prop diameter 254mm; nose- -----
-#           mounted tractor layout per vtol_project_summary.md) ----------
-PARTS["fwd_motor"] = {"kind": "hull", "pts": disc((0, 0, 0), 127, "x"),
+# ---- 160  forward / cruise propulsion unit (REAL prop diameter 254mm; --
+#           nose-mounted tractor, separate from the 4 lift rotors) -------
+PARTS["fwd_motor"] = {"kind": "hull", "pts": disc((0, 0, 8), 127, "x"),
                       "num": 160}
 
 # ---- 170 / 180  RGB camera + ToF ranging sensor (REAL parts, SCHEMATIC -
-#           underside placement -- VL53L1X + ESP32-CAM class, per specs) -
-PARTS["camera"] = {"kind": "hull", "pts": disc((200, 0, -45), 15, "x"),
+#           underside placement) ------------------------------------------
+PARTS["camera"] = {"kind": "hull", "pts": disc((150, 0, -50), 15, "x"),
                    "num": 170}
-PARTS["tof"] = {"kind": "hull", "pts": disc((320, 0, -45), 10, "x"),
+PARTS["tof"] = {"kind": "hull", "pts": disc((260, 0, -48), 10, "x"),
                 "num": 180}
 
 LABEL_TEXT = {
-    100: "100  fuselage pod",
-    110: "110  main wing",
-    112: "112  elevon (pitch+roll control surface)",
-    120: "120  horizontal tail",
-    130: "130  vertical fin (twin)",
-    140: "140  tail boom (twin)",
-    150: "150  lift rotor (quad-X, x4)",
-    160: "160  forward propulsion unit",
+    100: "100  blended fuselage/wing body",
+    112: "112  aileron (roll control surface)",
+    114: "114  elevator (pitch control surface, fixed body)",
+    120: "120  horizontal tail (fixed)",
+    130: "130  vertical fin, twin (fixed)",
+    140: "140  rotor-mount beam (twin)",
+    150: "150  lift rotor (x4, on beams)",
+    160: "160  forward / cruise propulsion unit",
     170: "170  RGB camera",
     180: "180  time-of-flight ranging sensor",
 }
 
 ANCHOR = {  # representative 3D point used for each numeral's leader line
-    100: (100, 0, 40), 110: (300, 480, 55), 112: (420, 560, 55),
-    120: (1140, 150, 40), 130: (1150, 300, 30), 140: (700, 300, 15),
-    150: (300, 300, 140), 160: (0, 0, 60), 170: (200, 0, -45),
-    180: (320, 0, -45),
+    100: (150, 500, 15), 112: (410, 580, 0), 114: (450, 0, 0),
+    120: (520, 150, 20), 130: (560, 380, 60), 140: (300, 400, 15),
+    150: (280, 300, 85), 160: (0, 0, 30), 170: (150, 0, -50),
+    180: (260, 0, -48),
 }
 
 # ===========================================================================
@@ -176,29 +203,27 @@ def rot(pts, deg_z, deg_x):
 
 
 VIEWS = {
-    # name: (project(pts)->(u,v) , closeness(pts)-> scalar, label_offset)
     "FIG1_isometric": dict(
-        proj=lambda p: (rot(p, 20, 60)[:, 0], rot(p, 20, 60)[:, 1]),
-        close=lambda p: rot(p, 20, 60)[:, 2].mean(),
-        flip_v=False),
+        proj=lambda p: (rot(p, 10, 55)[:, 0], rot(p, 10, 55)[:, 1]),
+        close=lambda p: rot(p, 10, 55)[:, 2].mean()),
     "FIG2_top": dict(
-        proj=lambda p: (np.array(p)[:, 1], 1250 - np.array(p)[:, 0]),
-        close=lambda p: np.array(p)[:, 2].mean(), flip_v=False),
+        proj=lambda p: (np.array(p)[:, 1], AIRLEN - np.array(p)[:, 0]),
+        close=lambda p: np.array(p)[:, 2].mean()),
     "FIG3_bottom": dict(
-        proj=lambda p: (-np.array(p)[:, 1], 1250 - np.array(p)[:, 0]),
-        close=lambda p: -np.array(p)[:, 2].mean(), flip_v=False),
+        proj=lambda p: (-np.array(p)[:, 1], AIRLEN - np.array(p)[:, 0]),
+        close=lambda p: -np.array(p)[:, 2].mean()),
     "FIG4_front": dict(
         proj=lambda p: (-np.array(p)[:, 1], np.array(p)[:, 2]),
-        close=lambda p: -np.array(p)[:, 0].mean(), flip_v=False),
+        close=lambda p: -np.array(p)[:, 0].mean()),
     "FIG5_rear": dict(
         proj=lambda p: (np.array(p)[:, 1], np.array(p)[:, 2]),
-        close=lambda p: np.array(p)[:, 0].mean(), flip_v=False),
+        close=lambda p: np.array(p)[:, 0].mean()),
     "FIG6_left": dict(
         proj=lambda p: (np.array(p)[:, 0], np.array(p)[:, 2]),
-        close=lambda p: -np.array(p)[:, 1].mean(), flip_v=False),
+        close=lambda p: -np.array(p)[:, 1].mean()),
     "FIG7_right": dict(
-        proj=lambda p: (1250 - np.array(p)[:, 0], np.array(p)[:, 2]),
-        close=lambda p: np.array(p)[:, 1].mean(), flip_v=False),
+        proj=lambda p: (AIRLEN - np.array(p)[:, 0], np.array(p)[:, 2]),
+        close=lambda p: np.array(p)[:, 1].mean()),
 }
 
 FIG_TITLE = {
@@ -211,31 +236,27 @@ FIG_TITLE = {
     "FIG7_right": "FIG. 7 — Right side view",
 }
 
-# which reference numerals to call out on each view (kept sparse -> legible)
 CALLOUTS = {
-    "FIG1_isometric": [100, 110, 112, 120, 130, 140, 150, 160],
-    "FIG2_top": [100, 110, 112, 120, 130, 140, 150, 160],
-    "FIG3_bottom": [100, 110, 150, 160, 170, 180],
-    "FIG4_front": [100, 110, 130, 150, 160],
+    "FIG1_isometric": [100, 112, 114, 120, 130, 140, 150, 160],
+    "FIG2_top": [100, 112, 114, 120, 130, 140, 150, 160],
+    "FIG3_bottom": [100, 140, 150, 160, 170, 180],
+    "FIG4_front": [100, 130, 150, 160],
     "FIG5_rear": [100, 120, 130, 140, 150],
-    "FIG6_left": [100, 110, 120, 130, 140, 150, 160],
-    "FIG7_right": [100, 110, 120, 130, 140, 150, 160],
+    "FIG6_left": [100, 120, 130, 140, 150, 160],
+    "FIG7_right": [100, 120, 130, 140, 150, 160],
 }
 
-
-# Per-(view, numeral) label direction override, as a unit-ish (dx, dy) --
-# only needed where the default up-right placement collides with another
-# label or with the title. Values are directions, scaled by the view's
-# own bounding-box diagonal so they work at any zoom level.
 DIR_OVERRIDE = {
-    ("FIG4_front", 150): (0.3, 1.6), ("FIG4_front", 100): (1.3, 0.2),
-    ("FIG4_front", 160): (1.9, 0.9),
-    ("FIG5_rear", 150): (0.6, 1.6), ("FIG5_rear", 130): (1.6, -0.3),
-    ("FIG5_rear", 140): (1.6, -1.4), ("FIG5_rear", 120): (-1.6, 0.6),
-    ("FIG6_left", 150): (0.2, 1.9), ("FIG6_left", 120): (-1.2, 1.3),
-    ("FIG6_left", 130): (1.4, -0.9),
-    ("FIG7_right", 150): (0.2, 1.9), ("FIG7_right", 120): (-1.4, -0.9),
-    ("FIG7_right", 130): (1.2, 1.3),
+    ("FIG1_isometric", 150): (0.2, 1.7), ("FIG1_isometric", 140): (-1.4, 1.0),
+    ("FIG2_top", 150): (1.6, 0.4), ("FIG2_top", 140): (1.7, -0.3),
+    ("FIG4_front", 150): (1.6, 0.6), ("FIG4_front", 160): (0.2, 1.7),
+    ("FIG4_front", 130): (-1.4, 1.1),
+    ("FIG5_rear", 150): (1.6, 0.6), ("FIG5_rear", 130): (-1.4, 1.1),
+    ("FIG5_rear", 140): (1.6, -0.7),
+    ("FIG6_left", 150): (0.2, 1.8), ("FIG6_left", 140): (-0.3, -1.7),
+    ("FIG6_left", 120): (1.2, -1.2),
+    ("FIG7_right", 150): (0.2, 1.8), ("FIG7_right", 140): (0.3, -1.7),
+    ("FIG7_right", 120): (-1.2, -1.2),
 }
 
 
@@ -287,7 +308,6 @@ def draw_view(view_name, save_path):
 
     ax.set_aspect("equal")
     ax.axis("off")
-    # extra headroom above the geometry so labels/title never collide
     ax.set_xlim(umin - 0.12 * diag, umax + 0.12 * diag)
     ax.set_ylim(vmin - 0.08 * diag, vmax + 0.30 * diag)
     ax.set_title(FIG_TITLE[view_name], fontsize=12, family="serif", pad=16,
@@ -303,14 +323,9 @@ if __name__ == "__main__":
     for vname in VIEWS:
         draw_view(vname, OUT / f"{vname}.png")
 
-    print("\nREAL (fixed) dimensions used: wing span 1300mm, root/tip chord "
-          "288/173mm, wing area 0.30 m^2, unswept LE, wing incidence 1 deg "
-          "(aero/RESULTS.md); elevon hinge at 28% local chord "
-          "(control_authority.py); twin vertical fin area 170 cm^2 each "
-          "(RESULTS.md fin-sizing table); forward + lift propeller diameter "
-          "254mm / 10x4.5in (vtol_project_summary.md).")
-    print("\nSCHEMATIC (placeholder, not yet engineered) dimensions used: "
-          "fuselage pod length/cross-section, tail boom length/placement, "
-          "horizontal-tail span/chord, lift-motor mount positions, camera/"
-          "ToF underside placement. Proportioned to be plausible, not "
-          "measured -- refine before a final filing.")
+    print("\nREAL (fixed) dimension used: lift + cruise propeller diameter "
+          "254mm / 10x4.5in (vtol_project_summary.md). Everything else in "
+          "this shape -- the body/wing blend, tail size and placement, "
+          "beam layout, overall length -- is a SCHEMATIC reading of the "
+          "team's hand sketch and has not been aero-analysed yet. That is "
+          "the next step once this shape is confirmed correct.")

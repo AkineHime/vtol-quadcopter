@@ -11,30 +11,27 @@ FIGS = ["FIG1_isometric", "FIG2_top", "FIG3_bottom", "FIG4_front",
 
 CAPTIONS = {
     "FIG1_isometric": ("FIG. 1", "Perspective view",
-        "Lead figure. Shows how the wing, tail booms, twin fin/tail "
-        "assembly and quad-X lift rotors relate to one another."),
+        "Lead figure. Blended fuselage/wing body, nose-mounted cruise "
+        "motor, twin rotor-mount beams, swept twin fin at the tail."),
     "FIG2_top": ("FIG. 2", "Top view",
-        "Wing planform is to real dimension (1.3 m span, tapered chord, "
-        "unswept leading edge)."),
+        "Body blends continuously into the wing — no separate pod. "
+        "All four lift rotors visible on their beams."),
     "FIG3_bottom": ("FIG. 3", "Bottom view",
         "Distinguishing content vs. the top view: underside camera and "
         "ranging-sensor placement."),
     "FIG4_front": ("FIG. 4", "Front view",
-        "Forward propulsion unit centred on the fuselage; wing and tail "
+        "Forward propulsion unit centred on the body; wing and tail "
         "seen edge-on."),
     "FIG5_rear": ("FIG. 5", "Rear view",
-        "Twin vertical fins and the H-tail horizontal stabiliser, seen "
+        "Twin swept fins and the small fixed horizontal tail, seen "
         "from behind."),
     "FIG6_left": ("FIG. 6", "Left side view",
-        "Fuselage pod profile, boom run, and tail assembly in profile."),
+        "Body profile, beam run, and tail assembly in profile."),
     "FIG7_right": ("FIG. 7", "Right side view", "Mirror of FIG. 6."),
 }
 
-REAL_FLAG = {
-    "FIG1_isometric": "mixed", "FIG2_top": "mixed", "FIG3_bottom": "mixed",
-    "FIG4_front": "mixed", "FIG5_rear": "mixed", "FIG6_left": "schematic",
-    "FIG7_right": "schematic",
-}
+REAL_FLAG = {}  # unused in v2 (see legend note: almost everything here
+                # is a schematic reading of the sketch, not yet analysed)
 
 def b64(name):
     data = (HERE / f"{name}.png").read_bytes()
