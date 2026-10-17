@@ -1,0 +1,100 @@
+[link] connecting to tcp:127.0.0.1:5760 ...
+[link] heartbeat from system 1 component 0
+[boot] waiting for GPS + EKF ...
+[fc] Barometer 1 calibration complete
+[fc] Barometer 2 calibration complete
+[fc] No airspeed sensor
+[fc] ArduPilot Ready
+[fc] Field Elevation Set: 300m
+[fc] GPS 1: probing for u-blox at 230400 baud
+[fc] GPS 1: detected u-blox
+[boot] GPS+EKF ok, letting it settle ...
+[plan] vtol_sweep: 18 items, 0 targets
+[mission] uploading 18 commands (+ home) = 19 items ...
+[mission]  -> sent item 0/18 (cmd HOME)
+[mission]  -> sent item 1/18 (cmd 84)
+[mission]  -> sent item 2/18 (cmd 3000)
+[mission]  -> sent item 3/18 (cmd 16)
+[mission]  -> sent item 4/18 (cmd 16)
+[mission]  -> sent item 5/18 (cmd 16)
+[mission]  -> sent item 6/18 (cmd 16)
+[mission]  -> sent item 7/18 (cmd 16)
+[mission]  -> sent item 8/18 (cmd 16)
+[mission]  -> sent item 9/18 (cmd 16)
+[mission]  -> sent item 10/18 (cmd 16)
+[mission]  -> sent item 11/18 (cmd 16)
+[mission]  -> sent item 12/18 (cmd 16)
+[mission]  -> sent item 13/18 (cmd 16)
+[mission]  -> sent item 14/18 (cmd 16)
+[mission]  -> sent item 15/18 (cmd 16)
+[mission]  -> sent item 16/18 (cmd 16)
+[mission]  -> sent item 17/18 (cmd 16)
+[mission]  -> sent item 18/18 (cmd 85)
+[mission] upload accepted by vehicle (19/19 items)
+[verify] round-trip OK
+[fc] Throttle armed
+[arm] armed
+[mission] current set to 1
+[fc] Mission: 1 VTOLTakeoff
+[phase]   1  VTOL takeoff (dock)
+[fc] Weathervane Active: nose in
+[fc] Mission: 2 VTOLTransition
+[fc] Entered VTOL mode
+[fc] Mission: 3 WP
+[phase]   3  VTOL lane 1 start
+[fc] Reached waypoint #3 dist 1m
+[fc] Mission: 4 WP
+[phase]   4  VTOL lane 1 end
+[fc] Reached waypoint #4 dist 0m
+[fc] Mission: 5 WP
+[phase]   5  VTOL lane 2 start
+[fc] Reached waypoint #5 dist 1m
+[fc] Mission: 6 WP
+[phase]   6  VTOL lane 2 end
+[fc] Reached waypoint #6 dist 2m
+[fc] Mission: 7 WP
+[phase]   7  VTOL lane 3 start
+[fc] Reached waypoint #7 dist 1m
+[fc] Mission: 8 WP
+[phase]   8  VTOL lane 3 end
+[fc] Reached waypoint #8 dist 1m
+[fc] Mission: 9 WP
+[phase]   9  VTOL lane 4 start
+[fc] Passed waypoint #9 dist 0m
+[fc] Mission: 10 WP
+[phase]  10  VTOL lane 4 end
+[fc] Reached waypoint #10 dist 1m
+[fc] Mission: 11 WP
+[phase]  11  VTOL lane 5 start
+[fc] Reached waypoint #11 dist 1m
+[fc] Mission: 12 WP
+[phase]  12  VTOL lane 5 end
+[fc] Reached waypoint #12 dist 1m
+[fc] Mission: 13 WP
+[phase]  13  VTOL lane 6 start
+[fc] Passed waypoint #13 dist 0m
+[fc] Mission: 14 WP
+[phase]  14  VTOL lane 6 end
+[fc] Reached waypoint #14 dist 2m
+[fc] Mission: 15 WP
+[phase]  15  VTOL lane 7 start
+[fc] Reached waypoint #15 dist 1m
+[fc] Mission: 16 WP
+[phase]  16  VTOL lane 7 end
+[phase]  17  return to dock
+[fc] Reached waypoint #16 dist 1m
+[fc] Mission: 17 WP
+[fc] Passed waypoint #17 dist 0m
+[fc] Mission: 18 VTOLLand
+[fc] VTOL Position1 d=59.9
+[fc] VTOL Overshoot d=59.9 cs=1.2 yerr=-173.6
+[phase]  18  VTOL land (dock)
+[fc] VTOL position2 started v=3.5 d=9.9 h=30.0
+[fc] Weathervane Active: nose in
+[fc] Land descend started
+[fc] Land final started
+[fc] Land complete
+[fc] Throttle disarmed
+[phase] landed & disarmed
+
+FLIGHT: OK {"ok": true, "landed": true, "crashed": false, "wall_s": 333.6, "strategy": "vtol_sweep", "roundtrip_ok": true, "items": 18}

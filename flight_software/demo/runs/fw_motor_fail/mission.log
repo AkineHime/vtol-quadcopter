@@ -1,0 +1,103 @@
+[link] connecting to tcp:127.0.0.1:5760 ...
+[link] heartbeat from system 1 component 0
+[boot] waiting for GPS + EKF ...
+[fc] Barometer 1 calibration complete
+[fc] Barometer 2 calibration complete
+[fc] No airspeed sensor
+[fc] ArduPilot Ready
+[fc] Field Elevation Set: 300m
+[fc] GPS 1: probing for u-blox at 230400 baud
+[fc] GPS 1: detected u-blox
+[boot] GPS+EKF ok, letting it settle ...
+[plan] fw_sweep: 19 items, 0 targets
+[mission] uploading 19 commands (+ home) = 20 items ...
+[mission]  -> sent item 0/19 (cmd HOME)
+[mission]  -> sent item 1/19 (cmd 84)
+[mission]  -> sent item 2/19 (cmd 3000)
+[mission]  -> sent item 3/19 (cmd 16)
+[mission]  -> sent item 4/19 (cmd 16)
+[mission]  -> sent item 5/19 (cmd 16)
+[mission]  -> sent item 6/19 (cmd 16)
+[mission]  -> sent item 7/19 (cmd 16)
+[mission]  -> sent item 8/19 (cmd 16)
+[mission]  -> sent item 9/19 (cmd 16)
+[mission]  -> sent item 10/19 (cmd 16)
+[mission]  -> sent item 11/19 (cmd 16)
+[mission]  -> sent item 12/19 (cmd 16)
+[mission]  -> sent item 13/19 (cmd 16)
+[mission]  -> sent item 14/19 (cmd 16)
+[mission]  -> sent item 15/19 (cmd 16)
+[mission]  -> sent item 16/19 (cmd 16)
+[mission]  -> sent item 17/19 (cmd 16)
+[mission]  -> sent item 18/19 (cmd 16)
+[mission]  -> sent item 19/19 (cmd 85)
+[mission] upload accepted by vehicle (20/20 items)
+[verify] round-trip OK
+[fc] Throttle armed
+[arm] armed
+[mission] current set to 1
+[fc] Mission: 1 VTOLTakeoff
+[phase]   1  VTOL takeoff (dock)
+[fc] Weathervane Active: nose in
+[fc] Mission: 2 VTOLTransition
+[fc] Mission: 3 WP
+[fc] Transition started airspeed 0.1
+[phase]   3  line-up before lane 1
+[fc] Transition airspeed reached 12.0
+[fc] Reached waypoint #3 dist 25m
+[fc] Mission: 4 WP
+[phase]   4  FW lane 1 start
+[fc] Transition done
+[fc] Passed waypoint #4 dist 21m
+[fc] Mission: 5 WP
+[phase]   5  FW lane 1 end
+[fc] Reached waypoint #5 dist 25m
+[fc] Mission: 6 WP
+[phase]   6  FW lane 2 start
+[event] front-left lift motor fails in cruise (SERVO7 output disabled; SERVOn_MAX does not limit motors) fired
+[fc] Reached waypoint #6 dist 24m
+[fc] Mission: 7 WP
+[phase]   7  FW lane 2 end
+[fc] Reached waypoint #7 dist 24m
+[fc] Mission: 8 WP
+[phase]   8  FW lane 3 start
+[fc] Reached waypoint #8 dist 25m
+[fc] Mission: 9 WP
+[phase]   9  FW lane 3 end
+[fc] Reached waypoint #9 dist 25m
+[fc] Mission: 10 WP
+[phase]  10  FW lane 4 start
+[fc] Reached waypoint #10 dist 25m
+[fc] Mission: 11 WP
+[phase]  11  FW lane 4 end
+[fc] Reached waypoint #11 dist 25m
+[fc] Mission: 12 WP
+[phase]  12  FW lane 5 start
+[fc] Reached waypoint #12 dist 25m
+[fc] Mission: 13 WP
+[phase]  13  FW lane 5 end
+[fc] Reached waypoint #13 dist 25m
+[fc] Mission: 14 WP
+[phase]  14  FW lane 6 start
+[fc] Reached waypoint #14 dist 25m
+[fc] Mission: 15 WP
+[phase]  15  FW lane 6 end
+[fc] Reached waypoint #15 dist 24m
+[fc] Mission: 16 WP
+[phase]  16  FW lane 7 start
+[fc] Reached waypoint #16 dist 25m
+[fc] Mission: 17 WP
+[phase]  17  FW lane 7 end
+[fc] Reached waypoint #17 dist 25m
+[fc] Mission: 18 WP
+[phase]  18  landing approach
+[fc] Passed waypoint #18 dist 14m
+[fc] Mission: 19 VTOLLand
+[fc] VTOL approach d=90.5
+[phase]  19  VTOL land (dock)
+[fc] VTOL airbrake v=11.2 d=54 sd=54 h=36.1
+[fc] VTOL position1 v=11.1 d=28.7 h=35.8 dc=10.7
+[fc] Weathervane Active: nose in
+[fc] VTOL Overshoot d=10.5 cs=1.3 yerr=-60.2
+[fc] VTOL position2 started v=5.9 d=9.8 h=28.8
+[fc] Weathervane Active: nose in

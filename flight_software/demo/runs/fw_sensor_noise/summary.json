@@ -1,0 +1,38 @@
+{
+ "name": "fw_sensor_noise",
+ "strategy": "fw_sweep",
+ "targets": null,
+ "wind_ne": [
+  0.0,
+  0.0
+ ],
+ "gust": 0.0,
+ "param_files": [
+  "/mnt/c/claude/vtol-quadcopter/flight_software/demo/scenarios/sensor_noise.param"
+ ],
+ "events": null,
+ "flight_s": 252.5,
+ "distance_m": 2338,
+ "energy_wh": 7.2,
+ "battery_used_pct": 16.1,
+ "trees_imaged": 164,
+ "trees_imaged_2plus": 163,
+ "targets_imaged_2plus": 0,
+ "target_frames_median": null,
+ "frames_per_tree_median": 4,
+ "frames_total": 758,
+ "min_crown_clearance_m": 14.71,
+ "max_abs_roll": 42.1,
+ "max_abs_pitch": 28.9,
+ "lift_events": 2,
+ "n_targets": 0,
+ "flight": {
+  "ok": true,
+  "landed": true,
+  "crashed": false,
+  "wall_s": 230.4,
+  "strategy": "fw_sweep",
+  "roundtrip_ok": true,
+  "items": 19
+ }
+}

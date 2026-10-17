@@ -1,0 +1,5 @@
+# Realistic sensor imperfections for every disturbance scenario
+SIM_GPS1_NOISE    0.6      # m position noise
+SIM_GPS1_NUMSATS  10
+SIM_ACC1_RND      0.3      # m/s^2 accel noise
+SIM_GYR1_RND      0.4      # deg/s gyro noise

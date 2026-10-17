@@ -1,0 +1,36 @@
+{
+ "name": "vtol_sweep",
+ "strategy": "vtol_sweep",
+ "targets": null,
+ "wind_ne": [
+  0.0,
+  0.0
+ ],
+ "gust": 0.0,
+ "param_files": [],
+ "events": null,
+ "flight_s": 350.4,
+ "distance_m": 1187,
+ "energy_wh": 25.8,
+ "battery_used_pct": 58.0,
+ "trees_imaged": 168,
+ "trees_imaged_2plus": 167,
+ "targets_imaged_2plus": 0,
+ "target_frames_median": null,
+ "frames_per_tree_median": 10,
+ "frames_total": 1052,
+ "min_crown_clearance_m": 9.25,
+ "max_abs_roll": 8.0,
+ "max_abs_pitch": 12.3,
+ "lift_events": 0,
+ "n_targets": 0,
+ "flight": {
+  "ok": true,
+  "landed": true,
+  "crashed": false,
+  "wall_s": 333.6,
+  "strategy": "vtol_sweep",
+  "roundtrip_ok": true,
+  "items": 18
+ }
+}

@@ -1,0 +1,27 @@
+{
+ "name": "fw_motor_fail",
+ "strategy": "fw_sweep",
+ "targets": null,
+ "wind_ne": [
+  0.0,
+  0.0
+ ],
+ "gust": 0.0,
+ "param_files": [],
+ "events": "/mnt/c/claude/vtol-quadcopter/flight_software/demo/scenarios/motor_fail_events.json",
+ "flight_s": 214.5,
+ "distance_m": 2300,
+ "energy_wh": 159.6,
+ "battery_used_pct": 359.4,
+ "trees_imaged": 165,
+ "trees_imaged_2plus": 165,
+ "targets_imaged_2plus": 4,
+ "target_frames_median": 6,
+ "frames_per_tree_median": 5,
+ "frames_total": 644,
+ "min_crown_clearance_m": 15.32,
+ "max_abs_roll": 57.1,
+ "max_abs_pitch": 32.4,
+ "lift_events": 2,
+ "n_targets": 4
+}

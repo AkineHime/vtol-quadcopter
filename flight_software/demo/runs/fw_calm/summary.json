@@ -1,0 +1,44 @@
+{
+ "name": "fw_calm",
+ "strategy": "fw_sweep",
+ "targets": null,
+ "wind_ne": [
+  0.0,
+  0.0
+ ],
+ "gust": 0.0,
+ "param_files": [],
+ "events": null,
+ "flight_s": 250.0,
+ "distance_m": 2296,
+ "energy_wh": 7.1,
+ "battery_used_pct": 16.1,
+ "trees_imaged": 163,
+ "trees_imaged_2plus": 162,
+ "targets_imaged_2plus": 0,
+ "target_frames_median": null,
+ "frames_per_tree_median": 5,
+ "frames_total": 750,
+ "min_crown_clearance_m": 15.02,
+ "max_abs_roll": 41.3,
+ "max_abs_pitch": 29.1,
+ "lift_events": 2,
+ "n_targets": 0,
+ "flight": {
+  "ok": true,
+  "landed": true,
+  "crashed": false,
+  "wall_s": 313.2,
+  "strategy": "fw_sweep",
+  "roundtrip_ok": true,
+  "items": 19
+ },
+ "media": [
+  "chase.mp4",
+  "chase_sheet.png",
+  "esp32cam.mp4",
+  "esp32cam_sheet.png",
+  "overview.mp4",
+  "overview_sheet.png"
+ ]
+}

@@ -130,6 +130,13 @@ def get_home(m: mavutil.mavfile, timeout: float = 30.0) -> tuple[float, float]:
 # --------------------------------------------------------------------------
 # Mission protocol
 # --------------------------------------------------------------------------
+_YAW_PARAM4 = {
+    mavutil.mavlink.MAV_CMD_NAV_WAYPOINT,
+    mavutil.mavlink.MAV_CMD_NAV_VTOL_TAKEOFF,
+    mavutil.mavlink.MAV_CMD_NAV_VTOL_LAND,
+}
+
+
 def _pack_item(m, seq: int, wp: Waypoint, total: int):
     # ArduPilot reserves mission seq 0 for HOME. Seq 0 we send as a plain
     # waypoint placeholder (the FC overwrites it with the real home); the
@@ -143,10 +150,13 @@ def _pack_item(m, seq: int, wp: Waypoint, total: int):
             mavutil.mavlink.MAV_MISSION_TYPE_MISSION)
     wp = wp  # the command at this seq
     frame = mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT_INT
+    # param4 is yaw for waypoint/VTOL commands (NaN = keep heading), but e.g.
+    # NAV_LOITER_TIME's param4 is a flag and ArduPilot rejects NaN there.
+    p4 = float("nan") if wp.command in _YAW_PARAM4 else 0.0
     return m.mav.mission_item_int_encode(
         m.target_system, m.target_component, seq, frame, wp.command,
         0, 1,                              # current, autocontinue
-        wp.param1, 0.0, 0.0, float("nan"),  # param1..4
+        wp.param1, 0.0, 0.0, p4,           # param1..4
         int(wp.lat * 1e7), int(wp.lon * 1e7), wp.alt,
         mavutil.mavlink.MAV_MISSION_TYPE_MISSION)
 

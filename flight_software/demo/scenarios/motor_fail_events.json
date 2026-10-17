@@ -1,0 +1,4 @@
+[
+ {"name": "front-left lift motor fails in cruise (SERVO7 output disabled; SERVOn_MAX does not limit motors)",
+  "at_seq": 6, "action": "param", "params": {"SERVO7_TRIM": 1000, "SERVO7_FUNCTION": 0}}
+]

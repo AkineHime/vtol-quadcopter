@@ -1,0 +1,4 @@
+[
+ {"name": "bird strike (25 N side + 1.5 Nm roll, 0.15 s)", "at_seq": 8, "action": "wrench",
+  "force": [0, 25, 0], "torque": [1.5, 0, 0], "duration": 0.15}
+]

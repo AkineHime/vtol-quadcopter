@@ -11,7 +11,9 @@ documentation and report imagery are still to be done** (see "For whoever
 writes up the report" at the bottom). It exists so anyone picking this repo
 up cold can find what's here and regenerate any of it.
 
-## Status snapshot (2026-09-19)
+> **New to the project? Start with [`documents/TEAM_GUIDE.md`](documents/TEAM_GUIDE.md)**: what's new, how to run everything, results, and open items.
+
+## Status snapshot (2026-09-19; Gazebo demo 2026-10-16; printable airframe + 1 ha sim study 2026-10-18)
 
 | Area | State | Where |
 |---|---|---|
@@ -23,7 +25,10 @@ up cold can find what's here and regenerate any of it.
 | Propulsion (measured thrust curves) | Not started — currently hand-calibrated placeholder curves | `flight_software/jsbsim/PROPULSION_NOTES.md` |
 | AUTOTUNE / transition tuning | Not started | — |
 | Review 2 report | Drafted | `report/report.docx`, `report/report.pdf` |
-| Detection pipelines, route planner, dashboard | Not started (scoped in the summary doc) | — |
+| **Visual Gazebo demo** (final review) | Done. ArduPilot QuadPlane SITL flies our Gazebo model (the printed build: 1.84 kg) over a **1 ha, 169-palm** plantation. The mission is dock takeoff, then a fixed-wing scout sweep, then VTOL confirm stops at 4 flagged palms, then landing on the dock. Run: `bash flight_software/gazebo/run_demo.sh` in WSL | `flight_software/gazebo/README.md` |
+| Route planner + sim study | Done. Strategies: fw_sweep, vtol_sweep, hover, hybrid. Wind-aligned lanes; camera-aware hover stops. Headless batch runner, flight analysis (imaging, energy, transition turbulence, clearance), disturbance scenarios, a week-of-operations Monte-Carlo. **Results and recommendations: `documents/sim_results.md`** | `flight_software/route_planner.py`, `sim_runner.py`, `analysis.py`, `schedule_sim.py`, `report_runs.py` |
+| **Print-ready airframe** | Done (CadQuery, no FreeCAD). 40 parts for a 220 mm bed. Detachable wing halves on a carbon spar; openable electronics hatch. LW-PLA build is 1843 g at CG 33% MAC | `airframe/BUILD_NOTES.md`, `airframe/print/` |
+| Detection pipelines, dashboard | Not started (scoped in the summary doc) | — |
 
 ## Repo map
 
@@ -35,6 +40,9 @@ up cold can find what's here and regenerate any of it.
 | `models/patent_drawings/` | `generate_patent_sheet.py` builds the 3-view line drawing directly from the FreeCAD model (headless, via FreeCAD's TechDraw module) → `patent_sheet.svg` / `.png`. |
 | `3d model files/` | The original reference CAD (KittyCAD/Zoo `.kcl` source, zipped) that `build_assembly.py`'s numbers trace back to — a Raefly VT240 Pro reference photo, reverse-engineered. Keep this; it's the ground truth for every "real" dimension in the model. |
 | `flight_software/` | ArduPilot SITL setup, ground-station script, mission verification. Has its own detailed `README.md` — start there. |
+| `flight_software/gazebo/` | The visual demo: Gazebo model/world generators, param overlay, one-command `run_demo.sh`, WSL setup script. Its `README.md` lists what's real vs simplified and the design findings from bring-up (motor yaw-tilt, elevon modelling, weathervaning, assist speed). |
+| `flight_software/demo/` | The 1 ha plantation (`trees.csv`, `layout.json`, `make_plantation.py`), disturbance `scenarios/`, `run_batch.sh`, and per-run results in `runs/` (summaries and contact sheets; logs and videos are git-ignored). |
+| `airframe/` | Print-ready airframe (CadQuery): `params.py` (all dimensions), `build_airframe.py`, `BUILD_NOTES.md`, the STLs in `print/`. |
 | `flight_software/jsbsim/` | The JSBSim aircraft model (real aero) and the bridge that connects it to ArduPilot. `BRIDGE.md` explains the bridge design, `BRIDGE_RESULTS.md` has the test results and exactly what's still wrong, `PROPULSION_NOTES.md` covers the motor/prop modeling gap. |
 | `report/` | Review 2 report source (`build_report.py`, `content.py`, a Word template) and the built `.docx`/`.pdf`. |
 

@@ -1,0 +1,9 @@
+{
+ "ok": true,
+ "landed": true,
+ "crashed": false,
+ "wall_s": 313.2,
+ "strategy": "fw_sweep",
+ "roundtrip_ok": true,
+ "items": 19
+}

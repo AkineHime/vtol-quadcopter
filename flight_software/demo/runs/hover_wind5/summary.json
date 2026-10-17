@@ -1,0 +1,36 @@
+{
+ "name": "hover_wind5",
+ "strategy": "hover",
+ "targets": "ripe",
+ "wind_ne": [
+  -3.0,
+  4.0
+ ],
+ "gust": 2.0,
+ "param_files": [],
+ "events": null,
+ "flight_s": 468.8,
+ "distance_m": 783,
+ "energy_wh": 35.3,
+ "battery_used_pct": 79.6,
+ "trees_imaged": 87,
+ "trees_imaged_2plus": 81,
+ "targets_imaged_2plus": 25,
+ "target_frames_median": 15,
+ "frames_per_tree_median": 1,
+ "frames_total": 1407,
+ "min_crown_clearance_m": 5.25,
+ "max_abs_roll": 18.0,
+ "max_abs_pitch": 16.0,
+ "lift_events": 0,
+ "n_targets": 29,
+ "flight": {
+  "ok": true,
+  "landed": true,
+  "crashed": false,
+  "wall_s": 440.0,
+  "strategy": "hover",
+  "roundtrip_ok": true,
+  "items": 55
+ }
+}

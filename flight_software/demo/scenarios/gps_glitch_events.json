@@ -1,0 +1,4 @@
+[
+ {"name": "GPS glitch 10 m east", "at_seq": 7, "action": "param", "params": {"SIM_GPS1_GLTCH_Y": 0.00009}},
+ {"name": "GPS glitch cleared", "at_seq": 8, "action": "param", "params": {"SIM_GPS1_GLTCH_Y": 0.0}}
+]

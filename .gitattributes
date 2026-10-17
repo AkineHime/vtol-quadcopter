@@ -1,0 +1,2 @@
+# Scripts run inside WSL/Linux must keep LF line endings on Windows checkouts.
+*.sh text eol=lf

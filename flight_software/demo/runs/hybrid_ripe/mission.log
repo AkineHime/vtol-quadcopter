@@ -1,0 +1,375 @@
+[link] connecting to tcp:127.0.0.1:5760 ...
+[link] heartbeat from system 1 component 0
+[boot] waiting for GPS + EKF ...
+[fc] Barometer 1 calibration complete
+[fc] Barometer 2 calibration complete
+[fc] No airspeed sensor
+[fc] ArduPilot Ready
+[fc] Field Elevation Set: 300m
+[fc] GPS 1: probing for u-blox at 230400 baud
+[fc] GPS 1: detected u-blox
+[boot] GPS+EKF ok, letting it settle ...
+[plan] hybrid: 70 items, 29 targets
+[mission] uploading 70 commands (+ home) = 71 items ...
+[mission]  -> sent item 0/70 (cmd HOME)
+[mission]  -> sent item 1/70 (cmd 84)
+[mission]  -> sent item 2/70 (cmd 3000)
+[mission]  -> sent item 3/70 (cmd 16)
+[mission]  -> sent item 4/70 (cmd 16)
+[mission]  -> sent item 5/70 (cmd 16)
+[mission]  -> sent item 6/70 (cmd 16)
+[mission]  -> sent item 7/70 (cmd 16)
+[mission]  -> sent item 8/70 (cmd 16)
+[mission]  -> sent item 9/70 (cmd 16)
+[mission]  -> sent item 10/70 (cmd 16)
+[mission]  -> sent item 11/70 (cmd 16)
+[mission]  -> sent item 12/70 (cmd 16)
+[mission]  -> sent item 13/70 (cmd 16)
+[mission]  -> sent item 14/70 (cmd 16)
+[mission]  -> sent item 15/70 (cmd 16)
+[mission]  -> sent item 16/70 (cmd 16)
+[mission]  -> sent item 17/70 (cmd 16)
+[mission]  -> sent item 18/70 (cmd 3000)
+[mission]  -> sent item 19/70 (cmd 19)
+[mission]  -> sent item 20/70 (cmd 16)
+[mission]  -> sent item 21/70 (cmd 19)
+[mission]  -> sent item 22/70 (cmd 16)
+[mission]  -> sent item 23/70 (cmd 19)
+[mission]  -> sent item 24/70 (cmd 16)
+[mission]  -> sent item 25/70 (cmd 19)
+[mission]  -> sent item 26/70 (cmd 19)
+[mission]  -> sent item 27/70 (cmd 19)
+[mission]  -> sent item 28/70 (cmd 16)
+[mission]  -> sent item 29/70 (cmd 19)
+[mission]  -> sent item 30/70 (cmd 16)
+[mission]  -> sent item 31/70 (cmd 19)
+[mission]  -> sent item 32/70 (cmd 16)
+[mission]  -> sent item 33/70 (cmd 19)
+[mission]  -> sent item 34/70 (cmd 16)
+[mission]  -> sent item 35/70 (cmd 19)
+[mission]  -> sent item 36/70 (cmd 16)
+[mission]  -> sent item 37/70 (cmd 19)
+[mission]  -> sent item 38/70 (cmd 16)
+[mission]  -> sent item 39/70 (cmd 19)
+[mission]  -> sent item 40/70 (cmd 16)
+[mission]  -> sent item 41/70 (cmd 19)
+[mission]  -> sent item 42/70 (cmd 19)
+[mission]  -> sent item 43/70 (cmd 16)
+[mission]  -> sent item 44/70 (cmd 19)
+[mission]  -> sent item 45/70 (cmd 19)
+[mission]  -> sent item 46/70 (cmd 19)
+[mission]  -> sent item 47/70 (cmd 16)
+[mission]  -> sent item 48/70 (cmd 19)
+[mission]  -> sent item 49/70 (cmd 16)
+[mission]  -> sent item 50/70 (cmd 19)
+[mission]  -> sent item 51/70 (cmd 16)
+[mission]  -> sent item 52/70 (cmd 19)
+[mission]  -> sent item 53/70 (cmd 16)
+[mission]  -> sent item 54/70 (cmd 19)
+[mission]  -> sent item 55/70 (cmd 16)
+[mission]  -> sent item 56/70 (cmd 19)
+[mission]  -> sent item 57/70 (cmd 16)
+[mission]  -> sent item 58/70 (cmd 19)
+[mission]  -> sent item 59/70 (cmd 16)
+[mission]  -> sent item 60/70 (cmd 19)
+[mission]  -> sent item 61/70 (cmd 16)
+[mission]  -> sent item 62/70 (cmd 19)
+[mission]  -> sent item 63/70 (cmd 16)
+[mission]  -> sent item 64/70 (cmd 19)
+[mission]  -> sent item 65/70 (cmd 16)
+[mission]  -> sent item 66/70 (cmd 19)
+[mission]  -> sent item 67/70 (cmd 19)
+[mission]  -> sent item 68/70 (cmd 19)
+[mission]  -> sent item 69/70 (cmd 16)
+[mission]  -> sent item 70/70 (cmd 85)
+[mission] upload accepted by vehicle (71/71 items)
+[verify] round-trip OK
+[fc] Throttle armed
+[arm] armed
+[mission] current set to 1
+[phase]   1  VTOL takeoff (dock)
+[fc] Mission: 1 VTOLTakeoff
+[fc] Weathervane Active: nose in
+[fc] Mission: 2 VTOLTransition
+[fc] Mission: 3 WP
+[fc] Transition started airspeed 0.0
+[phase]   3  line-up south of the field
+[fc] Transition airspeed reached 12.0
+[fc] Reached waypoint #3 dist 25m
+[fc] Mission: 4 WP
+[phase]   4  FW lane 1 start
+[fc] Transition done
+[fc] Passed waypoint #4 dist 29m
+[fc] Mission: 5 WP
+[phase]   5  FW lane 1 end
+[fc] Reached waypoint #5 dist 24m
+[fc] Mission: 6 WP
+[phase]   6  FW lane 2 start
+[fc] Reached waypoint #6 dist 25m
+[fc] Mission: 7 WP
+[phase]   7  FW lane 2 end
+[fc] Reached waypoint #7 dist 24m
+[fc] Mission: 8 WP
+[phase]   8  FW lane 3 start
+[fc] Reached waypoint #8 dist 25m
+[fc] Mission: 9 WP
+[phase]   9  FW lane 3 end
+[fc] Reached waypoint #9 dist 25m
+[fc] Mission: 10 WP
+[phase]  10  FW lane 4 start
+[fc] Reached waypoint #10 dist 25m
+[fc] Mission: 11 WP
+[phase]  11  FW lane 4 end
+[fc] Reached waypoint #11 dist 25m
+[fc] Mission: 12 WP
+[phase]  12  FW lane 5 start
+[fc] Reached waypoint #12 dist 25m
+[fc] Mission: 13 WP
+[phase]  13  FW lane 5 end
+[fc] Reached waypoint #13 dist 25m
+[fc] Mission: 14 WP
+[phase]  14  FW lane 6 start
+[fc] Reached waypoint #14 dist 24m
+[fc] Mission: 15 WP
+[phase]  15  FW lane 6 end
+[fc] Reached waypoint #15 dist 25m
+[fc] Mission: 16 WP
+[phase]  16  FW lane 7 start
+[fc] Reached waypoint #16 dist 25m
+[fc] Mission: 17 WP
+[phase]  17  FW lane 7 end
+[fc] Reached waypoint #17 dist 25m
+[fc] Mission: 18 VTOLTransition
+[fc] Entered VTOL mode
+[fc] Mission: 19 LoitTime
+[fc] VTOL Overshoot d=12.8 cs=-11.3 yerr=-177.2
+[phase]  19  inspect P1205 (ripe)
+[fc] VTOL position2 started v=3.5 d=9.8 h=26.0
+[fc] Weathervane Active: nose in
+[fc] Loiter time complete
+[fc] Mission: 20 WP
+[phase]  20  lead-in P1104
+[fc] Reached waypoint #20 dist 0m
+[fc] Mission: 21 LoitTime
+[fc] VTOL Overshoot d=14.6 cs=-1.1 yerr=-3.6
+[phase]  21  inspect P1104 (ripe)
+[fc] VTOL position2 started v=2.4 d=9.8 h=26.0
+[fc] Weathervane Active: nose in
+[fc] Loiter time complete
+[fc] Mission: 22 WP
+[phase]  22  lead-in P1105
+[fc] Reached waypoint #22 dist 1m
+[fc] Mission: 23 LoitTime
+[fc] VTOL Overshoot d=13.2 cs=-2.0 yerr=-113.0
+[phase]  23  inspect P1105 (ripe)
+[fc] VTOL position2 started v=2.9 d=9.9 h=26.0
+[fc] Weathervane Active: nose in
+[fc] Loiter time complete
+[fc] Mission: 24 WP
+[phase]  24  lead-in P1207
+[fc] Reached waypoint #24 dist 0m
+[fc] Mission: 25 LoitTime
+[fc] VTOL Overshoot d=15.0 cs=-0.1 yerr=-26.6
+[phase]  25  inspect P1207 (ripe)
+[fc] VTOL position2 started v=2.5 d=9.8 h=26.0
+[fc] Weathervane Active: nose in
+[fc] Loiter time complete
+[fc] Mission: 26 LoitTime
+[phase]  26  inspect P1210 (ripe)
+[fc] Loiter time complete
+[fc] Mission: 27 LoitTime
+[phase]  27  inspect P0911 (ripe)
+[fc] Loiter time complete
+[fc] Mission: 28 WP
+[phase]  28  lead-in P0912
+[fc] Reached waypoint #28 dist 0m
+[fc] Mission: 29 LoitTime
+[fc] VTOL Overshoot d=14.7 cs=-0.6 yerr=6.3
+[phase]  29  inspect P0912 (ripe+frond)
+[fc] VTOL position2 started v=2.4 d=10.0 h=26.0
+[fc] Weathervane Active: nose in
+[fc] Loiter time complete
+[fc] Mission: 30 WP
+[phase]  30  lead-in P0712
+[fc] Reached waypoint #30 dist 0m
+[fc] Mission: 31 LoitTime
+[fc] VTOL Overshoot d=14.7 cs=-1.2 yerr=64.1
+[phase]  31  inspect P0712 (ripe+frond)
+[fc] VTOL position2 started v=2.7 d=9.8 h=26.0
+[fc] Weathervane Active: nose in
+[fc] Loiter time complete
+[fc] Mission: 32 WP
+[phase]  32  lead-in P0612
+[fc] Reached waypoint #32 dist 0m
+[fc] Mission: 33 LoitTime
+[fc] VTOL Overshoot d=14.6 cs=-0.8 yerr=-3.1
+[phase]  33  inspect P0612 (ripe)
+[fc] VTOL position2 started v=2.4 d=9.8 h=26.0
+[fc] Weathervane Active: nose in
+[fc] Loiter time complete
+[fc] Mission: 34 WP
+[phase]  34  lead-in P0511
+[fc] Reached waypoint #34 dist 0m
+[fc] Mission: 35 LoitTime
+[fc] VTOL Overshoot d=14.7 cs=-1.4 yerr=48.7
+[phase]  35  inspect P0511 (ripe)
+[fc] VTOL position2 started v=2.6 d=10.0 h=26.0
+[fc] Weathervane Active: nose in
+[fc] Loiter time complete
+[fc] Mission: 36 WP
+[phase]  36  lead-in P0410
+[fc] Reached waypoint #36 dist 0m
+[fc] Mission: 37 LoitTime
+[fc] VTOL Overshoot d=14.6 cs=-0.9 yerr=4.6
+[phase]  37  inspect P0410 (ripe)
+[fc] VTOL position2 started v=2.4 d=9.9 h=26.0
+[fc] Weathervane Active: nose in
+[phase]  38  lead-in P0311
+[fc] Loiter time complete
+[fc] Mission: 38 WP
+[fc] Reached waypoint #38 dist 1m
+[fc] Mission: 39 LoitTime
+[fc] VTOL Overshoot d=13.1 cs=-2.5 yerr=-112.0
+[phase]  39  inspect P0311 (ripe+frond)
+[fc] VTOL position2 started v=3.2 d=9.8 h=26.0
+[fc] Weathervane Active: nose in
+[fc] Loiter time complete
+[fc] Mission: 40 WP
+[phase]  40  lead-in P0209
+[phase]  41  inspect P0209 (ripe)
+[fc] Reached waypoint #40 dist 1m
+[fc] Mission: 41 LoitTime
+[fc] VTOL Overshoot d=13.5 cs=-0.4 yerr=91.3
+[fc] VTOL position2 started v=2.6 d=10.0 h=26.0
+[fc] Weathervane Active: nose in
+[fc] Loiter time complete
+[fc] Mission: 42 LoitTime
+[phase]  42  inspect P0709 (ripe)
+[fc] Loiter time complete
+[fc] Mission: 43 WP
+[phase]  43  lead-in P0508
+[fc] Reached waypoint #43 dist 0m
+[fc] Mission: 44 LoitTime
+[fc] VTOL Overshoot d=14.8 cs=-1.2 yerr=-28.7
+[phase]  44  inspect P0508 (ripe)
+[fc] VTOL position2 started v=2.5 d=9.9 h=26.0
+[fc] Weathervane Active: nose in
+[fc] Loiter time complete
+[fc] Mission: 45 LoitTime
+[phase]  45  inspect P0305 (ripe)
+[fc] Loiter time complete
+[fc] Mission: 46 LoitTime
+[phase]  46  inspect P0104 (ripe)
+[fc] Loiter time complete
+[fc] Mission: 47 WP
+[phase]  47  lead-in P0005
+[fc] Reached waypoint #47 dist 1m
+[fc] Mission: 48 LoitTime
+[fc] VTOL Overshoot d=13.2 cs=-2.3 yerr=-109.7
+[phase]  48  inspect P0005 (ripe)
+[fc] VTOL position2 started v=3.2 d=9.8 h=26.0
+[fc] Weathervane Active: nose in
+[fc] Loiter time complete
+[fc] Mission: 49 WP
+[phase]  49  lead-in P0004
+[fc] Reached waypoint #49 dist 1m
+[fc] Mission: 50 LoitTime
+[fc] VTOL Overshoot d=13.2 cs=-2.1 yerr=129.5
+[phase]  50  inspect P0004 (ripe)
+[fc] VTOL position2 started v=3.0 d=9.9 h=26.0
+[fc] Weathervane Active: nose in
+[fc] Loiter time complete
+[fc] Mission: 51 WP
+[phase]  51  lead-in P0003
+[fc] Reached waypoint #51 dist 0m
+[fc] Mission: 52 LoitTime
+[fc] VTOL Overshoot d=14.6 cs=-0.6 yerr=-3.6
+[phase]  52  inspect P0003 (ripe)
+[fc] VTOL position2 started v=2.4 d=10.0 h=26.0
+[fc] Weathervane Active: nose in
+[fc] Loiter time complete
+[fc] Mission: 53 WP
+[phase]  53  lead-in P0202
+[fc] Reached waypoint #53 dist 1m
+[fc] Mission: 54 LoitTime
+[fc] VTOL Overshoot d=13.6 cs=-1.6 yerr=96.5
+[phase]  54  inspect P0202 (ripe)
+[fc] VTOL position2 started v=3.1 d=9.8 h=26.0
+[fc] Weathervane Active: nose in
+[fc] Loiter time complete
+[fc] Mission: 55 WP
+[phase]  55  lead-in P0302
+[fc] Reached waypoint #55 dist 0m
+[fc] Mission: 56 LoitTime
+[fc] VTOL Overshoot d=14.6 cs=-0.6 yerr=-4.7
+[phase]  56  inspect P0302 (ripe)
+[fc] VTOL position2 started v=2.4 d=9.8 h=26.0
+[fc] Weathervane Active: nose in
+[fc] Loiter time complete
+[fc] Mission: 57 WP
+[phase]  57  lead-in P0301
+[fc] Reached waypoint #57 dist 1m
+[fc] Mission: 58 LoitTime
+[fc] VTOL Overshoot d=13.2 cs=-2.5 yerr=-106.4
+[phase]  58  inspect P0301 (ripe+frond)
+[fc] VTOL position2 started v=3.0 d=10.0 h=26.0
+[fc] Weathervane Active: nose in
+[fc] Loiter time complete
+[fc] Mission: 59 WP
+[phase]  59  lead-in P0300
+[fc] Passed waypoint #59 dist 0m
+[fc] Mission: 60 LoitTime
+[fc] VTOL Overshoot d=15.1 cs=-1.3 yerr=47.4
+[phase]  60  inspect P0300 (ripe)
+[fc] VTOL position2 started v=2.6 d=9.8 h=26.0
+[fc] Weathervane Active: nose in
+[fc] Loiter time complete
+[fc] Mission: 61 WP
+[phase]  61  lead-in P0401
+[fc] Reached waypoint #61 dist 1m
+[fc] Mission: 62 LoitTime
+[fc] VTOL Overshoot d=13.1 cs=-2.0 yerr=117.4
+[phase]  62  inspect P0401 (ripe)
+[fc] VTOL position2 started v=2.9 d=9.9 h=26.0
+[fc] Weathervane Active: nose in
+[fc] Loiter time complete
+[fc] Mission: 63 WP
+[phase]  63  lead-in P0500
+[fc] Reached waypoint #63 dist 2m
+[fc] Mission: 64 LoitTime
+[fc] VTOL Overshoot d=13.0 cs=-2.4 yerr=-133.5
+[phase]  64  inspect P0500 (ripe)
+[fc] VTOL position2 started v=3.2 d=9.7 h=26.0
+[fc] Weathervane Active: nose in
+[fc] Loiter time complete
+[fc] Mission: 65 WP
+[phase]  65  lead-in P0502
+[fc] Reached waypoint #65 dist 1m
+[fc] Mission: 66 LoitTime
+[fc] VTOL Overshoot d=13.2 cs=-2.4 yerr=137.3
+[phase]  66  inspect P0502 (ripe)
+[fc] VTOL position2 started v=3.1 d=9.7 h=26.0
+[fc] Weathervane Active: nose in
+[fc] Loiter time complete
+[fc] Mission: 67 LoitTime
+[phase]  67  inspect P0604 (ripe+frond)
+[fc] Loiter time complete
+[fc] Mission: 68 LoitTime
+[phase]  68  inspect P1200 (ripe+frond)
+[fc] Loiter time complete
+[fc] Mission: 69 WP
+[phase]  69  return to dock (VTOL)
+[fc] Reached waypoint #69 dist 0m
+[fc] Mission: 70 VTOLLand
+[fc] VTOL Position1 d=60.3
+[fc] VTOL Overshoot d=60.3 cs=0.0 yerr=178.4
+[phase]  70  VTOL land (dock)
+[fc] VTOL position2 started v=3.5 d=10.0 h=30.0
+[fc] Weathervane Active: nose in
+[fc] Land descend started
+[fc] Land final started
+[fc] Land complete
+[fc] Throttle disarmed
+[phase] landed & disarmed
+
+FLIGHT: OK {"ok": true, "landed": true, "crashed": false, "wall_s": 628.9, "strategy": "hybrid", "roundtrip_ok": true, "items": 70}

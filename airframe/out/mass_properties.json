@@ -1,0 +1,1405 @@
+{
+ "bed_mm": [
+  220.0,
+  220.0,
+  250.0
+ ],
+ "problems": [],
+ "geometry": {
+  "x_spar": 71.7,
+  "z_spar": 66.8,
+  "spar_margin_mm": 1.2,
+  "x_pin": 158.7,
+  "z_pin": 66.6,
+  "pin_margin_mm": 4.5,
+  "x_cg_target": 88.1,
+  "x_cg_limits": [
+   69.3,
+   104.6
+  ]
+ },
+ "part_dims_mm": {
+  "wing_R1a": [
+   118,
+   145,
+   27
+  ],
+  "wing_R1b": [
+   170,
+   145,
+   25
+  ],
+  "wing_R2a": [
+   113,
+   145,
+   24
+  ],
+  "wing_R2b": [
+   150,
+   145,
+   22
+  ],
+  "wing_R3a": [
+   107,
+   176,
+   22
+  ],
+  "wing_R3b": [
+   127,
+   176,
+   20
+  ],
+  "wing_R4": [
+   180,
+   172,
+   19
+  ],
+  "boom_node_R": [
+   237,
+   22,
+   61
+  ],
+  "boom_pylon_R": [
+   24,
+   21,
+   40
+  ],
+  "elevon_R1": [
+   74,
+   165,
+   11
+  ],
+  "elevon_R2": [
+   67,
+   166,
+   9
+  ],
+  "fin_R": [
+   117,
+   10,
+   182
+  ],
+  "wing_L1a": [
+   118,
+   145,
+   27
+  ],
+  "wing_L1b": [
+   170,
+   145,
+   25
+  ],
+  "wing_L2a": [
+   113,
+   145,
+   24
+  ],
+  "wing_L2b": [
+   150,
+   145,
+   22
+  ],
+  "wing_L3a": [
+   107,
+   176,
+   22
+  ],
+  "wing_L3b": [
+   127,
+   176,
+   20
+  ],
+  "wing_L4": [
+   180,
+   172,
+   19
+  ],
+  "boom_node_L": [
+   237,
+   22,
+   61
+  ],
+  "boom_pylon_L": [
+   24,
+   21,
+   40
+  ],
+  "elevon_L1": [
+   74,
+   165,
+   11
+  ],
+  "elevon_L2": [
+   67,
+   166,
+   9
+  ],
+  "fin_L": [
+   117,
+   10,
+   182
+  ],
+  "pod_nose": [
+   190,
+   124,
+   98
+  ],
+  "pod_mid": [
+   205,
+   124,
+   111
+  ],
+  "pod_tail": [
+   87,
+   110,
+   107
+  ],
+  "hatch": [
+   174,
+   113,
+   32
+  ],
+  "stab_centre": [
+   148,
+   200,
+   26
+  ],
+  "stab_tip_R": [
+   130,
+   150,
+   12
+  ],
+  "stab_tip_L": [
+   130,
+   150,
+   12
+  ],
+  "motor_pod_FR": [
+   50,
+   34,
+   53
+  ],
+  "foot_FR": [
+   14,
+   14,
+   18
+  ],
+  "motor_pod_RL": [
+   50,
+   34,
+   53
+  ],
+  "foot_RL": [
+   14,
+   14,
+   18
+  ],
+  "motor_pod_FL": [
+   50,
+   34,
+   53
+  ],
+  "foot_FL": [
+   14,
+   14,
+   18
+  ],
+  "motor_pod_RR": [
+   50,
+   34,
+   53
+  ],
+  "foot_RR": [
+   14,
+   14,
+   18
+  ],
+  "pusher_mount": [
+   34,
+   34,
+   34
+  ]
+ },
+ "configs": [
+  {
+   "config": "LW-PLA skins + PLA pod + PETG nodes",
+   "total_g": 1843.1,
+   "printed_g": 661.2,
+   "carbon_g": 248.1,
+   "cots_g": 934.0,
+   "battery_x_needed": -149.4,
+   "battery_x_used": -149.4,
+   "battery_in_range": true,
+   "cg_build_mm": [
+    88.1,
+    -0.0,
+    21.8
+   ],
+   "cg_pct_mac": 33.0,
+   "inertia_kgm2_flu": {
+    "ixx": 0.0686,
+    "iyy": 0.0958,
+    "izz": 0.1574
+   },
+   "parts": [
+    {
+     "part": "wing_R1a",
+     "kind": "skin",
+     "material": "LW-PLA",
+     "mass_g": 21.5,
+     "x": 66.0,
+     "y": 70.9,
+     "z": 68.8
+    },
+    {
+     "part": "wing_R1b",
+     "kind": "skin",
+     "material": "LW-PLA",
+     "mass_g": 22.4,
+     "x": 172.4,
+     "y": 69.5,
+     "z": 67.2
+    },
+    {
+     "part": "wing_R2a",
+     "kind": "skin",
+     "material": "LW-PLA",
+     "mass_g": 19.6,
+     "x": 67.9,
+     "y": 215.6,
+     "z": 68.2
+    },
+    {
+     "part": "wing_R2b",
+     "kind": "skin",
+     "material": "LW-PLA",
+     "mass_g": 18.7,
+     "x": 165.2,
+     "y": 214.0,
+     "z": 66.6
+    },
+    {
+     "part": "wing_R3a",
+     "kind": "skin",
+     "material": "LW-PLA",
+     "mass_g": 21.2,
+     "x": 69.5,
+     "y": 387.8,
+     "z": 67.5
+    },
+    {
+     "part": "wing_R3b",
+     "kind": "skin",
+     "material": "LW-PLA",
+     "mass_g": 11.5,
+     "x": 146.2,
+     "y": 381.7,
+     "z": 66.5
+    },
+    {
+     "part": "wing_R4",
+     "kind": "skin",
+     "material": "LW-PLA",
+     "mass_g": 24.3,
+     "x": 89.9,
+     "y": 559.2,
+     "z": 66.4
+    },
+    {
+     "part": "boom_node_R",
+     "kind": "solid",
+     "material": "PETG",
+     "mass_g": 34.1,
+     "x": 94.6,
+     "y": 296.6,
+     "z": 57.6
+    },
+    {
+     "part": "boom_pylon_R",
+     "kind": "solid",
+     "material": "PETG",
+     "mass_g": 5.6,
+     "x": 200.0,
+     "y": 300.0,
+     "z": 43.2
+    },
+    {
+     "part": "elevon_R1",
+     "kind": "skin",
+     "material": "LW-PLA",
+     "mass_g": 6.6,
+     "x": 195.7,
+     "y": 391.1,
+     "z": 63.1
+    },
+    {
+     "part": "elevon_R2",
+     "kind": "skin",
+     "material": "LW-PLA",
+     "mass_g": 5.6,
+     "x": 177.1,
+     "y": 556.8,
+     "z": 63.0
+    },
+    {
+     "part": "fin_R",
+     "kind": "skin",
+     "material": "LW-PLA",
+     "mass_g": 12.2,
+     "x": 588.8,
+     "y": 250.0,
+     "z": 86.0
+    },
+    {
+     "part": "wing_L1a",
+     "kind": "skin",
+     "material": "LW-PLA",
+     "mass_g": 21.5,
+     "x": 66.0,
+     "y": -70.9,
+     "z": 68.8
+    },
+    {
+     "part": "wing_L1b",
+     "kind": "skin",
+     "material": "LW-PLA",
+     "mass_g": 22.4,
+     "x": 172.4,
+     "y": -69.5,
+     "z": 67.2
+    },
+    {
+     "part": "wing_L2a",
+     "kind": "skin",
+     "material": "LW-PLA",
+     "mass_g": 19.6,
+     "x": 67.9,
+     "y": -215.6,
+     "z": 68.2
+    },
+    {
+     "part": "wing_L2b",
+     "kind": "skin",
+     "material": "LW-PLA",
+     "mass_g": 18.7,
+     "x": 165.2,
+     "y": -214.0,
+     "z": 66.6
+    },
+    {
+     "part": "wing_L3a",
+     "kind": "skin",
+     "material": "LW-PLA",
+     "mass_g": 21.2,
+     "x": 69.5,
+     "y": -387.8,
+     "z": 67.5
+    },
+    {
+     "part": "wing_L3b",
+     "kind": "skin",
+     "material": "LW-PLA",
+     "mass_g": 11.5,
+     "x": 146.2,
+     "y": -381.7,
+     "z": 66.5
+    },
+    {
+     "part": "wing_L4",
+     "kind": "skin",
+     "material": "LW-PLA",
+     "mass_g": 24.3,
+     "x": 89.9,
+     "y": -559.2,
+     "z": 66.4
+    },
+    {
+     "part": "boom_node_L",
+     "kind": "solid",
+     "material": "PETG",
+     "mass_g": 34.1,
+     "x": 94.6,
+     "y": -296.6,
+     "z": 57.6
+    },
+    {
+     "part": "boom_pylon_L",
+     "kind": "solid",
+     "material": "PETG",
+     "mass_g": 5.6,
+     "x": 200.0,
+     "y": -300.0,
+     "z": 43.2
+    },
+    {
+     "part": "elevon_L1",
+     "kind": "skin",
+     "material": "LW-PLA",
+     "mass_g": 6.6,
+     "x": 195.7,
+     "y": -391.1,
+     "z": 63.1
+    },
+    {
+     "part": "elevon_L2",
+     "kind": "skin",
+     "material": "LW-PLA",
+     "mass_g": 5.6,
+     "x": 177.1,
+     "y": -556.8,
+     "z": 63.0
+    },
+    {
+     "part": "fin_L",
+     "kind": "skin",
+     "material": "LW-PLA",
+     "mass_g": 12.2,
+     "x": 588.8,
+     "y": -250.0,
+     "z": 86.0
+    },
+    {
+     "part": "pod_nose",
+     "kind": "shell",
+     "material": "LW-PLA",
+     "mass_g": 29.8,
+     "x": -100.2,
+     "y": 0.0,
+     "z": -20.6
+    },
+    {
+     "part": "pod_mid",
+     "kind": "shell",
+     "material": "PLA",
+     "mass_g": 100.8,
+     "x": 73.8,
+     "y": -0.0,
+     "z": -4.4
+    },
+    {
+     "part": "pod_tail",
+     "kind": "shell",
+     "material": "LW-PLA",
+     "mass_g": 19.6,
+     "x": 221.0,
+     "y": -0.0,
+     "z": 5.2
+    },
+    {
+     "part": "hatch",
+     "kind": "shell",
+     "material": "LW-PLA",
+     "mass_g": 11.0,
+     "x": -81.1,
+     "y": -0.0,
+     "z": 41.5
+    },
+    {
+     "part": "stab_centre",
+     "kind": "skin",
+     "material": "LW-PLA",
+     "mass_g": 25.2,
+     "x": 598.1,
+     "y": -0.0,
+     "z": 11.0
+    },
+    {
+     "part": "stab_tip_R",
+     "kind": "skin",
+     "material": "LW-PLA",
+     "mass_g": 13.6,
+     "x": 587.6,
+     "y": 169.3,
+     "z": 11.6
+    },
+    {
+     "part": "stab_tip_L",
+     "kind": "skin",
+     "material": "LW-PLA",
+     "mass_g": 13.6,
+     "x": 587.6,
+     "y": -169.3,
+     "z": 11.6
+    },
+    {
+     "part": "motor_pod_FR",
+     "kind": "solid",
+     "material": "PETG",
+     "mass_g": 8.7,
+     "x": -223.9,
+     "y": 299.9,
+     "z": 34.4
+    },
+    {
+     "part": "foot_FR",
+     "kind": "solid",
+     "material": "PETG",
+     "mass_g": 0.7,
+     "x": -223.9,
+     "y": 300.0,
+     "z": -193.3
+    },
+    {
+     "part": "motor_pod_RL",
+     "kind": "solid",
+     "material": "PETG",
+     "mass_g": 8.7,
+     "x": 400.2,
+     "y": -299.9,
+     "z": 34.4
+    },
+    {
+     "part": "foot_RL",
+     "kind": "solid",
+     "material": "PETG",
+     "mass_g": 0.7,
+     "x": 400.1,
+     "y": -300.0,
+     "z": -193.3
+    },
+    {
+     "part": "motor_pod_FL",
+     "kind": "solid",
+     "material": "PETG",
+     "mass_g": 8.7,
+     "x": -223.9,
+     "y": -299.9,
+     "z": 34.4
+    },
+    {
+     "part": "foot_FL",
+     "kind": "solid",
+     "material": "PETG",
+     "mass_g": 0.7,
+     "x": -223.9,
+     "y": -300.0,
+     "z": -193.3
+    },
+    {
+     "part": "motor_pod_RR",
+     "kind": "solid",
+     "material": "PETG",
+     "mass_g": 8.7,
+     "x": 400.2,
+     "y": 299.9,
+     "z": 34.4
+    },
+    {
+     "part": "foot_RR",
+     "kind": "solid",
+     "material": "PETG",
+     "mass_g": 0.7,
+     "x": 400.1,
+     "y": 300.0,
+     "z": -193.3
+    },
+    {
+     "part": "pusher_mount",
+     "kind": "solid",
+     "material": "PETG",
+     "mass_g": 3.4,
+     "x": 690.4,
+     "y": -0.0,
+     "z": -0.0
+    },
+    {
+     "part": "main_spar",
+     "kind": "carbon",
+     "material": "CF",
+     "mass_g": 67.0,
+     "x": 71.656,
+     "y": 0,
+     "z": 62.0
+    },
+    {
+     "part": "booms",
+     "kind": "carbon",
+     "material": "CF",
+     "mass_g": 98.5,
+     "x": 88.14800000000002,
+     "y": 0,
+     "z": 30.0
+    },
+    {
+     "part": "tailboom",
+     "kind": "carbon",
+     "material": "CF",
+     "mass_g": 20.8,
+     "x": 459.0176470588235,
+     "y": 0,
+     "z": 0.0
+    },
+    {
+     "part": "legs",
+     "kind": "carbon",
+     "material": "CF",
+     "mass_g": 40.3,
+     "x": 88.14800000000002,
+     "y": 0,
+     "z": -85.0
+    },
+    {
+     "part": "wing_pins",
+     "kind": "carbon",
+     "material": "CF",
+     "mass_g": 11.8,
+     "x": 158.675,
+     "y": 0,
+     "z": 62.0
+    },
+    {
+     "part": "stab_spar",
+     "kind": "carbon",
+     "material": "CF",
+     "mass_g": 9.7,
+     "x": 582.2705882352941,
+     "y": 0,
+     "z": 11.0
+    },
+    {
+     "part": "motor_lift_FR",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 50.0,
+     "x": -223.85199999999998,
+     "y": 300.0,
+     "z": 60.0
+    },
+    {
+     "part": "motor_lift_FL",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 50.0,
+     "x": -223.85199999999998,
+     "y": -300.0,
+     "z": 60.0
+    },
+    {
+     "part": "motor_lift_RR",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 50.0,
+     "x": 400.148,
+     "y": 300.0,
+     "z": 60.0
+    },
+    {
+     "part": "motor_lift_RL",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 50.0,
+     "x": 400.148,
+     "y": -300.0,
+     "z": 60.0
+    },
+    {
+     "part": "motor_pusher",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 50.0,
+     "x": 689.035294117647,
+     "y": 0,
+     "z": 0.0
+    },
+    {
+     "part": "props_x5",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 50.0,
+     "x": 211.32545882352943,
+     "y": 0,
+     "z": 70.0
+    },
+    {
+     "part": "esc_lift_x4",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 100.0,
+     "x": 88.14800000000002,
+     "y": 0,
+     "z": 30.0
+    },
+    {
+     "part": "esc_pusher",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 25.0,
+     "x": 200.0,
+     "y": 0,
+     "z": 0
+    },
+    {
+     "part": "servo_elevon_x2",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 27.0,
+     "x": 120.0,
+     "y": 0,
+     "z": 62.0
+    },
+    {
+     "part": "flight_controller",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 10.0,
+     "x": 28.14800000000001,
+     "y": 0,
+     "z": -10
+    },
+    {
+     "part": "gps_compass",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 25.0,
+     "x": -95.0,
+     "y": 0,
+     "z": 60.0
+    },
+    {
+     "part": "esp32_cam",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 12.0,
+     "x": -185.0,
+     "y": 0,
+     "z": -30
+    },
+    {
+     "part": "tof_vl53l1x",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 3.0,
+     "x": -150.0,
+     "y": 0,
+     "z": -60
+    },
+    {
+     "part": "rx_telemetry",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 12.0,
+     "x": 60.0,
+     "y": 0,
+     "z": -20
+    },
+    {
+     "part": "wiring_pdb_xt60",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 70.0,
+     "x": 0.0,
+     "y": 0,
+     "z": -20
+    },
+    {
+     "part": "magnets_screws_inserts",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 30.0,
+     "x": -60.0,
+     "y": 0,
+     "z": 0
+    },
+    {
+     "part": "battery_3s_4000",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 320.0,
+     "x": -149.4,
+     "y": 0,
+     "z": -35
+    }
+   ]
+  },
+  {
+   "config": "all PLA (+PETG nodes)",
+   "total_g": 2312.4,
+   "printed_g": 1130.4,
+   "carbon_g": 248.1,
+   "cots_g": 934.0,
+   "battery_x_needed": -288.5,
+   "battery_x_used": -150.0,
+   "battery_in_range": false,
+   "cg_build_mm": [
+    107.3,
+    0.0,
+    28.0
+   ],
+   "cg_pct_mac": 41.1,
+   "inertia_kgm2_flu": {
+    "ixx": 0.1085,
+    "iyy": 0.1193,
+    "izz": 0.2193
+   },
+   "parts": [
+    {
+     "part": "wing_R1a",
+     "kind": "skin",
+     "material": "PLA",
+     "mass_g": 44.4,
+     "x": 66.0,
+     "y": 70.9,
+     "z": 68.8
+    },
+    {
+     "part": "wing_R1b",
+     "kind": "skin",
+     "material": "PLA",
+     "mass_g": 46.4,
+     "x": 172.4,
+     "y": 69.5,
+     "z": 67.2
+    },
+    {
+     "part": "wing_R2a",
+     "kind": "skin",
+     "material": "PLA",
+     "mass_g": 40.4,
+     "x": 67.9,
+     "y": 215.6,
+     "z": 68.2
+    },
+    {
+     "part": "wing_R2b",
+     "kind": "skin",
+     "material": "PLA",
+     "mass_g": 38.6,
+     "x": 165.2,
+     "y": 214.0,
+     "z": 66.6
+    },
+    {
+     "part": "wing_R3a",
+     "kind": "skin",
+     "material": "PLA",
+     "mass_g": 43.9,
+     "x": 69.5,
+     "y": 387.8,
+     "z": 67.5
+    },
+    {
+     "part": "wing_R3b",
+     "kind": "skin",
+     "material": "PLA",
+     "mass_g": 23.7,
+     "x": 146.2,
+     "y": 381.7,
+     "z": 66.5
+    },
+    {
+     "part": "wing_R4",
+     "kind": "skin",
+     "material": "PLA",
+     "mass_g": 50.3,
+     "x": 89.9,
+     "y": 559.2,
+     "z": 66.4
+    },
+    {
+     "part": "boom_node_R",
+     "kind": "solid",
+     "material": "PETG",
+     "mass_g": 34.1,
+     "x": 94.6,
+     "y": 296.6,
+     "z": 57.6
+    },
+    {
+     "part": "boom_pylon_R",
+     "kind": "solid",
+     "material": "PETG",
+     "mass_g": 5.6,
+     "x": 200.0,
+     "y": 300.0,
+     "z": 43.2
+    },
+    {
+     "part": "elevon_R1",
+     "kind": "skin",
+     "material": "PLA",
+     "mass_g": 13.6,
+     "x": 195.7,
+     "y": 391.1,
+     "z": 63.1
+    },
+    {
+     "part": "elevon_R2",
+     "kind": "skin",
+     "material": "PLA",
+     "mass_g": 11.6,
+     "x": 177.1,
+     "y": 556.8,
+     "z": 63.0
+    },
+    {
+     "part": "fin_R",
+     "kind": "skin",
+     "material": "PLA",
+     "mass_g": 25.1,
+     "x": 588.8,
+     "y": 250.0,
+     "z": 86.0
+    },
+    {
+     "part": "wing_L1a",
+     "kind": "skin",
+     "material": "PLA",
+     "mass_g": 44.4,
+     "x": 66.0,
+     "y": -70.9,
+     "z": 68.8
+    },
+    {
+     "part": "wing_L1b",
+     "kind": "skin",
+     "material": "PLA",
+     "mass_g": 46.4,
+     "x": 172.4,
+     "y": -69.5,
+     "z": 67.2
+    },
+    {
+     "part": "wing_L2a",
+     "kind": "skin",
+     "material": "PLA",
+     "mass_g": 40.4,
+     "x": 67.9,
+     "y": -215.6,
+     "z": 68.2
+    },
+    {
+     "part": "wing_L2b",
+     "kind": "skin",
+     "material": "PLA",
+     "mass_g": 38.6,
+     "x": 165.2,
+     "y": -214.0,
+     "z": 66.6
+    },
+    {
+     "part": "wing_L3a",
+     "kind": "skin",
+     "material": "PLA",
+     "mass_g": 43.9,
+     "x": 69.5,
+     "y": -387.8,
+     "z": 67.5
+    },
+    {
+     "part": "wing_L3b",
+     "kind": "skin",
+     "material": "PLA",
+     "mass_g": 23.7,
+     "x": 146.2,
+     "y": -381.7,
+     "z": 66.5
+    },
+    {
+     "part": "wing_L4",
+     "kind": "skin",
+     "material": "PLA",
+     "mass_g": 50.3,
+     "x": 89.9,
+     "y": -559.2,
+     "z": 66.4
+    },
+    {
+     "part": "boom_node_L",
+     "kind": "solid",
+     "material": "PETG",
+     "mass_g": 34.1,
+     "x": 94.6,
+     "y": -296.6,
+     "z": 57.6
+    },
+    {
+     "part": "boom_pylon_L",
+     "kind": "solid",
+     "material": "PETG",
+     "mass_g": 5.6,
+     "x": 200.0,
+     "y": -300.0,
+     "z": 43.2
+    },
+    {
+     "part": "elevon_L1",
+     "kind": "skin",
+     "material": "PLA",
+     "mass_g": 13.6,
+     "x": 195.7,
+     "y": -391.1,
+     "z": 63.1
+    },
+    {
+     "part": "elevon_L2",
+     "kind": "skin",
+     "material": "PLA",
+     "mass_g": 11.6,
+     "x": 177.1,
+     "y": -556.8,
+     "z": 63.0
+    },
+    {
+     "part": "fin_L",
+     "kind": "skin",
+     "material": "PLA",
+     "mass_g": 25.1,
+     "x": 588.8,
+     "y": -250.0,
+     "z": 86.0
+    },
+    {
+     "part": "pod_nose",
+     "kind": "shell",
+     "material": "PLA",
+     "mass_g": 61.6,
+     "x": -100.2,
+     "y": 0.0,
+     "z": -20.6
+    },
+    {
+     "part": "pod_mid",
+     "kind": "shell",
+     "material": "PLA",
+     "mass_g": 100.8,
+     "x": 73.8,
+     "y": -0.0,
+     "z": -4.4
+    },
+    {
+     "part": "pod_tail",
+     "kind": "shell",
+     "material": "PLA",
+     "mass_g": 40.6,
+     "x": 221.0,
+     "y": -0.0,
+     "z": 5.2
+    },
+    {
+     "part": "hatch",
+     "kind": "shell",
+     "material": "PLA",
+     "mass_g": 22.7,
+     "x": -81.1,
+     "y": -0.0,
+     "z": 41.5
+    },
+    {
+     "part": "stab_centre",
+     "kind": "skin",
+     "material": "PLA",
+     "mass_g": 52.1,
+     "x": 598.1,
+     "y": -0.0,
+     "z": 11.0
+    },
+    {
+     "part": "stab_tip_R",
+     "kind": "skin",
+     "material": "PLA",
+     "mass_g": 28.1,
+     "x": 587.6,
+     "y": 169.3,
+     "z": 11.6
+    },
+    {
+     "part": "stab_tip_L",
+     "kind": "skin",
+     "material": "PLA",
+     "mass_g": 28.1,
+     "x": 587.6,
+     "y": -169.3,
+     "z": 11.6
+    },
+    {
+     "part": "motor_pod_FR",
+     "kind": "solid",
+     "material": "PETG",
+     "mass_g": 8.7,
+     "x": -223.9,
+     "y": 299.9,
+     "z": 34.4
+    },
+    {
+     "part": "foot_FR",
+     "kind": "solid",
+     "material": "PETG",
+     "mass_g": 0.7,
+     "x": -223.9,
+     "y": 300.0,
+     "z": -193.3
+    },
+    {
+     "part": "motor_pod_RL",
+     "kind": "solid",
+     "material": "PETG",
+     "mass_g": 8.7,
+     "x": 400.2,
+     "y": -299.9,
+     "z": 34.4
+    },
+    {
+     "part": "foot_RL",
+     "kind": "solid",
+     "material": "PETG",
+     "mass_g": 0.7,
+     "x": 400.1,
+     "y": -300.0,
+     "z": -193.3
+    },
+    {
+     "part": "motor_pod_FL",
+     "kind": "solid",
+     "material": "PETG",
+     "mass_g": 8.7,
+     "x": -223.9,
+     "y": -299.9,
+     "z": 34.4
+    },
+    {
+     "part": "foot_FL",
+     "kind": "solid",
+     "material": "PETG",
+     "mass_g": 0.7,
+     "x": -223.9,
+     "y": -300.0,
+     "z": -193.3
+    },
+    {
+     "part": "motor_pod_RR",
+     "kind": "solid",
+     "material": "PETG",
+     "mass_g": 8.7,
+     "x": 400.2,
+     "y": 299.9,
+     "z": 34.4
+    },
+    {
+     "part": "foot_RR",
+     "kind": "solid",
+     "material": "PETG",
+     "mass_g": 0.7,
+     "x": 400.1,
+     "y": 300.0,
+     "z": -193.3
+    },
+    {
+     "part": "pusher_mount",
+     "kind": "solid",
+     "material": "PETG",
+     "mass_g": 3.4,
+     "x": 690.4,
+     "y": -0.0,
+     "z": -0.0
+    },
+    {
+     "part": "main_spar",
+     "kind": "carbon",
+     "material": "CF",
+     "mass_g": 67.0,
+     "x": 71.656,
+     "y": 0,
+     "z": 62.0
+    },
+    {
+     "part": "booms",
+     "kind": "carbon",
+     "material": "CF",
+     "mass_g": 98.5,
+     "x": 88.14800000000002,
+     "y": 0,
+     "z": 30.0
+    },
+    {
+     "part": "tailboom",
+     "kind": "carbon",
+     "material": "CF",
+     "mass_g": 20.8,
+     "x": 459.0176470588235,
+     "y": 0,
+     "z": 0.0
+    },
+    {
+     "part": "legs",
+     "kind": "carbon",
+     "material": "CF",
+     "mass_g": 40.3,
+     "x": 88.14800000000002,
+     "y": 0,
+     "z": -85.0
+    },
+    {
+     "part": "wing_pins",
+     "kind": "carbon",
+     "material": "CF",
+     "mass_g": 11.8,
+     "x": 158.675,
+     "y": 0,
+     "z": 62.0
+    },
+    {
+     "part": "stab_spar",
+     "kind": "carbon",
+     "material": "CF",
+     "mass_g": 9.7,
+     "x": 582.2705882352941,
+     "y": 0,
+     "z": 11.0
+    },
+    {
+     "part": "motor_lift_FR",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 50.0,
+     "x": -223.85199999999998,
+     "y": 300.0,
+     "z": 60.0
+    },
+    {
+     "part": "motor_lift_FL",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 50.0,
+     "x": -223.85199999999998,
+     "y": -300.0,
+     "z": 60.0
+    },
+    {
+     "part": "motor_lift_RR",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 50.0,
+     "x": 400.148,
+     "y": 300.0,
+     "z": 60.0
+    },
+    {
+     "part": "motor_lift_RL",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 50.0,
+     "x": 400.148,
+     "y": -300.0,
+     "z": 60.0
+    },
+    {
+     "part": "motor_pusher",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 50.0,
+     "x": 689.035294117647,
+     "y": 0,
+     "z": 0.0
+    },
+    {
+     "part": "props_x5",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 50.0,
+     "x": 211.32545882352943,
+     "y": 0,
+     "z": 70.0
+    },
+    {
+     "part": "esc_lift_x4",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 100.0,
+     "x": 88.14800000000002,
+     "y": 0,
+     "z": 30.0
+    },
+    {
+     "part": "esc_pusher",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 25.0,
+     "x": 200.0,
+     "y": 0,
+     "z": 0
+    },
+    {
+     "part": "servo_elevon_x2",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 27.0,
+     "x": 120.0,
+     "y": 0,
+     "z": 62.0
+    },
+    {
+     "part": "flight_controller",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 10.0,
+     "x": 28.14800000000001,
+     "y": 0,
+     "z": -10
+    },
+    {
+     "part": "gps_compass",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 25.0,
+     "x": -95.0,
+     "y": 0,
+     "z": 60.0
+    },
+    {
+     "part": "esp32_cam",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 12.0,
+     "x": -185.0,
+     "y": 0,
+     "z": -30
+    },
+    {
+     "part": "tof_vl53l1x",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 3.0,
+     "x": -150.0,
+     "y": 0,
+     "z": -60
+    },
+    {
+     "part": "rx_telemetry",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 12.0,
+     "x": 60.0,
+     "y": 0,
+     "z": -20
+    },
+    {
+     "part": "wiring_pdb_xt60",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 70.0,
+     "x": 0.0,
+     "y": 0,
+     "z": -20
+    },
+    {
+     "part": "magnets_screws_inserts",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 30.0,
+     "x": -60.0,
+     "y": 0,
+     "z": 0
+    },
+    {
+     "part": "battery_3s_4000",
+     "kind": "cots",
+     "material": "-",
+     "mass_g": 320.0,
+     "x": -150.0,
+     "y": 0,
+     "z": -35
+    }
+   ]
+  }
+ ]
+}

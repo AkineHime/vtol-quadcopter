@@ -1,0 +1,44 @@
+{
+ "name": "demo_hybrid4",
+ "strategy": "hybrid",
+ "targets": "P0005,P0302,P0612,P0911",
+ "wind_ne": [
+  0.0,
+  0.0
+ ],
+ "gust": 0.0,
+ "param_files": [],
+ "events": null,
+ "flight_s": 325.9,
+ "distance_m": 2288,
+ "energy_wh": 14.0,
+ "battery_used_pct": 31.5,
+ "trees_imaged": 166,
+ "trees_imaged_2plus": 163,
+ "targets_imaged_2plus": 4,
+ "target_frames_median": 22,
+ "frames_per_tree_median": 4,
+ "frames_total": 978,
+ "min_crown_clearance_m": 5.44,
+ "max_abs_roll": 42.7,
+ "max_abs_pitch": 27.5,
+ "lift_events": 2,
+ "n_targets": 4,
+ "flight": {
+  "ok": true,
+  "landed": true,
+  "crashed": false,
+  "wall_s": 536.7,
+  "strategy": "hybrid",
+  "roundtrip_ok": true,
+  "items": 28
+ },
+ "media": [
+  "chase.mp4",
+  "chase_sheet.png",
+  "esp32cam.mp4",
+  "esp32cam_sheet.png",
+  "overview.mp4",
+  "overview_sheet.png"
+ ]
+}

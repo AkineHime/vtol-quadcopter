@@ -1,0 +1,36 @@
+{
+ "name": "hybrid_ripe",
+ "strategy": "hybrid",
+ "targets": "ripe",
+ "wind_ne": [
+  0.0,
+  0.0
+ ],
+ "gust": 0.0,
+ "param_files": [],
+ "events": null,
+ "flight_s": 661.9,
+ "distance_m": 2839,
+ "energy_wh": 38.2,
+ "battery_used_pct": 86.0,
+ "trees_imaged": 169,
+ "trees_imaged_2plus": 167,
+ "targets_imaged_2plus": 29,
+ "target_frames_median": 20,
+ "frames_per_tree_median": 7,
+ "frames_total": 1986,
+ "min_crown_clearance_m": 5.35,
+ "max_abs_roll": 40.2,
+ "max_abs_pitch": 16.7,
+ "lift_events": 2,
+ "n_targets": 29,
+ "flight": {
+  "ok": true,
+  "landed": true,
+  "crashed": false,
+  "wall_s": 628.9,
+  "strategy": "hybrid",
+  "roundtrip_ok": true,
+  "items": 70
+ }
+}

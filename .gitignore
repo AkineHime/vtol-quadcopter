@@ -6,4 +6,13 @@ Thumbs.db
 report/page-*.jpg
 models/freecad/*.stl
 models/freecad/*.FCBak
+# Gazebo demo: mesh is regenerated from the STEP by run_demo.sh; run logs/replays are local
+flight_software/gazebo/models/coconut_quadplane/meshes/
+flight_software/demo/logs/
+flight_software/demo/gz_log/
 
+
+# headless sim runs: dataflash logs and videos are large; keep summaries
+flight_software/demo/runs/**/*.BIN
+flight_software/demo/runs/**/*.mp4
+flight_software/demo/captures/

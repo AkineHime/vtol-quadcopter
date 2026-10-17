@@ -1,0 +1,36 @@
+{
+ "name": "fw_wind8",
+ "strategy": "fw_sweep",
+ "targets": null,
+ "wind_ne": [
+  0.0,
+  8.0
+ ],
+ "gust": 3.0,
+ "param_files": [],
+ "events": null,
+ "flight_s": 329.5,
+ "distance_m": 2671,
+ "energy_wh": 41.5,
+ "battery_used_pct": 93.4,
+ "trees_imaged": 134,
+ "trees_imaged_2plus": 120,
+ "targets_imaged_2plus": 0,
+ "target_frames_median": null,
+ "frames_per_tree_median": 5,
+ "frames_total": 989,
+ "min_crown_clearance_m": -0.8,
+ "max_abs_roll": 101.5,
+ "max_abs_pitch": 86.1,
+ "lift_events": 7,
+ "n_targets": 0,
+ "flight": {
+  "ok": true,
+  "landed": true,
+  "crashed": false,
+  "wall_s": 299.4,
+  "strategy": "fw_sweep",
+  "roundtrip_ok": true,
+  "items": 19
+ }
+}

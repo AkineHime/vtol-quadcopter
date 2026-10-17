@@ -1,0 +1,675 @@
+{
+ "frames_sensitivity": [
+  {
+   "frames": 1,
+   "recall_vote2": 0,
+   "false_pos_vote2": 0,
+   "false_reports_per_169_palms": 0
+  },
+  {
+   "frames": 2,
+   "recall_vote2": 0.49,
+   "false_pos_vote2": 0.0016,
+   "false_reports_per_169_palms": 0.22
+  },
+  {
+   "frames": 3,
+   "recall_vote2": 0.784,
+   "false_pos_vote2": 0.0047,
+   "false_reports_per_169_palms": 0.65
+  },
+  {
+   "frames": 4,
+   "recall_vote2": 0.916,
+   "false_pos_vote2": 0.0091,
+   "false_reports_per_169_palms": 1.27
+  },
+  {
+   "frames": 5,
+   "recall_vote2": 0.969,
+   "false_pos_vote2": 0.0148,
+   "false_reports_per_169_palms": 2.07
+  },
+  {
+   "frames": 6,
+   "recall_vote2": 0.989,
+   "false_pos_vote2": 0.0216,
+   "false_reports_per_169_palms": 3.02
+  },
+  {
+   "frames": 7,
+   "recall_vote2": 0.996,
+   "false_pos_vote2": 0.0294,
+   "false_reports_per_169_palms": 4.11
+  },
+  {
+   "frames": 8,
+   "recall_vote2": 0.999,
+   "false_pos_vote2": 0.0381,
+   "false_reports_per_169_palms": 5.34
+  },
+  {
+   "frames": 9,
+   "recall_vote2": 1.0,
+   "false_pos_vote2": 0.0478,
+   "false_reports_per_169_palms": 6.69
+  },
+  {
+   "frames": 10,
+   "recall_vote2": 1.0,
+   "false_pos_vote2": 0.0582,
+   "false_reports_per_169_palms": 8.14
+  }
+ ],
+ "costs": {
+  "scout_s": 250.0,
+  "scout_wh": 7.1,
+  "src_scout": "demo/runs/fw_calm",
+  "per_palm_s": 17.79310344827586,
+  "per_palm_wh": 1.3,
+  "src_hover": "demo/runs/hover_ripe"
+ },
+ "assumptions": {
+  "ripen_days": 30,
+  "p_frame_tp": 0.7,
+  "p_frame_fp": 0.04,
+  "p_nofly": 0.12,
+  "weeks": 500
+ },
+ "policies": [
+  {
+   "policy": "hover_all",
+   "flight_min_week": 311.5,
+   "energy_wh_week": 1365.7,
+   "sorties_week": 43.5,
+   "max_sorties_day": 7,
+   "busy_min_week_incl_charge": 2577.6,
+   "harvested_week": 60.9,
+   "latency_days_mean": 1.14,
+   "wasted_climbs_week": 0,
+   "ripe_unreported_end": 6.5
+  },
+  {
+   "policy": "scout_confirm",
+   "flight_min_week": 97.6,
+   "energy_wh_week": 359.4,
+   "sorties_week": 18.9,
+   "max_sorties_day": 3,
+   "busy_min_week_incl_charge": 731.0,
+   "harvested_week": 59.0,
+   "latency_days_mean": 1.16,
+   "wasted_climbs_week": 0,
+   "ripe_unreported_end": 8.3
+  },
+  {
+   "policy": "scout2_confirm",
+   "flight_min_week": 61.2,
+   "energy_wh_week": 229.6,
+   "sorties_week": 11.1,
+   "max_sorties_day": 4,
+   "busy_min_week_incl_charge": 460.9,
+   "harvested_week": 51.3,
+   "latency_days_mean": 1.48,
+   "wasted_climbs_week": 0,
+   "ripe_unreported_end": 15.1
+  },
+  {
+   "policy": "scout_vote",
+   "flight_min_week": 74.1,
+   "energy_wh_week": 256.6,
+   "sorties_week": 14.9,
+   "max_sorties_day": 2,
+   "busy_min_week_incl_charge": 533.5,
+   "harvested_week": 58.8,
+   "latency_days_mean": 1.14,
+   "wasted_climbs_week": 14.21,
+   "ripe_unreported_end": 8.5
+  },
+  {
+   "policy": "scout_v2_confirm",
+   "flight_min_week": 49.6,
+   "energy_wh_week": 149.0,
+   "sorties_week": 13.1,
+   "max_sorties_day": 2,
+   "busy_min_week_incl_charge": 338.6,
+   "harvested_week": 57.6,
+   "latency_days_mean": 1.24,
+   "wasted_climbs_week": 0,
+   "ripe_unreported_end": 9.4
+  },
+  {
+   "policy": "scout_only",
+   "flight_min_week": 25.7,
+   "energy_wh_week": 43.7,
+   "sorties_week": 6.2,
+   "max_sorties_day": 1,
+   "busy_min_week_incl_charge": 122.0,
+   "harvested_week": 58.8,
+   "latency_days_mean": 1.13,
+   "wasted_climbs_week": 151.24,
+   "ripe_unreported_end": 8.2
+  }
+ ],
+ "sample_week": {
+  "hover_all": [
+   {
+    "day": 1,
+    "fly": true,
+    "flights": [
+     [
+      "hover all",
+      3007.0344827586205,
+      219.70000000000002
+     ]
+    ]
+   },
+   {
+    "day": 2,
+    "fly": true,
+    "flights": [
+     [
+      "hover all",
+      3007.0344827586205,
+      219.70000000000002
+     ]
+    ]
+   },
+   {
+    "day": 3,
+    "fly": false,
+    "flights": []
+   },
+   {
+    "day": 4,
+    "fly": true,
+    "flights": [
+     [
+      "hover all",
+      3007.0344827586205,
+      219.70000000000002
+     ]
+    ]
+   },
+   {
+    "day": 5,
+    "fly": true,
+    "flights": [
+     [
+      "hover all",
+      3007.0344827586205,
+      219.70000000000002
+     ]
+    ]
+   },
+   {
+    "day": 6,
+    "fly": true,
+    "flights": [
+     [
+      "hover all",
+      3007.0344827586205,
+      219.70000000000002
+     ]
+    ]
+   },
+   {
+    "day": 7,
+    "fly": true,
+    "flights": [
+     [
+      "hover all",
+      3007.0344827586205,
+      219.70000000000002
+     ]
+    ]
+   }
+  ],
+  "scout_confirm": [
+   {
+    "day": 1,
+    "fly": true,
+    "flights": [
+     [
+      "scout",
+      250.0,
+      7.1
+     ],
+     [
+      "confirm 62",
+      1103.1724137931035,
+      80.60000000000001
+     ]
+    ]
+   },
+   {
+    "day": 2,
+    "fly": false,
+    "flights": []
+   },
+   {
+    "day": 3,
+    "fly": true,
+    "flights": [
+     [
+      "scout",
+      250.0,
+      7.1
+     ],
+     [
+      "confirm 39",
+      693.9310344827586,
+      50.7
+     ]
+    ]
+   },
+   {
+    "day": 4,
+    "fly": true,
+    "flights": [
+     [
+      "scout",
+      250.0,
+      7.1
+     ],
+     [
+      "confirm 42",
+      747.3103448275862,
+      54.6
+     ]
+    ]
+   },
+   {
+    "day": 5,
+    "fly": true,
+    "flights": [
+     [
+      "scout",
+      250.0,
+      7.1
+     ],
+     [
+      "confirm 28",
+      498.2068965517241,
+      36.4
+     ]
+    ]
+   },
+   {
+    "day": 6,
+    "fly": true,
+    "flights": [
+     [
+      "scout",
+      250.0,
+      7.1
+     ],
+     [
+      "confirm 32",
+      569.3793103448276,
+      41.6
+     ]
+    ]
+   },
+   {
+    "day": 7,
+    "fly": true,
+    "flights": [
+     [
+      "scout",
+      250.0,
+      7.1
+     ],
+     [
+      "confirm 40",
+      711.7241379310344,
+      52.0
+     ]
+    ]
+   }
+  ],
+  "scout2_confirm": [
+   {
+    "day": 1,
+    "fly": true,
+    "flights": [
+     [
+      "scout",
+      250.0,
+      7.1
+     ],
+     [
+      "confirm 65",
+      1156.551724137931,
+      84.5
+     ]
+    ]
+   },
+   {
+    "day": 2,
+    "fly": true,
+    "flights": []
+   },
+   {
+    "day": 3,
+    "fly": true,
+    "flights": [
+     [
+      "scout",
+      250.0,
+      7.1
+     ],
+     [
+      "confirm 45",
+      800.6896551724137,
+      58.5
+     ]
+    ]
+   },
+   {
+    "day": 4,
+    "fly": true,
+    "flights": []
+   },
+   {
+    "day": 5,
+    "fly": false,
+    "flights": []
+   },
+   {
+    "day": 6,
+    "fly": true,
+    "flights": []
+   },
+   {
+    "day": 7,
+    "fly": true,
+    "flights": [
+     [
+      "scout",
+      250.0,
+      7.1
+     ],
+     [
+      "confirm 46",
+      818.4827586206897,
+      59.800000000000004
+     ]
+    ]
+   }
+  ],
+  "scout_vote": [
+   {
+    "day": 1,
+    "fly": true,
+    "flights": [
+     [
+      "scout",
+      250.0,
+      7.1
+     ],
+     [
+      "confirm 28",
+      498.2068965517241,
+      36.4
+     ]
+    ]
+   },
+   {
+    "day": 2,
+    "fly": true,
+    "flights": [
+     [
+      "scout",
+      250.0,
+      7.1
+     ],
+     [
+      "confirm 21",
+      373.6551724137931,
+      27.3
+     ]
+    ]
+   },
+   {
+    "day": 3,
+    "fly": true,
+    "flights": [
+     [
+      "scout",
+      250.0,
+      7.1
+     ],
+     [
+      "confirm 21",
+      373.6551724137931,
+      27.3
+     ]
+    ]
+   },
+   {
+    "day": 4,
+    "fly": true,
+    "flights": [
+     [
+      "scout",
+      250.0,
+      7.1
+     ],
+     [
+      "confirm 28",
+      498.2068965517241,
+      36.4
+     ]
+    ]
+   },
+   {
+    "day": 5,
+    "fly": true,
+    "flights": [
+     [
+      "scout",
+      250.0,
+      7.1
+     ],
+     [
+      "confirm 25",
+      444.8275862068965,
+      32.5
+     ]
+    ]
+   },
+   {
+    "day": 6,
+    "fly": true,
+    "flights": [
+     [
+      "scout",
+      250.0,
+      7.1
+     ],
+     [
+      "confirm 33",
+      587.1724137931034,
+      42.9
+     ]
+    ]
+   },
+   {
+    "day": 7,
+    "fly": false,
+    "flights": []
+   }
+  ],
+  "scout_v2_confirm": [
+   {
+    "day": 1,
+    "fly": true,
+    "flights": [
+     [
+      "scout",
+      250.0,
+      7.1
+     ],
+     [
+      "confirm 40",
+      711.7241379310344,
+      52.0
+     ]
+    ]
+   },
+   {
+    "day": 2,
+    "fly": true,
+    "flights": [
+     [
+      "scout",
+      250.0,
+      7.1
+     ],
+     [
+      "confirm 9",
+      160.13793103448276,
+      11.700000000000001
+     ]
+    ]
+   },
+   {
+    "day": 3,
+    "fly": true,
+    "flights": [
+     [
+      "scout",
+      250.0,
+      7.1
+     ],
+     [
+      "confirm 13",
+      231.3103448275862,
+      16.900000000000002
+     ]
+    ]
+   },
+   {
+    "day": 4,
+    "fly": false,
+    "flights": []
+   },
+   {
+    "day": 5,
+    "fly": true,
+    "flights": [
+     [
+      "scout",
+      250.0,
+      7.1
+     ],
+     [
+      "confirm 7",
+      124.55172413793103,
+      9.1
+     ]
+    ]
+   },
+   {
+    "day": 6,
+    "fly": true,
+    "flights": [
+     [
+      "scout",
+      250.0,
+      7.1
+     ],
+     [
+      "confirm 2",
+      35.58620689655172,
+      2.6
+     ]
+    ]
+   },
+   {
+    "day": 7,
+    "fly": false,
+    "flights": []
+   }
+  ],
+  "scout_only": [
+   {
+    "day": 1,
+    "fly": true,
+    "flights": [
+     [
+      "scout",
+      250.0,
+      7.1
+     ]
+    ]
+   },
+   {
+    "day": 2,
+    "fly": true,
+    "flights": [
+     [
+      "scout",
+      250.0,
+      7.1
+     ]
+    ]
+   },
+   {
+    "day": 3,
+    "fly": true,
+    "flights": [
+     [
+      "scout",
+      250.0,
+      7.1
+     ]
+    ]
+   },
+   {
+    "day": 4,
+    "fly": true,
+    "flights": [
+     [
+      "scout",
+      250.0,
+      7.1
+     ]
+    ]
+   },
+   {
+    "day": 5,
+    "fly": true,
+    "flights": [
+     [
+      "scout",
+      250.0,
+      7.1
+     ]
+    ]
+   },
+   {
+    "day": 6,
+    "fly": true,
+    "flights": [
+     [
+      "scout",
+      250.0,
+      7.1
+     ]
+    ]
+   },
+   {
+    "day": 7,
+    "fly": true,
+    "flights": [
+     [
+      "scout",
+      250.0,
+      7.1
+     ]
+    ]
+   }
+  ]
+ }
+}
