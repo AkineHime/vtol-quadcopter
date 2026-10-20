@@ -16,3 +16,6 @@ flight_software/demo/gz_log/
 flight_software/demo/runs/**/*.BIN
 flight_software/demo/runs/**/*.mp4
 flight_software/demo/captures/
+
+# Local Claude Code / MCP tooling config
+.mcp.json
