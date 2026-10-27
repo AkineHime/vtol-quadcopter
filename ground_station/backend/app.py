@@ -8,11 +8,11 @@ from contextlib import asynccontextmanager
 from typing import Literal
 
 from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
-from fastapi.responses import FileResponse, PlainTextResponse, Response
+from fastapi.responses import FileResponse, PlainTextResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from . import config, db, planner, ripeness
+from . import camera, config, db, flights, planner, ripeness
 from .capture import Capture
 
 MAX_PHOTO_BYTES = 8 * 1024 * 1024
@@ -38,6 +38,11 @@ class Hub:
 
 class PatternIn(BaseModel):
     every: Literal[1, 2, 4, 8]
+
+
+class CameraIn(BaseModel):
+    mode: Literal["webrtc", "mjpeg"]
+    url: str | None = Field(None, max_length=200)     # mjpeg: the phone app's / ESP32-CAM's address
 
 
 class WindIn(BaseModel):
@@ -122,9 +127,14 @@ def create_app(telemetry=None, signaling=None) -> FastAPI:
         state["plan"] = planner.plan(con)
         await hub.send_all({"type": "plan", "plan": planner.public(state["plan"])})
     state["replan"] = replan
+    recorder = flights.Recorder(con, snapshot=lambda: (planner.public(state["plan"]), sim_mission()))
 
     async def on_telemetry(msg: dict) -> None:
         await hub.send_all(msg)
+        ended = recorder.feed(msg)
+        if ended:                                    # post-flight report is ready
+            await hub.send_all({"type": "flight_ended", "flight": next(
+                (f for f in flights.list_flights(con) if f["id"] == ended), None)})
         req = capture.check(msg)
         if req:
             await hub.send_all(req)
@@ -252,6 +262,80 @@ def create_app(telemetry=None, signaling=None) -> FastAPI:
         await hub.send_all({"type": "pattern", "pattern": pat})
         return pat
 
+    @app.get("/api/photos")
+    def get_photos(tree: str | None = None, maturity: str | None = None, limit: int = 120):
+        """Photos across the farm, newest first, with what was seen in each (gallery)."""
+        q = ("SELECT e.id, e.tree_id, e.ts, e.kind, e.maturity, e.label, e.confidence, e.model, e.image, e.source,"
+             " t.row, t.col FROM tree_events e JOIN trees t ON t.id = e.tree_id WHERE e.image IS NOT NULL")
+        args: list = []
+        if tree:
+            q += " AND e.tree_id = ?"
+            args.append(tree)
+        if maturity:
+            q += " AND (e.maturity = ? OR (? = 'tender' AND e.label = 'pre-mature'))"
+            args += [maturity, maturity]
+        q += " ORDER BY e.ts DESC, e.id DESC LIMIT ?"
+        args.append(max(1, min(limit, 500)))
+        return [dict(r) for r in con.execute(q, args)]
+
+    @app.get("/api/flights")
+    def get_flights():
+        """Recorded flights, newest first, each with its post-flight summary."""
+        return flights.list_flights(con)
+
+    @app.get("/api/flights/{flight_id}")
+    def get_flight(flight_id: int):
+        """One flight for replay: track, events, the plan/mission at takeoff, summary."""
+        f = flights.get_flight(con, flight_id)
+        if not f:
+            raise HTTPException(404, f"no flight {flight_id}")
+        return f
+
+    @app.get("/api/camera")
+    def get_camera():
+        return camera.get(con)
+
+    @app.post("/api/camera")
+    async def post_camera(c: CameraIn):
+        """Choose the camera: the phone browser (WebRTC) or an MJPEG stream on the
+        LAN (Android IP Webcam app, ESP32-CAM). Shared by all dashboards."""
+        try:
+            v = camera.set_(con, c.mode, c.url)
+        except ValueError as e:
+            raise HTTPException(422, str(e))
+        await hub.send_all({"type": "camera", "camera": v})
+        return v
+
+    @app.get("/api/camera/stream")
+    async def camera_stream():
+        """Relay the MJPEG stream (same origin, so the dashboard can read frames)."""
+        import httpx
+        cam = camera.get(con)
+        if cam["mode"] != "mjpeg" or not cam["url"]:
+            raise HTTPException(404, "no MJPEG camera set")
+        client = httpx.AsyncClient(timeout=httpx.Timeout(10.0, read=15.0))
+        try:
+            up = await client.send(client.build_request("GET", cam["url"]), stream=True)
+        except httpx.HTTPError as e:
+            await client.aclose()
+            raise HTTPException(502, f"camera not reachable at {cam['url']}: {type(e).__name__}")
+        if up.status_code != 200:
+            await up.aclose()
+            await client.aclose()
+            raise HTTPException(502, f"camera answered {up.status_code}")
+
+        async def relay():
+            try:
+                async for chunk in up.aiter_raw():
+                    yield chunk
+            except httpx.HTTPError:
+                pass
+            finally:
+                await up.aclose()
+                await client.aclose()
+        return StreamingResponse(relay(), media_type=up.headers.get("content-type", "multipart/x-mixed-replace"),
+                                 headers={"Cache-Control": "no-store"})
+
     @app.get("/api/wind")
     def get_wind():
         return db.get_wind(con)
@@ -287,6 +371,7 @@ def create_app(telemetry=None, signaling=None) -> FastAPI:
         await ws.send_text(json.dumps({"type": "plan", "plan": planner.public(state["plan"])}))
         await ws.send_text(json.dumps({"type": "mission", "mission": sim_mission()}))
         await ws.send_text(json.dumps({"type": "wind", "wind": db.get_wind(con)}))
+        await ws.send_text(json.dumps({"type": "camera", "camera": camera.get(con)}))
         if telemetry:
             await ws.send_text(json.dumps({"type": "telemetry", **telemetry.snapshot()}))
         try:

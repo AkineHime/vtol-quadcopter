@@ -3,6 +3,7 @@ import FarmMap from "./FarmMap.jsx";
 import { GoCard, Legend, MapBar, MissionStrip, Rail, SidePanel, TelemetryCard, Toasts, TreeCard, VideoCard } from "./panels.jsx";
 import { diffAlerts, goNoGo, remaining } from "./checks.js";
 import { api, captureTree, connectLive } from "./live.js";
+import { FlightsPanel, PhotosPanel, ReplayBar, ReportModal, sampleAt } from "./extras.jsx";
 
 const TRAIL_MAX = 3000;   // points; at 5 Hz that is the last 10 minutes of flight
 const HIST_MAX = 150;     // altitude samples for the HUD sparkline (~30 s)
@@ -38,6 +39,7 @@ export default function App() {
   const [focus, setFocus] = useState(null);
   const [flashId, setFlashId] = useState(null);
   const [panel, setPanel] = useState("overview");
+  const [drawer, setDrawer] = useState(false);          // tablet: the sidebar slides in over the map
   const [filter, setFilter] = useState({ field: null, value: null, q: "" });
   const [colorBy, setColorBy] = useState("harvest");
   const [video, setVideo] = useState(true);
@@ -46,8 +48,12 @@ export default function App() {
   const [layers, setLayers] = useState({ plan: true, sim: true, trail: true, chips: true });
   const [fitKey, setFitKey] = useState(0);
   const [wind, setWind] = useState(null);
+  const [cam, setCam] = useState(null);
   const [alerts, setAlerts] = useState([]);
   const [muted, setMuted] = useState(() => { try { return localStorage.getItem("gs-muted") === "1"; } catch (e) { return false; } });
+  const [flightList, setFlightList] = useState([]);
+  const [replay, setReplay] = useState(null);          // {flight, t, playing, speed}
+  const [report, setReport] = useState(null);          // flight shown in the post-flight report
   const alertState = useRef(null);
   const everConnected = useRef(false);
   const photoSeen = useRef({});          // tree id -> last_photo already shown
@@ -62,6 +68,7 @@ export default function App() {
     let flashTimer = null;
     api("/api/layout").then((i) => { homeRef.current = i.layout.home; setInfo(i); }).catch(() => {});
     api("/api/trees").then(loadTrees).catch(() => {});
+    api("/api/flights").then(setFlightList).catch(() => {});
     const stop = connectLive((msg) => {
       if (msg.type === "telemetry") {
         setTel(msg);
@@ -99,6 +106,11 @@ export default function App() {
         setMission(msg.mission);
       } else if (msg.type === "wind") {
         setWind(msg.wind);
+      } else if (msg.type === "camera") {
+        setCam(msg.camera);
+      } else if (msg.type === "flight_ended") {         // post-flight report pops up on landing
+        api("/api/flights").then(setFlightList).catch(() => {});
+        if (msg.flight) api(`/api/flights/${msg.flight.id}`).then(setReport).catch(() => {});
       } else if (msg.type === "capture") {
         captureTree(msg.tree_id, msg.capture_id).catch(() => {});
       }
@@ -138,8 +150,39 @@ export default function App() {
   }, []);
   const toggleMute = (m) => { setMuted(m); try { localStorage.setItem("gs-muted", m ? "1" : "0"); } catch (e) { /* private mode */ } };
 
+  // ---- replay of a recorded flight
+  const openReplay = (id) => api(`/api/flights/${id}`).then((f) => {
+    setReplay({ flight: f, t: 0, playing: true, speed: 4 });
+    setFitKey((k) => k + 1);
+  }).catch(() => {});
+  const openReport = (id) => api(`/api/flights/${id}`).then(setReport).catch(() => {});
+  useEffect(() => {
+    if (!replay?.playing) return;
+    let last = performance.now(), raf = 0;
+    const step = (now) => {
+      const dt = (now - last) / 1000;
+      last = now;
+      setReplay((r) => {
+        if (!r || !r.playing) return r;
+        const end = r.flight.points.length ? r.flight.points[r.flight.points.length - 1].t : 0;
+        const t = Math.min(end, r.t + dt * r.speed);
+        return { ...r, t, playing: t < end };
+      });
+      raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [replay?.playing]);
+  const rp = replay && sampleAt(replay.flight.points, replay.t);
+  const replayTel = rp && { connected: true, armed: true, mode: "REPLAY", lat: rp.lat, lon: rp.lon, alt: rp.alt,
+    heading: rp.heading, groundspeed: 0, airspeed: rp.airspeed, battery: rp.battery, phase: rp.phase, wp: rp.wp };
+  const replayTrail = useMemo(() => (replay ? replay.flight.points.filter((p) => p.t <= replay.t && p.lat != null)
+    .map((p) => [p.lat, p.lon]) : null), [replay?.flight, replay && Math.floor(replay.t * 2)]);
+
+  const railPanel = (p) => { if (p === panel) setDrawer((d) => !d); else { setPanel(p); setDrawer(true); } };
   const select = (id, fly) => {
     setSelectedId(id);
+    setDrawer(false);
     if (fly && treeMap[id]) setFocus({ latlng: [treeMap[id].lat, treeMap[id].lon] });
   };
   const locate = () => tel.lat != null && setFocus({ latlng: [tel.lat, tel.lon] });
@@ -149,24 +192,39 @@ export default function App() {
   };
 
   return (
-    <div className="app">
-      <Rail panel={panel} setPanel={setPanel} video={video} setVideo={setVideo}
+    <div className={"app" + (drawer ? " drawer-open" : "")}>
+      <div className="scrim" onClick={() => setDrawer(false)} />
+      <Rail panel={panel} setPanel={railPanel} video={video} setVideo={setVideo}
         onLocate={locate} canLocate={tel.lat != null} />
-      <SidePanel panel={panel} setPanel={setPanel} info={info} trees={trees} pattern={pattern} setPattern={setPattern}
-        selectedId={selectedId} onSelect={select} filter={filter} setFilter={setFilter} plan={plan} mission={mission}
-        setColorBy={setColorBy} goCard={<GoCard tel={tel} wind={wind} plan={plan} />} />
-      <main className="stage">
+      {panel === "flights" ? (
+        <FlightsPanel flights={flightList} onReplay={openReplay} onReport={openReport} activeId={replay?.flight.id} />
+      ) : panel === "photos" ? (
+        <PhotosPanel onSelect={select} />
+      ) : (
+        <SidePanel panel={panel} setPanel={setPanel} info={info} trees={trees} pattern={pattern} setPattern={setPattern}
+          selectedId={selectedId} onSelect={select} filter={filter} setFilter={setFilter} plan={plan} mission={mission}
+          setColorBy={setColorBy} goCard={<GoCard tel={tel} wind={wind} plan={plan} />} />
+      )}
+      <main className={"stage" + (replay ? " replaying" : "")}>
         <FarmMap info={info} trees={trees} colorBy={colorBy} pattern={pattern} selectedId={selectedId}
-          onSelect={(id) => select(id)} telemetry={tel} trail={trail2d} focus={focus} flashId={flashId}
-          plan={plan} mission={mission} layers={layers} fitKey={fitKey} />
-        <TelemetryCard tel={tel} live={live} altHist={altHist} />
+          onSelect={(id) => select(id)} telemetry={replayTel || tel} trail={replayTrail || trail2d} focus={focus} flashId={flashId}
+          plan={replay ? replay.flight.plan : plan} mission={replay ? replay.flight.mission : mission} layers={layers} fitKey={fitKey} />
+        <TelemetryCard tel={replayTel || tel} live={live} altHist={altHist} />
         <MapBar layers={layers} setLayers={setLayers} onFit={() => setFitKey((k) => k + 1)} muted={muted} setMuted={toggleMute} />
         <Toasts alerts={alerts} onDismiss={(k) => setAlerts((l) => l.filter((a) => a.key !== k))} onSelect={select} />
         <Legend colorBy={colorBy} setColorBy={setColorBy} />
-        <MissionStrip mission={mission} plan={plan} tel={tel} onSelect={select} />
+        {replay ? (
+          <ReplayBar flight={replay.flight} t={replay.t} setT={(t) => setReplay((r) => ({ ...r, t }))}
+            playing={replay.playing} setPlaying={(p) => setReplay((r) => ({ ...r, playing: p }))}
+            speed={replay.speed} setSpeed={(v) => setReplay((r) => ({ ...r, speed: v }))}
+            onExit={() => setReplay(null)} onReport={() => setReport(replay.flight)} onSelect={select} />
+        ) : (
+          <MissionStrip mission={mission} plan={plan} tel={tel} onSelect={select} />
+        )}
+        {report && <ReportModal flight={report} onClose={() => setReport(null)} onReplay={openReplay} onSelect={select} />}
         {selected && <TreeCard id={selectedId} tree={selected} pattern={pattern} compact={video} plan={plan}
           onClose={() => setSelectedId(null)} />}
-        {video && <VideoCard />}
+        {video && <VideoCard cam={cam} />}
       </main>
     </div>
   );

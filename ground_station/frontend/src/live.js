@@ -27,15 +27,18 @@ export function connectLive(onMessage, onLink) {
   return () => { stopped = true; clearTimeout(retry); ws && ws.close(); };
 }
 
-// The video panel registers its <video>; a capture request grabs one frame.
-export const camera = { video: null, onShutter: null };
+// The camera card registers its <video> (phone browser, WebRTC) or <img>
+// (MJPEG from the IP Webcam app / ESP32-CAM, same-origin via /api/camera/stream);
+// a capture request grabs one frame from it.
+export const camera = { el: null, onShutter: null };
 
 export async function captureTree(treeId, captureId) {
-  const v = camera.video;
-  if (!v || !v.srcObject || !v.videoWidth) return false;       // no live feed here
+  const v = camera.el;
+  const w = v && (v.videoWidth || v.naturalWidth), h = v && (v.videoHeight || v.naturalHeight);
+  if (!v || !w || (v.tagName === "VIDEO" && !v.srcObject)) return false;   // no live feed here
   const c = document.createElement("canvas");
-  c.width = v.videoWidth;
-  c.height = v.videoHeight;
+  c.width = w;
+  c.height = h;
   c.getContext("2d").drawImage(v, 0, 0);
   const blob = await new Promise((r) => c.toBlob(r, "image/jpeg", 0.9));
   if (!blob) return false;

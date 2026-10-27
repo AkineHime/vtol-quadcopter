@@ -97,10 +97,25 @@ It prints:
 1. Open **https://localhost:8443** on the laptop (accept the self-signed
    certificate once: Chrome/Edge *Advanced → Proceed*), or **http://localhost:8080**,
    which needs no certificate (plain HTTP, this computer only; `GS_HTTP_PORT`, 0 = off).
-2. **Connect the phone camera.** Put the phone on the **same Wi-Fi** as the
-   laptop and scan the QR code in the dashboard's camera card (or open the
-   *Phone setup* URL that `run.py` prints, `https://<laptop-wifi-ip>:8443/phone`).
-   The page has two steps:
+2. **Connect an Android phone as the camera (recommended).** No browser
+   streaming and no certificates on the phone:
+   - Install **IP Webcam** (free, by Pavel Khlebovich) from the Play Store on
+     the phone, put the phone on the **same Wi-Fi** as the laptop, open the app
+     and tap **Start server**. It shows an address like `http://192.168.1.20:8080`.
+   - In the dashboard's camera card, tab **Android app**, type that address and
+     tap **Connect**. The card goes **Live**.
+   - The ground station relays the phone's MJPEG stream (`/api/camera/stream`),
+     so the colour-card reader can read frames. The drone's **ESP32-CAM**
+     streams the same way (`http://<esp32-ip>:81/stream`), so the same setting
+     works for the real aircraft.
+   - Only cameras on the local network (private IP addresses) are accepted.
+   - Some cameras (the ESP32-CAM) serve one viewer at a time: keep a single
+     dashboard showing the camera.
+
+   **Or use the phone's browser** (any phone; tab *Phone browser* in the camera
+   card). Scan the QR code (click it to enlarge), or open the *Phone setup* URL
+   that `run.py` prints, `https://<laptop-wifi-ip>:8443/phone`. That page has
+   two steps:
    - **Trust the ground station** (once; optional): *Download certificate* and
      install it: Android *Settings → Security → Encryption & credentials →
      Install a certificate → CA certificate*; iPhone (Safari) *Settings →
@@ -114,6 +129,47 @@ It prints:
    sure the phone isn't on a guest network that isolates devices. The phone
    needs the laptop's Wi-Fi address (192.168.x.x or 10.x.x.x), not a
    172.x.x.x one, which is usually the WSL/Hyper-V virtual adapter.
+
+### Flights: replay, report, photos
+
+- **Every flight is recorded** automatically from arming to disarming
+  (`backend/flights.py`): the track at 2 Hz, the plan and mission as they were
+  at takeoff, and a summary. A flight that loses the link for 30 s, or is left
+  open by a restart, is closed as `lost`.
+- **Post-flight report** opens on landing, or from *Flights* in the rail →
+  *Report*. It shows:
+  - flight time and distance against the plan;
+  - stops reached, with the missed stops named;
+  - battery from start to end;
+  - photos and classifications;
+  - maximum wind and altitude, and telemetry gaps;
+  - time in each phase (VTOL / transition / fixed-wing);
+  - the palms where tender nuts were found and new targets were flagged.
+
+  *Print / save PDF* gives a clean page.
+- **Replay** (*Flights* → *Replay*): the recorded flight plays back on the
+  map with its plan and mission as they were at takeoff.
+  - Play or pause at 1×, 4×, 16× or 64×, and drag the scrubber.
+  - A coloured band under the scrubber shows the flight phase over time.
+  - Marks on the band are detections and new targets; click one to jump to it.
+  - *Exit replay* returns to live.
+- **Photos** (rail): every photo across the farm, newest first, filtered by
+  maturity. The tree card has the same gallery for one palm; click a photo for
+  the full-size viewer (← → keys).
+
+### Layout
+
+- **Background:** a blurred pixel-art relief of the land around the farm
+  (`frontend/src/relief.js`): a fine 750 m patch over a coarse 6 km one, so it
+  fills the view at every zoom.
+- **Zoom:** live layers (trail, routes, stops, the drone) hold still while a
+  zoom animates and catch up when it ends, so nothing flickers or jumps.
+- **Tablets** (720–1199 px wide):
+  - the sidebar becomes a drawer that slides in from the rail (tap the rail
+    icon again, or the map, to close it);
+  - buttons and rows get bigger for touch;
+  - the telemetry bar keeps the essentials;
+  - in portrait, the legend moves to the right.
 
 ### Alerts and go / no-go
 
@@ -248,6 +304,8 @@ python -m pytest -v
 | File | Covers |
 |---|---|
 | `test_db.py` | schema keeps the `trees.csv` columns, 169 trees seeded exactly, idempotent seed, events update tree + history, bad values rejected |
+| `test_flights.py` | flight recorder: start on arm, track, end on disarm / link loss, crash recovery, summary (distance, stops reached and missed, photos, tender found, battery, phases), flights API |
+| `test_camera.py` | camera address checks (private network only, IP Webcam default path), the MJPEG relay against a fake IP Webcam, errors |
 | `test_checks.py` | go/no-go thresholds, wind source, landing projection and every alert rule (Node) |
 | `test_card_reader.py` | the colour-card reader on synthetic frames (Node): green/light green/yellow/brown → stage, tiny card and blank paper ignored |
 | `test_plan.py` | ripeness rules (fresh/stale sightings, harvest cycle, health, survey, visits), migration to maturity/health/harvested, photo with a card reading, planner battery cap + targets first + stop order + WPL export, confirmed palms dropped, plan/export/image endpoints, ML label/model fields, live re-plan |
@@ -340,6 +398,10 @@ the same transaction, or call `backend.db.add_event()` from Python.
 | `GET /phone` | phone setup page: trust the certificate, then open the camera (the dashboard shows it as a QR code) |
 | `GET /ca.crt` | the ground station's local CA certificate (DER), to install on phones and laptops |
 | `GET /api/qr?text=…` | QR code (SVG) of a short text |
+| `GET /api/camera` · `POST /api/camera` | camera source `{mode: "webrtc" \| "mjpeg", url}` (mjpeg: an IP Webcam / ESP32-CAM address on the LAN); pushed as `{"type":"camera"}` |
+| `GET /api/camera/stream` | the MJPEG camera relayed (same origin) |
+| `GET /api/flights` · `GET /api/flights/{id}` | recorded flights with their summary; one flight with its track, events, plan and mission (replay); `{"type":"flight_ended"}` is pushed on landing |
+| `GET /api/photos?tree=&maturity=&limit=` | photos across the farm, newest first (gallery) |
 | `GET /api/wind` · `POST /api/wind` | operator-entered wind `{speed, gust}` (m/s; `speed: null` clears); pushed as `{"type":"wind"}` |
 | `GET /media/…` | tree images |
 | `WS /ws` | server → dashboard: `{"type":"telemetry", connected, mode, armed, phase, lat, lon, alt, heading, groundspeed, airspeed, climb, battery, voltage, wp, wp_total, wind_speed, wind_dir, gps_fix, gps_sats, text}` (≤ 5 Hz; `phase` = `vtol`/`transition`/`fixed-wing`/`ground` from the motor outputs), `{"type":"tree", tree}`, `{"type":"trees", trees}`, `{"type":"pattern", pattern}`, `{"type":"capture", tree_id, capture_id}`, `{"type":"plan", plan}` (after every change), `{"type":"mission", mission}` |
@@ -360,6 +422,20 @@ milliseconds, so it runs after every change and is pushed to all dashboards.
 Checked in JSBSim (2026-10-27): the seeded farm's 22-stop plan, estimated at
 34.6 Wh (78%), flew 2.76 km in 555 s on 32.4 Wh (73%), imaged all 22 targets and
 landed on the dock, so the estimate is about 7% conservative.
+
+*Why the sweep comes before the stops.* The sweep is the cheap scout: 7.3 Wh
+(about 16% of the pack) photographs all 169 palms from cruise. That keeps the
+evidence the ripeness rules feed on fresh (a stale sighting decays, so without
+regular sweeps predictions drift towards "unknown"), and it is how new tender
+bunches and health problems get noticed at all; the stops only go where the
+database already points. A hover stop costs about 1.2 Wh, so close-ups of every
+palm would take roughly 200 Wh, five to six full batteries. The stops then
+spend the rest of the budget on the palms that matter.
+
+**Battery in the simulator.** The JSBSim bridge sends ArduPilot the pack voltage
+and current from its battery model (SIM_JSON `battery.voltage`/`battery.current`)
+and `coconut_jsbsim.param` sets `BATT_CAPACITY 4000`, so the dashboard's battery
+percentage drains in flight; before this it stayed at 100%.
 
 **Ripeness prediction** (`backend/ripeness.py`). A palm opens a new bunch about
 monthly and a bunch is tender for about a month, so: a fresh tender detection

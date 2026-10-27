@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { HEALTH, LABEL_STAGE, LENSES, MATURITY, PHOTO, STATUS, colorOf, fmtNum, fmtPct, fmtTime, heat, photoState } from "./theme.js";
 import { api, camera } from "./live.js";
 import { goNoGo, LIMITS, remaining } from "./checks.js";
+import { Lightbox, QrModal, Thumbs } from "./extras.jsx";
 import { startViewer } from "./videoViewer.js";
 
 // ---------- icons (SF Symbols-like strokes) ----------
@@ -16,6 +17,8 @@ const PATHS = {
   camera: <><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.8l1.4-2h4.6l1.4 2h1.8A2.5 2.5 0 0 1 20 8.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5v-8Z" /><circle cx="12" cy="12.5" r="3.5" /></>,
   download: <><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5" /><path d="M5 19h14" /></>,
   fit: <><path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4" /></>,
+  photos: <><rect x="3.5" y="5" width="17" height="14" rx="3" /><circle cx="9" cy="10" r="1.6" /><path d="m4.5 17 5-4.5 3.5 3 2.5-2 4 3.5" /></>,
+  flights: <><path d="M12 4a8 8 0 1 1-7.4 5" /><path d="M4 4v5h5" /><path d="M12 8v4.5l3 2" /></>,
   bell: <><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15L6 16Z" /><path d="M10 20.5a2 2 0 0 0 4 0" /></>,
   bellOff: <><path d="M6 16V11a6 6 0 0 1 9.5-4.9M18 11v5l1.5 2H8" /><path d="M10 20.5a2 2 0 0 0 4 0" /><path d="m4 4 16 16" /></>,
 };
@@ -47,6 +50,8 @@ export function Rail({ panel, setPanel, video, setVideo, onLocate, canLocate }) 
       <div className="logo" aria-hidden="true"><span /></div>
       {btn("map", panel === "overview", () => setPanel("overview"), "Overview")}
       {btn("list", panel === "trees", () => setPanel("trees"), "Trees")}
+      {btn("photos", panel === "photos", () => setPanel("photos"), "Photos")}
+      {btn("flights", panel === "flights", () => setPanel("flights"), "Flights")}
       <div className="rail-gap" />
       {btn("video", video, () => setVideo(!video), video ? "Hide camera" : "Show camera")}
       {btn("location", false, onLocate, "Centre on drone", !canLocate)}
@@ -332,6 +337,7 @@ export function Legend({ colorBy, setColorBy }) {
 const KIND = { seed: "Imported", status: "Status changed", visit: "Visited", detection: "Detection", note: "Note" };
 
 export function TreeCard({ id, tree, pattern, onClose, compact, plan }) {
+  const [lightbox, setLightbox] = useState(null);
   const [hist, setHist] = useState([]);
   const [note, setNote] = useState("");
   const [stage, setStage] = useState(tree.maturity);
@@ -354,6 +360,7 @@ export function TreeCard({ id, tree, pattern, onClose, compact, plan }) {
   const addNote = () => { if (note.trim()) { send({ kind: "note", note: note.trim() }); setNote(""); } };
   const photo = hist.find((h) => h.image);
   const stop = plan?.stops?.find((x) => x.tree === id);
+  const gallery = hist.filter((h) => h.image).map((h) => ({ ...h, tree_id: id }));
   const ps = photoState(tree, pattern);
   const row = (label, value, mono) => (
     <div className="cell static"><span className="cell-label secondary">{label}</span><span className={"cell-value" + (mono ? " mono" : "")}>{value}</span></div>
@@ -427,6 +434,13 @@ export function TreeCard({ id, tree, pattern, onClose, compact, plan }) {
       </Group>
       {err && <p className="error">{err}</p>}
 
+      {gallery.length > 0 && (
+        <Group title="Photos" trailing={<span className="secondary">{gallery.length}</span>}>
+          <div className="cell static pad"><Thumbs photos={gallery} onOpen={setLightbox} /></div>
+        </Group>
+      )}
+      {lightbox != null && <Lightbox photos={gallery} index={lightbox} onClose={() => setLightbox(null)} />}
+
       <Group title="History" trailing={<span className="secondary">{hist.length}</span>}>
         {hist.map((h) => (
           <div key={h.id} className="cell static event">
@@ -447,33 +461,71 @@ export function TreeCard({ id, tree, pattern, onClose, compact, plan }) {
 }
 
 // ---------- floating: camera ----------
-export function VideoCard() {
+export function VideoCard({ cam }) {
   const ref = useRef(null);
+  const imgRef = useRef(null);
   const [status, setStatus] = useState("off");
   const [urls, setUrls] = useState([]);
   const [shutter, setShutter] = useState(0);
   const [reading, setReading] = useState(null);
+  const [setup, setSetup] = useState(false);
+  const [tab, setTab] = useState("app");
+  const [addr, setAddr] = useState("");
+  const [err, setErr] = useState(null);
+  const [qrBig, setQrBig] = useState(false);
+  const [retry, setRetry] = useState(0);
+  const mjpeg = cam?.mode === "mjpeg" && cam.url;
   useEffect(() => {
-    camera.video = ref.current;
     camera.onShutter = (treeId, card) => { setShutter((n) => n + 1); setReading({ treeId, card }); };
     api("/api/camera-urls").then(setUrls).catch(() => {});
+    return () => { camera.onShutter = null; };
+  }, []);
+  // phone browser over WebRTC
+  useEffect(() => {
+    if (mjpeg) return undefined;
+    camera.el = ref.current;
     const stop = startViewer((stream) => {
       const v = ref.current;
       if (!v) return;
       v.srcObject = stream;
       if (stream) v.play().catch(() => {});
     }, setStatus);
-    return () => { stop(); camera.video = null; camera.onShutter = null; };
-  }, []);
+    return () => { stop(); camera.el = null; };
+  }, [mjpeg]);
+  // MJPEG stream (Android IP Webcam app, ESP32-CAM) through /api/camera/stream
+  useEffect(() => {
+    if (!mjpeg) return undefined;
+    camera.el = imgRef.current;
+    setStatus("waiting");
+    const t = setInterval(() => {
+      const im = imgRef.current;
+      setStatus((st) => (st === "error" ? st : im && im.naturalWidth > 0 ? "live" : "waiting"));
+    }, 500);
+    return () => { clearInterval(t); camera.el = null; };
+  }, [mjpeg, retry]);
   const live = status === "live";
+  const phoneUrl = urls[0] ? urls[0].replace(/\/camera$/, "/phone") : null;
+  const connect = async () => {
+    setErr(null);
+    try { await api("/api/camera", { mode: "mjpeg", url: addr }); setSetup(false); setRetry((n) => n + 1); }
+    catch (e) { setErr(e.message.replace(/^\d+ /, "").replace(/^{"detail":"|"}$/g, "")); }
+  };
+  const useBrowser = () => api("/api/camera", { mode: "webrtc" }).then(() => setSetup(false)).catch(() => {});
+  const showSetup = setup || !live;
   return (
-    <div className={"material camera-card" + (live ? " live" : "")}>
-      <video ref={ref} autoPlay playsInline muted />
+    <div className={"material camera-card" + (live ? " live" : "") + (showSetup && !live ? " setup" : "")}>
+      {mjpeg ? (
+        <img key={retry} ref={imgRef} className="mjpeg" alt="" src={`/api/camera/stream?n=${retry}`}
+          onError={() => { setStatus("error"); setTimeout(() => { setStatus("waiting"); setRetry((n) => n + 1); }, 3000); }} />
+      ) : (
+        <video ref={ref} autoPlay playsInline muted />
+      )}
       {shutter > 0 && <div key={shutter} className="shutter" />}
       <div className="cam-label">
-        <span className={"rec" + (live ? " on" : "")} />{live ? "Live" : status === "waiting" ? "Connecting" : "Camera"}
+        <span className={"rec" + (live ? " on" : "")} />{live ? "Live" : status === "waiting" ? "Connecting" : status === "error" ? "Camera unreachable" : "Camera"}
       </div>
-      {live && reading && (
+      {live && <button className="cam-gear" onClick={() => setSetup(!setup)} title="Camera source" aria-label="Camera source">⚙</button>}
+      {live && reading && !setup && (
         <div className="cam-reading" key={shutter}>
           <b>{reading.treeId}</b>
           {reading.card
@@ -481,25 +533,39 @@ export function VideoCard() {
             : <span className="secondary">no card in view: photo only</span>}
         </div>
       )}
-      {!live && (
-        <div className="cam-empty">
-          {urls.length > 0 ? (
-            <>
-              <img className="qr" alt="QR code: phone setup" src={`/api/qr?text=${encodeURIComponent(urls[0].replace(/\/camera$/, "/phone"))}`} />
-              <div className="cam-help">
-                <b>Connect a phone camera</b>
-                <p>Same Wi-Fi as this laptop. Scan, then follow the two steps.</p>
-                <code>{urls[0].replace(/\/camera$/, "/phone")}</code>
+      {showSetup && (
+        <div className="cam-empty cam-setup">
+          <div className="segmented small">
+            <button className={tab === "app" ? "on" : ""} onClick={() => setTab("app")}>Android app</button>
+            <button className={tab === "browser" ? "on" : ""} onClick={() => setTab("browser")}>Phone browser</button>
+          </div>
+          {tab === "app" ? (
+            <div className="cam-help">
+              <p><b>IP Webcam</b> (free, Play Store) → <b>Start server</b>, then type the address it shows. Same Wi-Fi.
+                {mjpeg && <span> Now: {cam.url}</span>}</p>
+              <div className="cam-row">
+                <input value={addr} onChange={(e) => setAddr(e.target.value)} placeholder="192.168.1.20:8080"
+                  onKeyDown={(e) => e.key === "Enter" && addr && connect()} aria-label="Phone camera address" />
+                <button className="btn btn-sm" disabled={!addr} onClick={connect}>Connect</button>
               </div>
-            </>
+              {err && <span className="error">{err}</span>}
+            </div>
+          ) : phoneUrl ? (
+            <div className="cam-row">
+              <img className="qr" alt="QR code: phone setup (click to enlarge)" title="Click to enlarge"
+                src={`/api/qr?text=${encodeURIComponent(phoneUrl)}`} onClick={() => setQrBig(true)} />
+              <div className="cam-help">
+                <p>Scan with the phone (same Wi-Fi), then <b>Open camera</b> → <b>Start</b>.</p>
+                <code>{phoneUrl}</code>
+                {mjpeg && <button className="link" onClick={useBrowser}>Use the phone browser instead</button>}
+              </div>
+            </div>
           ) : (
-            <>
-              <Icon name="camera" size={26} stroke={1.5} />
-              <p>No network: connect the laptop to Wi-Fi to add a phone camera</p>
-            </>
+            <p>No network: connect the laptop to Wi-Fi to add a phone camera</p>
           )}
         </div>
       )}
+      {qrBig && phoneUrl && <QrModal url={phoneUrl} onClose={() => setQrBig(false)} />}
     </div>
   );
 }

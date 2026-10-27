@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import L from "leaflet";
 import { MapContainer, Marker, Polygon, Polyline, ScaleControl, Tooltip, ZoomControl, useMap } from "react-leaflet";
 import { colorOf, fmtPct, HEALTH, MATURITY, photoState, PREDICT_MIN, STATUS } from "./theme.js";
 import { chaikin, smoothRoute } from "./geo.js";
+import { reliefImage } from "./relief.js";
 
 // A palm canopy seen from above, as one layered glyph: the disc's fill is the
 // lens colour (maturity by default), a ring shows the harvest status, a red
@@ -73,6 +74,57 @@ const dockIcon = L.divIcon({
   html: '<span class="dock-pad"></span><span class="dock-label">Dock</span>',
 });
 
+// the pixel-art relief behind the farm (relief.js), 750 m square around the field
+// Two layers: a fine 750 m patch round the farm (edges faded) over a coarse
+// 6 km one, so the background fills the view at every zoom. The coarse one
+// is dropped when zoomed in (it would be a huge scaled image for nothing).
+function Relief({ info }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!info) return undefined;
+    if (!map.getPane("relief")) map.createPane("relief").style.zIndex = 150;     // under the field and routes
+    const [la, lo] = [(info.field[0][0] + info.field[2][0]) / 2, (info.field[0][1] + info.field[2][1]) / 2];
+    const box = (m) => {
+      const dLat = m / 111320, dLon = m / (111320 * Math.cos((la * Math.PI) / 180));
+      return [[la - dLat, lo - dLon], [la + dLat, lo + dLon]];
+    };
+    const wide = L.imageOverlay(reliefImage(120, 6, 11, { blur: 5 }), box(3000),
+      { pane: "relief", interactive: false, className: "relief wide" });
+    const near = L.imageOverlay(reliefImage(150, 10, 7, { blur: 6, fade: true }), box(375),
+      { pane: "relief", interactive: false, className: "relief near" }).addTo(map);
+    const sync = () => {
+      if (map.getZoom() < 18.5) { if (!map.hasLayer(wide)) { wide.addTo(map); wide.bringToBack(); } }
+      else if (map.hasLayer(wide)) wide.remove();
+    };
+    sync();
+    map.on("zoomend", sync);
+    return () => { map.off("zoomend", sync); wide.remove(); near.remove(); };
+  }, [info, map]);
+  return null;
+}
+
+// While Leaflet animates a zoom it scales the panes with a CSS transform;
+// redrawing lines or moving markers mid-animation makes them jump and flicker.
+// So live layers hold their last state until the zoom settles.
+function useZooming() {
+  const map = useMap();
+  const [zooming, setZooming] = useState(false);
+  useEffect(() => {
+    const on = () => setZooming(true), off = () => setZooming(false);
+    map.on("zoomstart", on);
+    map.on("zoomend", off);
+    return () => { map.off("zoomstart", on); map.off("zoomend", off); };
+  }, [map]);
+  return zooming;
+}
+
+function HoldWhileZooming({ children }) {
+  const zooming = useZooming();
+  const last = useRef(children);
+  if (!zooming) last.current = children;
+  return last.current;
+}
+
 function FitField({ bounds, fitKey }) {
   const map = useMap();
   useEffect(() => {
@@ -108,9 +160,12 @@ function Drone({ telemetry }) {
           <path d="M0,-9 L7,8 L0,4 L-7,8 Z" fill="currentColor" stroke-linejoin="round"/></svg></div>`,
       }),
     });
-    const st = { m, cur: null, fix: null, hdg: 0, goalHdg: 0, raf: 0, added: false };
+    const st = { m, cur: null, fix: null, hdg: 0, goalHdg: 0, raf: 0, added: false, zooming: false };
+    const zs = () => { st.zooming = true; }, ze = () => { st.zooming = false; };
+    map.on("zoomstart", zs);
+    map.on("zoomend", ze);
     const tick = () => {
-      if (st.fix) {
+      if (st.fix && !st.zooming) {
         const f = st.fix, dt = Math.min(MAX_EXTRAP, (performance.now() - f.t) / 1000);
         const goal = [f.lat + f.vn * dt / 111320, f.lon + f.ve * dt / (111320 * Math.cos((f.lat * Math.PI) / 180))];
         if (!st.cur) st.cur = goal.slice();
@@ -126,7 +181,7 @@ function Drone({ telemetry }) {
     };
     st.raf = requestAnimationFrame(tick);
     ref.current = st;
-    return () => { cancelAnimationFrame(st.raf); m.remove(); };
+    return () => { cancelAnimationFrame(st.raf); map.off("zoomstart", zs); map.off("zoomend", ze); m.remove(); };
   }, [map]);
   useEffect(() => {
     const st = ref.current;
@@ -168,11 +223,13 @@ export default function FarmMap({ info, trees, colorBy, pattern, selectedId, onS
 
   return (
     <MapContainer className="map" center={[10.6611, 77.0048]} zoom={19} minZoom={16} maxZoom={22}
-      zoomSnap={0.25} zoomControl={false} attributionControl={false}>
+      zoomSnap={0.25} zoomDelta={0.5} wheelPxPerZoomLevel={140} wheelDebounceTime={30}
+      zoomControl={false} attributionControl={false}>
+      <Relief info={info} />
       <FitField bounds={bounds} fitKey={fitKey} />
       <FlyTo target={focus} />
-      <ZoomControl position="bottomleft" />
-      <ScaleControl position="bottomleft" imperial={false} />
+      <ZoomControl position="topleft" />
+      <ScaleControl position="topleft" imperial={false} />
       {info && (
         <>
           <Polygon positions={info.field} interactive={false}
@@ -182,6 +239,7 @@ export default function FarmMap({ info, trees, colorBy, pattern, selectedId, onS
           <Marker position={info.dock} icon={dockIcon} interactive={false} />
         </>
       )}
+      <HoldWhileZooming>
       {layers.sim && simRoute.length > 1 && (
         <Polyline positions={simRoute} interactive={false}
           pathOptions={{ color: "rgba(255,255,255,0.32)", weight: 1.5, dashArray: "2 6", lineCap: "round", className: "route-sim" }} />
@@ -221,6 +279,7 @@ export default function FarmMap({ info, trees, colorBy, pattern, selectedId, onS
         <Polyline positions={trailSmooth} interactive={false}
           pathOptions={{ color: "#e3a06a", weight: 3, opacity: 0.9, lineCap: "round", lineJoin: "round" }} />
       )}
+      </HoldWhileZooming>
       <Drone telemetry={telemetry} />
     </MapContainer>
   );

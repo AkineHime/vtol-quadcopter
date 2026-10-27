@@ -153,7 +153,7 @@ class Bridge:
             T = self.rotors[i].step(thr[i], -w, vb, self.dt)
             f[f"external_reactions/liftM{i + 1}/magnitude"] = T / LBF2N
             Mz += LIFT_SPIN[i] * self.rotors[i].torque   # reaction on the airframe
-        self.pack.update(self.rotors, self.dt)
+        self.i_total = self.pack.update(self.rotors, self.dt)        # A, all five motors
         mag_lbf = (Mz / (2.0 * YAW_ARM)) / LBF2N
         f["external_reactions/yawTorqueF/magnitude"] = mag_lbf
         f["external_reactions/yawTorqueA/magnitude"] = mag_lbf
@@ -185,6 +185,9 @@ class Bridge:
             "quaternion": q,
             "velocity": vel,
             "airspeed": max(0.0, f["velocities/vt-fps"] * FT2M),
+            # the pack model (rotor_model.Pack): ArduPilot's battery monitor integrates
+            # this current, so battery % drains as the motors draw power
+            "battery": {"voltage": self.pack.v_bus, "current": getattr(self, "i_total", 0.0)},
         }
 
 

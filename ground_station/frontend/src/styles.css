@@ -30,7 +30,7 @@
 }
 * { box-sizing: border-box; }
 html, body, #root { margin: 0; height: 100%; }
-body { min-width: 1200px; overflow: hidden; }
+body { min-width: 720px; overflow: hidden; }
 button, input, select { font: inherit; color: inherit; letter-spacing: inherit; }
 button { cursor: pointer; background: none; border: 0; padding: 0; }
 button:disabled { cursor: default; }
@@ -40,7 +40,7 @@ h1, h2, p { margin: 0; }
 .mono { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
 .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
 
-.app { display: grid; grid-template-columns: 68px 300px 1fr; height: 100%; }
+.app { display: grid; grid-template-columns: 68px 328px 1fr; height: 100%; }
 
 /* ---------- rail ---------- */
 .rail { background: var(--sidebar); display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 20px 0; box-shadow: inset -0.5px 0 0 var(--separator); }
@@ -117,7 +117,8 @@ button.cell:active { background: rgba(255, 255, 255, 0.08); }
 .leaflet-tooltip.tip { background: var(--material-solid); color: var(--label); border: 0; border-radius: 8px; font-weight: 600; font-size: 12px;
   box-shadow: var(--shadow); padding: 4px 8px; }
 .leaflet-tooltip.tip::before { display: none; }
-.leaflet-bottom.leaflet-left { left: 300px; bottom: 6px; display: flex; flex-direction: column-reverse; }
+.leaflet-top.leaflet-left { top: 92px; left: 16px; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.leaflet-top.leaflet-left .leaflet-control { margin: 0; }
 .leaflet-control-zoom { border: 0 !important; border-radius: 10px !important; overflow: hidden; box-shadow: var(--shadow) !important; backdrop-filter: blur(30px); }
 .leaflet-control-zoom a { background: var(--material) !important; color: var(--label) !important; border-bottom: 0.5px solid var(--separator) !important;
   width: 34px !important; height: 34px !important; line-height: 34px !important; font-weight: 400 !important; }
@@ -335,8 +336,8 @@ path.route-sim { opacity: .9; }
   letter-spacing: 0.02em; white-space: nowrap; pointer-events: none; }
 
 /* mission progress strip */
-.leaflet-bottom.leaflet-left { left: 300px; }
-.strip { left: 360px; right: 372px; bottom: 16px; padding: 10px 14px 11px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+
+.strip { left: 300px; right: 372px; bottom: 16px; padding: 10px 14px 11px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .strip-head { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; white-space: nowrap; overflow: hidden; }
 .strip-head .secondary { font-size: 12px; overflow: hidden; text-overflow: ellipsis; }
 .strip-stops { display: flex; gap: 4px; }
@@ -355,7 +356,7 @@ path.route-sim { opacity: .9; }
 .cam-reading i { width: 8px; height: 8px; border-radius: 50%; }
 
 /* camera card: connect-a-phone */
-.cam-empty:has(.qr) { flex-direction: row; gap: 14px; justify-content: flex-start; text-align: left; padding: 14px; }
+.cam-empty:not(.cam-setup):has(.qr) { flex-direction: row; gap: 14px; justify-content: flex-start; text-align: left; padding: 14px; }
 .qr { width: 104px; height: 104px; border-radius: 10px; flex: none; background: #fff; }
 .cam-help { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .cam-help b { color: var(--label); font-size: 14px; }
@@ -392,3 +393,136 @@ path.route-sim { opacity: .9; }
 .toast .close { width: 22px; height: 22px; flex: none; }
 .icon-btn.on { color: var(--label); }
 .strip-figs .warn b { color: #ff9f0a; }
+
+/* ---------- modal ---------- */
+.modal-back { position: fixed; inset: 0; z-index: 2000; display: grid; place-items: center; padding: 24px;
+  background: rgba(0, 0, 0, .55); backdrop-filter: blur(6px); animation: fade .2s var(--ease); }
+@keyframes fade { from { opacity: 0; } }
+.modal { position: relative; max-width: min(560px, 100%); max-height: 100%; overflow: auto; padding: 22px; border-radius: var(--r-lg);
+  background: var(--material-solid); box-shadow: var(--shadow); animation: appear .25s var(--ease); }
+.modal.wide { max-width: min(960px, 100%); }
+.modal-close { position: absolute; top: 12px; right: 12px; font-size: 18px; line-height: 1; z-index: 1; }
+
+.qr-big { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+.qr-big img { width: min(360px, 70vw); height: auto; border-radius: 14px; background: #fff; }
+.qr-big code { font: 600 14px var(--mono); word-break: break-all; }
+.qr { cursor: zoom-in; transition: transform .2s var(--ease); }
+.qr:hover { transform: scale(1.04); }
+
+/* ---------- gallery ---------- */
+.thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 6px; width: 100%; }
+.thumb { position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; background: #000; padding: 0; }
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .25s var(--ease); }
+.thumb:hover img { transform: scale(1.06); }
+.thumb i { position: absolute; top: 5px; right: 5px; width: 9px; height: 9px; border-radius: 50%; box-shadow: 0 0 0 1.5px rgba(0, 0, 0, .6); }
+.thumb span { position: absolute; left: 4px; bottom: 4px; font: 600 10px var(--mono); padding: 1px 5px; border-radius: 4px; background: rgba(0, 0, 0, .6); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.empty { font-size: 13px; padding: 0 4px; }
+.lightbox { display: flex; flex-direction: column; gap: 10px; }
+.lightbox img { width: 100%; max-height: 70vh; object-fit: contain; border-radius: 12px; background: #000; }
+.lb-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.lb-bar .icon-btn { font-size: 22px; }
+.lb-cap { display: flex; align-items: center; gap: 10px; flex: 1; flex-wrap: wrap; font-size: 13px; }
+.lb-cap b { font-family: var(--mono); }
+
+/* ---------- flights ---------- */
+.flight-row { justify-content: space-between; gap: 8px; }
+.flight-row.active { background: rgba(227, 160, 106, .14); }
+.flight-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; font-size: 13px; }
+.flight-main b { font-size: 14px; }
+.flight-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.replay { gap: 6px; }
+.replay-track { position: relative; display: flex; flex-direction: column; gap: 2px; }
+.phase-band { position: relative; height: 6px; border-radius: 3px; background: var(--fill); }
+.phase-band span { position: absolute; top: 0; bottom: 0; }
+.phase-band .mark { position: absolute; top: -5px; width: 10px; height: 16px; margin-left: -5px; padding: 0; border-radius: 3px;
+  background: var(--predict); box-shadow: 0 0 0 1.5px #111; }
+.replay-track input[type=range] { width: 100%; accent-color: var(--tint); margin: 0; }
+.replay-ctl { display: flex; align-items: center; gap: 10px; font-size: 12px; }
+.replay-ctl .spacer { flex: 1; }
+.replay-time b { font-variant-numeric: tabular-nums; }
+.stage.replaying .hud { box-shadow: 0 0 0 1.5px var(--tint), var(--shadow); }
+
+/* ---------- post-flight report ---------- */
+.report { display: flex; flex-direction: column; gap: 12px; }
+.report h2 { font-size: 24px; font-weight: 700; letter-spacing: -.02em; }
+.report h3 { font-size: 13px; font-weight: 600; color: var(--secondary); margin: 6px 0 0; }
+.rep-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.rep-fig { display: flex; flex-direction: column; gap: 2px; padding: 12px; border-radius: 12px; background: var(--cell); }
+.rep-fig span { font-size: 11px; color: var(--secondary); text-transform: uppercase; letter-spacing: .06em; }
+.rep-fig b { font-size: 22px; font-weight: 300; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.rep-fig i { font-style: normal; font-size: 11px; color: var(--secondary); }
+.rep-phases { display: flex; height: 10px; border-radius: 5px; overflow: hidden; gap: 2px; }
+.rep-phase-keys { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--secondary); }
+.rep-phase-keys i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+.rep-found { display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+.rep-found div { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.rep-found b { min-width: 96px; }
+.rep-actions { display: flex; gap: 14px; align-items: center; justify-content: flex-end; }
+
+@media print {
+  body * { visibility: hidden; }
+  .modal, .modal * { visibility: visible; }
+  .modal { position: absolute; left: 0; top: 0; max-width: none; box-shadow: none; background: #fff; color: #111; }
+  .modal-back { background: none; backdrop-filter: none; }
+  .rep-fig { background: #f2f2f2; } .rep-fig span, .rep-fig i, .report h3, .secondary { color: #555; }
+  .modal-close, .rep-actions { display: none; }
+}
+
+/* camera card: source setup */
+.camera-card img.mjpeg { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity .4s var(--ease); }
+.camera-card.live img.mjpeg { opacity: 1; }
+.camera-card.setup { aspect-ratio: auto; min-height: 191px; }
+.cam-setup { justify-content: flex-start; align-items: stretch; text-align: left; gap: 10px; padding: 44px 14px 14px; }
+.cam-setup .segmented { align-self: flex-start; }
+.cam-setup p { margin: 0; font-size: 12px; }
+.cam-row { display: flex; align-items: center; gap: 10px; }
+.cam-row input { flex: 1; min-width: 0; height: 30px; border: 0; border-radius: 8px; padding: 0 10px; background: var(--fill-2); color: var(--label); outline: none; font: 500 13px var(--mono); }
+.cam-gear { position: absolute; z-index: 2; top: 8px; right: 8px; width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(0, 0, 0, .45); backdrop-filter: blur(20px); color: var(--label); font-size: 14px; }
+.camera-card.live .cam-setup { position: absolute; inset: 0; background: rgba(28, 32, 30, .94); }
+.leaflet-container { background: #0e1511; }
+img.relief { opacity: 0.92; }               /* blur and edge fade are baked into the image (relief.js) */
+img.relief.wide { opacity: 0.85; }
+
+.scrim { display: none; }
+
+/* =====================================================================
+   Tablet (720-1199 px, landscape or portrait): the sidebar becomes a drawer
+   that slides over the map from the rail; bigger touch targets; compact HUD
+   and floating cards.
+   ===================================================================== */
+@media (max-width: 1199px) {
+  .app { grid-template-columns: 60px 1fr; }
+  .rail { position: relative; z-index: 1600; gap: 8px; }
+  .rail-btn { width: 44px; height: 44px; }
+  .sidebar { position: fixed; z-index: 1500; left: 60px; top: 0; bottom: 0; width: min(340px, calc(100vw - 60px));
+    transform: translateX(-105%); transition: transform .3s var(--ease); box-shadow: 12px 0 40px rgba(0, 0, 0, .5); }
+  .app.drawer-open .sidebar { transform: none; }
+  .scrim { display: block; position: fixed; z-index: 1400; inset: 0 0 0 60px; background: rgba(0, 0, 0, .35);
+    opacity: 0; pointer-events: none; transition: opacity .3s var(--ease); }
+  .app.drawer-open .scrim { opacity: 1; pointer-events: auto; }
+  .stage { grid-column: 2; }
+  .hud { right: 16px; flex-wrap: wrap; row-gap: 6px; }
+  .hud .metric:nth-of-type(4), .hud .metric:nth-of-type(5), .spark-metric { display: none; }   /* airspeed, heading, sparkline */
+  .mapbar { top: 92px; right: 16px; }
+  .camera-card { width: 280px; bottom: 16px; }
+  .camera-card.setup { min-height: 0; }
+  .legend { width: 236px; bottom: 112px; }
+  .strip { left: 16px; right: 16px; bottom: 16px; }
+  .camera-card ~ .strip, .strip:has(~ .camera-card) { right: 312px; }
+  .inspector { top: 140px; width: min(360px, calc(100% - 32px)); max-height: calc(100% - 156px); z-index: 900; }
+  .inspector.compact { max-height: calc(100% - 156px); }
+  .toasts { top: 140px; width: min(380px, calc(100% - 32px)); }
+  .leaflet-top.leaflet-left { top: 128px; }
+  .cell, button.cell { min-height: 48px; }
+  .pill { height: 34px; padding: 0 14px; }
+  .segmented button { padding: 8px 10px; }
+  .rep-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 1199px) and (orientation: portrait) {
+  .legend { bottom: auto; top: 140px; left: auto; right: 16px; width: 220px; }
+  .leaflet-top.leaflet-left { top: 128px; }
+  .camera-card { left: 16px; right: auto; width: calc(50% - 24px); }
+  .strip, .camera-card ~ .strip, .strip:has(~ .camera-card) { left: calc(50% + 8px); right: 16px; }
+}
