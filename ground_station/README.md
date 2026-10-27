@@ -115,6 +115,41 @@ It prints:
    needs the laptop's Wi-Fi address (192.168.x.x or 10.x.x.x), not a
    172.x.x.x one, which is usually the WSL/Hyper-V virtual adapter.
 
+### Alerts and go / no-go
+
+**Go / no-go** (top of the sidebar) checks, before and during a flight:
+
+| Check | GO | CAUTION | NO-GO |
+|---|---|---|---|
+| Wind (mean) | ≤ 5 m/s | 5–6 m/s | > 6 m/s |
+| Gusts (if entered) | ≤ 7 m/s | 7–9 m/s | > 9 m/s |
+| Battery plan | within 80% | palms left out | over 80% |
+| Battery charge (on the ground) | ≥ 90% | 70–90% | < 70% |
+| Drone link | telemetry | | none |
+| GPS | 3D fix, ≥ 8 satellites | < 8 satellites | no 3D fix |
+
+- **Wind sources:** the value typed into the card (anemometer or forecast;
+  shared by all dashboards) is used on the ground. Once airborne, the
+  autopilot's own wind estimate (MAVLink `WIND`) takes over.
+- **Where the wind limits come from:** the sim study. 5 m/s with 2 m/s gusts
+  flew fine. At 8 m/s with 3 m/s gusts JSBSim stayed controllable but imaged
+  only 79% of the palms, and Gazebo crashed. The gust limits are provisional
+  until real flights.
+
+**Alerts** appear at the top of the map; click one to jump to its palm. A
+beep plays for warnings, unless the bell in the toolbar is muted.
+
+| Alert | When | Stays |
+|---|---|---|
+| Target found / Tender nuts at P… | a palm becomes a target, or a tender detection arrives (ML, colour card, visit) | 9 s |
+| Battery limit reached | predicted palms no longer fit the 80% rule | 9 s |
+| Battery over limit | in flight, the projected battery at landing drops below 20% | until it recovers |
+| Drone link lost | telemetry stops | until restored |
+| No-go | the go/no-go check turns red | 9 s |
+
+The rules are pure functions in `frontend/src/checks.js`, tested in Node by
+`tests/test_checks.py`.
+
 ### No security warning
 
 `run.py` signs its HTTPS certificate with the ground station's own small
@@ -213,6 +248,7 @@ python -m pytest -v
 | File | Covers |
 |---|---|
 | `test_db.py` | schema keeps the `trees.csv` columns, 169 trees seeded exactly, idempotent seed, events update tree + history, bad values rejected |
+| `test_checks.py` | go/no-go thresholds, wind source, landing projection and every alert rule (Node) |
 | `test_card_reader.py` | the colour-card reader on synthetic frames (Node): green/light green/yellow/brown → stage, tiny card and blank paper ignored |
 | `test_plan.py` | ripeness rules (fresh/stale sightings, harvest cycle, health, survey, visits), migration to maturity/health/harvested, photo with a card reading, planner battery cap + targets first + stop order + WPL export, confirmed palms dropped, plan/export/image endpoints, ML label/model fields, live re-plan |
 | `test_photo.py` | pattern membership (85/43/22), capture only over pattern palms within the radius, retry window, one answer per request, photo upload saved + history + `last_photo`, new round resets |
@@ -304,8 +340,9 @@ the same transaction, or call `backend.db.add_event()` from Python.
 | `GET /phone` | phone setup page: trust the certificate, then open the camera (the dashboard shows it as a QR code) |
 | `GET /ca.crt` | the ground station's local CA certificate (DER), to install on phones and laptops |
 | `GET /api/qr?text=…` | QR code (SVG) of a short text |
+| `GET /api/wind` · `POST /api/wind` | operator-entered wind `{speed, gust}` (m/s; `speed: null` clears); pushed as `{"type":"wind"}` |
 | `GET /media/…` | tree images |
-| `WS /ws` | server → dashboard: `{"type":"telemetry", connected, mode, armed, phase, lat, lon, alt, heading, groundspeed, airspeed, climb, battery, voltage, wp, wp_total, text}` (≤ 5 Hz; `phase` = `vtol`/`transition`/`fixed-wing`/`ground` from the motor outputs), `{"type":"tree", tree}`, `{"type":"trees", trees}`, `{"type":"pattern", pattern}`, `{"type":"capture", tree_id, capture_id}`, `{"type":"plan", plan}` (after every change), `{"type":"mission", mission}` |
+| `WS /ws` | server → dashboard: `{"type":"telemetry", connected, mode, armed, phase, lat, lon, alt, heading, groundspeed, airspeed, climb, battery, voltage, wp, wp_total, wind_speed, wind_dir, gps_fix, gps_sats, text}` (≤ 5 Hz; `phase` = `vtol`/`transition`/`fixed-wing`/`ground` from the motor outputs), `{"type":"tree", tree}`, `{"type":"trees", trees}`, `{"type":"pattern", pattern}`, `{"type":"capture", tree_id, capture_id}`, `{"type":"plan", plan}` (after every change), `{"type":"mission", mission}` |
 | `GET /api/trees` | each tree also carries `ripe_score` (0–1) and `ripe_reason`, computed, not stored |
 | `WS /ws/signal?role=camera\|viewer` | WebRTC signalling (offer/answer/ICE relay; protocol in `backend/signaling.py`) |
 

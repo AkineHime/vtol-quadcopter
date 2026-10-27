@@ -36,6 +36,9 @@ def test_reads_vehicle_state():
         assert tel.snapshot()["voltage"] == pytest.approx(15.8)
         assert wait_for(lambda: tel.snapshot().get("wp_total") == 29), "MISSION_COUNT minus home"
         assert tel.snapshot()["phase"] == "fixed-wing"                  # pusher on, lift rotors off
+        assert wait_for(lambda: tel.snapshot().get("wind_speed") == pytest.approx(3.2))
+        s = tel.snapshot()
+        assert s["wind_dir"] == pytest.approx(225.0) and s["gps_fix"] == 3 and s["gps_sats"] == 12
         assert v.got_gcs_heartbeat.wait(5), "bridge should send GCS heartbeats"
         n = len(got)
         time.sleep(1.0)

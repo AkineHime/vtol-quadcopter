@@ -139,6 +139,10 @@ class Telemetry:
                 if msg.seq > (self.state.get("wp_total") or 0) and now - asked_count > 5.0:
                     m.waypoint_request_list_send()
                     asked_count = now
+            elif t == "WIND":                        # ArduPilot's estimate; direction = where it comes from
+                self._update(wind_speed=round(msg.speed, 2), wind_dir=round(msg.direction % 360, 1))
+            elif t == "GPS_RAW_INT":
+                self._update(gps_fix=msg.fix_type, gps_sats=msg.satellites_visible)
             elif t == "MISSION_COUNT":
                 self._update(wp_total=max(0, msg.count - 1))      # item 0 is home
             elif t == "SERVO_OUTPUT_RAW":

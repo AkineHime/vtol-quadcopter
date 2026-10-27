@@ -138,3 +138,18 @@ def test_photo_with_card_reading():
         bad = client.post(f"/api/trees/P1111/photo?capture_id=x&label=pre-mature", content=b"\xff\xd8",
                           headers={"Content-Type": "image/jpeg"})
         assert bad.status_code == 422                       # a label needs a confidence
+
+
+def test_manual_wind():
+    with TestClient(create_app()) as client:
+        with client.websocket_connect("/ws") as ws:
+            r = client.post("/api/wind", json={"speed": 4.5, "gust": 7.0})
+            assert r.status_code == 200 and r.json()["speed"] == 4.5
+            while (m := ws.receive_json())["type"] != "wind" or not m["wind"]:
+                pass
+            assert m["wind"]["gust"] == 7.0
+        assert client.get("/api/wind").json()["speed"] == 4.5
+        assert client.post("/api/wind", json={"speed": 5, "gust": 3}).status_code == 422   # gust below mean
+        assert client.post("/api/wind", json={"speed": 99}).status_code == 422
+        assert client.post("/api/wind", json={"speed": None}).json() is None             # cleared
+        assert client.get("/api/wind").json() is None

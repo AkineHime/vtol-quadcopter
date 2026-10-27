@@ -3,7 +3,7 @@ without the simulator):   python tests/fake_vehicle.py   -> tcp:127.0.0.1:5762
 
 It circles the plantation at 30 m in fixed-wing flight (pusher on, lift rotors
 off) and streams HEARTBEAT, GLOBAL_POSITION_INT, VFR_HUD, SYS_STATUS,
-MISSION_CURRENT and SERVO_OUTPUT_RAW at 10 Hz; it answers a mission list request
+MISSION_CURRENT, SERVO_OUTPUT_RAW, WIND and GPS_RAW_INT at 10 Hz; it answers a mission list request
 with a MISSION_COUNT of 30 (home + 29 items)."""
 from __future__ import annotations
 
@@ -74,6 +74,8 @@ class FakeVehicle:
                 enc.sys_status_encode(0, 0, 0, 500, 15800, -1, 87, 0, 0, 0, 0, 0, 0),
                 enc.mission_current_encode(7),
                 enc.servo_output_raw_encode(k, 0, 1500, 1500, 1650, 1500, 1000, 1000, 1000, 1000),
+                enc.wind_encode(225.0, 3.2, 0.0),                     # 3.2 m/s from the south-west
+                enc.gps_raw_int_encode(k, 3, int(lat * 1e7), int(lon * 1e7), 330_000, 80, 120, 500, 0, 12),
             ]
             try:
                 conn.sendall(b"".join(m.pack(enc) for m in msgs))

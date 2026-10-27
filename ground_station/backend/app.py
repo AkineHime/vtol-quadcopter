@@ -40,6 +40,11 @@ class PatternIn(BaseModel):
     every: Literal[1, 2, 4, 8]
 
 
+class WindIn(BaseModel):
+    speed: float | None = Field(None, ge=0, le=40)       # m/s mean; null clears it
+    gust: float | None = Field(None, ge=0, le=50)
+
+
 class EventIn(BaseModel):
     kind: Literal["status", "visit", "detection", "note"]
     status: Literal["unscouted", "target", "confirmed", "harvested", "cleared"] | None = None   # cleared = old name
@@ -247,6 +252,20 @@ def create_app(telemetry=None, signaling=None) -> FastAPI:
         await hub.send_all({"type": "pattern", "pattern": pat})
         return pat
 
+    @app.get("/api/wind")
+    def get_wind():
+        return db.get_wind(con)
+
+    @app.post("/api/wind")
+    async def post_wind(w: WindIn):
+        """Operator-entered wind for the go/no-go card (all dashboards see it)."""
+        try:
+            v = db.set_wind(con, w.speed, w.gust)
+        except ValueError as e:
+            raise HTTPException(422, str(e))
+        await hub.send_all({"type": "wind", "wind": v})
+        return v
+
     @app.get("/api/telemetry")
     def get_telemetry():
         return telemetry.snapshot() if telemetry else {"connected": False}
@@ -267,6 +286,7 @@ def create_app(telemetry=None, signaling=None) -> FastAPI:
         await ws.send_text(json.dumps({"type": "pattern", "pattern": db.get_pattern(con)}))
         await ws.send_text(json.dumps({"type": "plan", "plan": planner.public(state["plan"])}))
         await ws.send_text(json.dumps({"type": "mission", "mission": sim_mission()}))
+        await ws.send_text(json.dumps({"type": "wind", "wind": db.get_wind(con)}))
         if telemetry:
             await ws.send_text(json.dumps({"type": "telemetry", **telemetry.snapshot()}))
         try:

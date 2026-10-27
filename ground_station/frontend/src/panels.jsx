@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { HEALTH, LABEL_STAGE, LENSES, MATURITY, PHOTO, STATUS, colorOf, fmtNum, fmtPct, fmtTime, heat, photoState } from "./theme.js";
 import { api, camera } from "./live.js";
+import { goNoGo, LIMITS, remaining } from "./checks.js";
 import { startViewer } from "./videoViewer.js";
 
 // ---------- icons (SF Symbols-like strokes) ----------
@@ -15,6 +16,8 @@ const PATHS = {
   camera: <><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.8l1.4-2h4.6l1.4 2h1.8A2.5 2.5 0 0 1 20 8.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5v-8Z" /><circle cx="12" cy="12.5" r="3.5" /></>,
   download: <><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5" /><path d="M5 19h14" /></>,
   fit: <><path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4" /></>,
+  bell: <><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15L6 16Z" /><path d="M10 20.5a2 2 0 0 0 4 0" /></>,
+  bellOff: <><path d="M6 16V11a6 6 0 0 1 9.5-4.9M18 11v5l1.5 2H8" /><path d="M10 20.5a2 2 0 0 0 4 0" /><path d="m4 4 16 16" /></>,
 };
 export const Icon = ({ name, size = 20, stroke = 1.7 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={stroke}
@@ -133,7 +136,7 @@ function MissionPlan({ plan, mission, onSelect, setColorBy }) {
 }
 
 export function SidePanel({ panel, info, trees, pattern, setPattern, selectedId, onSelect, filter, setFilter, setPanel,
-  plan, mission, setColorBy }) {
+  plan, mission, setColorBy, goCard }) {
   const lay = info?.layout;
   const show = (field, value) => { setFilter({ field, value, q: "" }); setPanel("trees"); };
 
@@ -148,6 +151,8 @@ export function SidePanel({ panel, info, trees, pattern, setPattern, selectedId,
           <h1>Plantation</h1>
           {lay && <p>{trees.length} palms · {lay.grid} × {lay.grid} · {lay.spacing} m spacing</p>}
         </header>
+
+        {goCard}
 
         <MissionPlan plan={plan} mission={mission} onSelect={onSelect} setColorBy={setColorBy} />
 
@@ -278,7 +283,7 @@ export function TelemetryCard({ tel, live, altHist = [] }) {
 }
 
 // ---------- floating: legend ----------
-export function MapBar({ layers, setLayers, onFit }) {
+export function MapBar({ layers, setLayers, onFit, muted, setMuted }) {
   const pill = (k, label) => (
     <button key={k} className={"pill" + (layers[k] ? " on" : "")} aria-pressed={layers[k]}
       onClick={() => setLayers({ ...layers, [k]: !layers[k] })}>{label}</button>
@@ -288,6 +293,9 @@ export function MapBar({ layers, setLayers, onFit }) {
       {pill("plan", "Plan")}{pill("sim", "Sim route")}{pill("trail", "Trail")}{pill("chips", "Labels")}
       <span className="bar-sep" />
       <button className="icon-btn" onClick={onFit} title="Fit field" aria-label="Fit field"><Icon name="fit" size={16} stroke={2} /></button>
+      <button className={"icon-btn" + (muted ? "" : " on")} onClick={() => setMuted(!muted)}
+        title={muted ? "Alert sounds off" : "Alert sounds on"} aria-label={muted ? "Turn alert sounds on" : "Turn alert sounds off"}>
+        <Icon name={muted ? "bellOff" : "bell"} size={16} stroke={2} /></button>
     </div>
   );
 }
@@ -499,22 +507,11 @@ export function VideoCard() {
 
 // ---------- floating: mission progress ----------
 // The stops of the mission being flown (the simulator's / uploaded plan) as
-// done / current / next, with a rough time and energy to landing from the
-// JSBSim figures (planner.py): ~18 s and 1.2 Wh per stop, 40 s / 0.9 Wh to land.
-const STOP_S = 18, STOP_WH = 1.2, LAND_S = 40, LAND_WH = 0.9, SWEEP_S = 150, SWEEP_WH = 7.3;
-
+// done / current / next, with time and energy to landing (checks.remaining).
 export function MissionStrip({ mission, plan, tel, onSelect }) {
-  const route = mission?.route || [];
-  const stops = route.filter((r) => r.tree);
-  if (!stops.length) return null;
-  const flying = tel.connected && tel.armed && tel.wp != null && tel.wp > 0;
-  const wp = flying ? tel.wp : 0;
-  const firstStop = stops[0].seq;
-  const left = stops.filter((s) => s.seq >= wp);
-  const sweepLeft = wp < firstStop ? (firstStop - wp) / Math.max(1, firstStop - 1) : 0;
-  const secs = left.length * STOP_S + LAND_S + sweepLeft * SWEEP_S;
-  const wh = left.length * STOP_WH + LAND_WH + sweepLeft * SWEEP_WH;
-  const current = stops.find((s) => s.seq >= wp);
+  const r = remaining(mission, tel);
+  if (!r) return null;
+  const { flying, wp, stops, left, current, secs, wh, landingPct } = r;
   const sameAsPlan = plan && plan.stops.length === stops.length && plan.stops.every((p) => stops.some((s) => s.tree === p.tree));
   return (
     <div className="material strip">
@@ -537,7 +534,71 @@ export function MissionStrip({ mission, plan, tel, onSelect }) {
         <span>{current ? <>next <b>{current.tree}</b></> : "landing"}</span>
         <span>≈ <b>{Math.floor(secs / 60)}:{String(Math.round(secs % 60)).padStart(2, "0")}</b> to landing</span>
         <span>≈ <b>{wh.toFixed(1)} Wh</b> still needed</span>
+        {landingPct != null && <span className={landingPct < 20 ? "warn" : ""}>≈ <b>{Math.max(0, Math.round(landingPct))}%</b> at landing</span>}
       </div>
+    </div>
+  );
+}
+
+// ---------- go / no-go (sidebar) ----------
+const GO_LABEL = { go: "GO", caution: "CAUTION", "no-go": "NO-GO" };
+
+export function GoCard({ tel, wind, plan }) {
+  const g = goNoGo({ tel, wind, plan });
+  const [speed, setSpeed] = useState("");
+  const [gust, setGust] = useState("");
+  const [err, setErr] = useState(null);
+  const save = async (clear) => {
+    setErr(null);
+    try {
+      await api("/api/wind", clear ? { speed: null } : { speed: Number(speed), gust: gust === "" ? null : Number(gust) });
+      if (clear) { setSpeed(""); setGust(""); }
+    } catch (e) { setErr("Mean 0-40 m/s; gust at least the mean"); }
+  };
+  return (
+    <Group title="Go / no-go" trailing={<span className={"go-pill " + g.overall}>{GO_LABEL[g.overall]}</span>}>
+      {g.checks.map((c) => (
+        <div key={c.key} className="cell static go-row">
+          <span className={"go-dot " + c.state} />
+          <span className="cell-label">{c.label}</span>
+          <span className="cell-value go-detail" title={c.detail}>{c.detail}</span>
+        </div>
+      ))}
+      <div className="cell static column wind-entry">
+        <div className="wind-inputs">
+          <label>Wind <input type="number" min="0" max="40" step="0.5" placeholder="mean" value={speed}
+            onChange={(e) => setSpeed(e.target.value)} aria-label="Mean wind, m/s" /></label>
+          <label>gust <input type="number" min="0" max="50" step="0.5" placeholder="—" value={gust}
+            onChange={(e) => setGust(e.target.value)} aria-label="Gusts, m/s" /></label>
+          <span className="secondary">m/s</span>
+          <button className="btn btn-sm" disabled={speed === ""} onClick={() => save(false)}>Set</button>
+          {wind && <button className="link" onClick={() => save(true)}>Clear</button>}
+        </div>
+        <div className="secondary wind-note">
+          Limits from the sim study: go ≤ {LIMITS.windGo} m/s, no-go &gt; {LIMITS.windNoGo} m/s mean.
+          {wind ? ` Entered ${new Date(wind.ts).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}.` : " In flight the autopilot's wind estimate is used."}
+        </div>
+        {err && <div className="error">{err}</div>}
+      </div>
+    </Group>
+  );
+}
+
+// ---------- floating: alerts ----------
+export function Toasts({ alerts, onDismiss, onSelect }) {
+  if (!alerts.length) return null;
+  return (
+    <div className="toasts" role="status" aria-live="polite">
+      {alerts.map((a) => (
+        <div key={a.key} className={"material toast " + a.level}>
+          <span className="toast-bar" />
+          <div className="toast-text" onClick={() => a.tree && onSelect(a.tree, true)} style={{ cursor: a.tree ? "pointer" : undefined }}>
+            <b>{a.title}</b>
+            {a.body && <span>{a.body}</span>}
+          </div>
+          <button className="close" onClick={() => onDismiss(a.key)} aria-label="Dismiss"><Icon name="close" size={12} stroke={2.4} /></button>
+        </div>
+      ))}
     </div>
   );
 }

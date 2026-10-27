@@ -17,8 +17,8 @@ tree_events  append-only history: every status change, visit, detection and
              note, newest last. Writing an event also updates the tree row.
              Detections carry the model name and its label; the ML labels map
              to maturity (pre-mature -> tender, mature, over-mature).
-meta         key/value: 'layout' (layout.json) and 'photo_pattern'
-             ({"every": N, "since": ts}), both as JSON.
+meta         key/value, JSON: 'layout' (layout.json), 'photo_pattern'
+             ({"every": N, "since": ts}) and 'wind_manual' ({"speed", "gust", "ts"}).
 
 Trees returned by list_trees/get_tree also carry `last_photo`, derived from
 tree_events (latest event with an image); it is not a stored column.
@@ -221,6 +221,24 @@ def set_pattern(con: sqlite3.Connection, every: int) -> dict:
     p = {"every": every, "since": now()}
     con.execute("INSERT OR REPLACE INTO meta VALUES ('photo_pattern', ?)", (json.dumps(p),))
     return p
+
+
+def get_wind(con: sqlite3.Connection) -> dict | None:
+    """Wind entered by the operator (anemometer or forecast), for the go/no-go check
+    before takeoff; once flying, the autopilot's own estimate is used instead."""
+    row = con.execute("SELECT value FROM meta WHERE key='wind_manual'").fetchone()
+    return json.loads(row[0]) if row else None
+
+
+def set_wind(con: sqlite3.Connection, speed: float | None, gust: float | None = None) -> dict | None:
+    if speed is None:
+        con.execute("DELETE FROM meta WHERE key='wind_manual'")
+        return None
+    if not 0 <= speed <= 40 or (gust is not None and not speed <= gust <= 50):
+        raise ValueError("wind speed 0-40 m/s; gust >= speed")
+    w = {"speed": speed, "gust": gust, "ts": now()}
+    con.execute("INSERT OR REPLACE INTO meta VALUES ('wind_manual', ?)", (json.dumps(w),))
+    return w
 
 
 def in_pattern(tree: dict, every: int, grid: int) -> bool:
