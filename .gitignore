@@ -31,6 +31,7 @@ dataset/
 flight_software/render/assets/
 # ML training runs and weights (large; base weights download on first use)
 ml/runs/
+ml/weights/
 ml/*.pt
 ml/models/*.pt
 ml/*.log

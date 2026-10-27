@@ -53,6 +53,7 @@ at least 2 photos agree on "ripe". Never hover at every tree.
 | `flight_software/demo/` | Plantation layout (`trees.csv`, `layout.json`), disturbance `scenarios/`, `run_batch.sh`, results in `runs/` |
 | `flight_software/jsbsim/` | JSBSim aircraft (`aircraft/CoconutQuadplane/`), `jsbsim_bridge.py` (ArduPilot JSON link, 1000 Hz), `rotor_model.py`, `coconut_jsbsim.param`, `test_physics.py` |
 | `flight_software/render/` | Blender replay: `extract_track.py` (log → track.json), `blender_replay.py` (scene + main cut, or `--shots`), `make_video.py` (encode main cut), `assemble_video.py` (final review cut) |
+| `ml/` | Ripeness detector (YOLO26s, 3 maturity classes; harvest target = tender/pre-mature) and `detect_pipeline.py`: camera frames + flight log → per-palm dashboard observations. See `ml/README.md` |
 | `flight_software/reanalyze.py` | Re-scores every run, e.g. after changing the camera rate |
 | `documents/sim_results.md` | **Results and recommendations** |
 | `documents/build_sim_progress.md` | Running log of the work, decisions and fixes |
@@ -256,7 +257,7 @@ Mission rules the planner already handles:
 | 1 | **Lift-motor failure handling** | Check ESC telemetry/RPM before every back-transition and abort to a fixed-wing belly landing if one fails. Alternative: an X8 coaxial lift set (about +150 g). |
 | 2 | Airspeed sensor | Add an MS4525/DLVR to the BOM and nose. In JSBSim it fixed assist cycling in wind (12 → 2 lift on/off events). |
 | 3 | Camera trigger at 5 fps | Now the analysis default. Check the ESP32-CAM can sustain it at SVGA. |
-| 4 | Ripe-bunch detector | Train on real oblique crown photos; measure per-photo recall and false-alarm rate; feed them into `schedule_sim.py`. |
+| 4 | Ripe-bunch detector | Baseline trained (`ml/`): test mAP50 0.72 for tender nuts, but on ground-level close-ups. **Needs real oblique crown photos from ~25 m** (1600×1200 at the confirm stops), labelled in the same 3 classes. Then measure per-photo recall and false-alarm rate and feed them into `schedule_sim.py`. |
 | 5 | Weight cuts | `BUILD_NOTES.md` lists them. All-PLA isn't viable: CG ends up at 41% MAC. |
 | 6 | Hover misses | 2 of 29 hover targets still miss the frame in calm air, and 4 of 29 in wind. |
 | 7 | Elevator in the Gazebo model | The CAD and JSBSim have it; `gazebo/gen_sdf.py` and `coconut_gazebo.param` still model elevons. |

@@ -1,0 +1,13 @@
+{
+ "model": "ripeness_yolo26s.pt",
+ "split": "test",
+ "mAP50": 0.5539,
+ "mAP50_95": 0.3968,
+ "precision": 0.5875,
+ "recall": 0.5245,
+ "per_class_mAP50": {
+  "pre-mature": 0.7153,
+  "mature": 0.657,
+  "over-mature": 0.2894
+ }
+}
