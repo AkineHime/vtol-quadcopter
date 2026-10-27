@@ -102,6 +102,16 @@ I_TAIL_DEG = -1.79                                   # relative to fuselage (aer
 Z_TAIL = 0.0                                         # tail boom on the pod axis
 Z_STAB = Z_TAIL + 11.0                               # stab chord line sits on a keel over the boom
 STAB_SPAR_OD = 4.0                                   # rod through the stab, 30% chord
+# Tail elevator (2026-10-27): the wing elevons could not control pitch (a
+# nose-up command mostly dumped wing lift -- documents/sim_results.md), so the
+# stab gets an elevator and the wing surfaces become ailerons. Straight hinge
+# line placed so the elevator is 30% of the stab area (straight LE):
+# S/2 - x*B/2 = 0.3 S/2  ->  x = 0.7 S/B.
+ELEV_HINGE_X = X_LE_H + 0.7 * S_H / B_H              # 88 mm aft of the stab LE
+ELEV_GAP = 1.0                                       # mm, hinge gap (CA/tape hinge)
+ELEV_BOOM_SLOT = 7.0                                 # mm half-width: elevator halves clear the boom
+ELEV_JOINER_OD = 2.0                                 # carbon rod joining the 4 elevator pieces
+ELEV_SERVO_X = 180.0     # elevator servo in the pod aft bay; a tail-mounted servo put the CG at 34.6% MAC
 S_V_EACH, B_V, TAPER_V = 17000.0, 180.0, 0.62      # 340 cm^2 total (aero fin sizing)
 C_ROOT_V = 2 * S_V_EACH / (B_V * (1 + TAPER_V))
 C_TIP_V = C_ROOT_V * TAPER_V
@@ -142,7 +152,9 @@ COTS = {
     "props_x5": (50.0, (2 * X_ROTOR_FRONT + 2 * X_ROTOR_REAR + X_PUSHER) / 5, 0, Z_BOOM + 40),
     "esc_lift_x4": (100.0, (X_ROTOR_FRONT + X_ROTOR_REAR) / 2, 0, Z_BOOM),   # on the booms
     "esc_pusher": (25.0, 200.0, 0, 0),
-    "servo_elevon_x2": (27.0, 120.0, 0, Z_WING),
+    "servo_aileron_x2": (27.0, 120.0, 0, Z_WING),   # the former elevon servos
+    "servo_elevator": (9.0, ELEV_SERVO_X, 0, 0.0),        # 9 g micro in the pod, near the CG
+    "elevator_horn_clevis": (3.0, ELEV_HINGE_X, 0, Z_STAB - 8),
     "flight_controller": (10.0, X_CG_TARGET - 60, 0, -10),
     "gps_compass": (25.0, -95.0, 0, POD_H / 2 + 6),      # on the hatch, clear of the wing
     "esp32_cam": (12.0, -185.0, 0, -30),
@@ -163,6 +175,8 @@ CARBON = {
     "legs": (LEG_OD, 0, LEG_LEN, (X_ROTOR_FRONT + X_ROTOR_REAR) / 2, 0, Z_BOOM - LEG_LEN / 2, 4),
     "wing_pins": (PIN_OD, 0, PIN_LEN, PIN_X_ROOT_FRAC * C_ROOT, 0, Z_WING, 1),
     "stab_spar": (STAB_SPAR_OD, 0, B_H, X_LE_H + 0.3 * C_ROOT_H, 0, Z_STAB, 1),
+    "elevator_joiner": (ELEV_JOINER_OD, 0, 300.0, ELEV_HINGE_X + 4.0, 0, Z_STAB, 1),
+    "elevator_pushrod": (1.5, 0, ELEV_HINGE_X - ELEV_SERVO_X, (ELEV_HINGE_X + ELEV_SERVO_X) / 2, 0, Z_TAIL + 8, 1),
 }
 
 

@@ -1,0 +1,38 @@
+{
+ "name": "js_demo_v4",
+ "physics": "jsbsim",
+ "test": null,
+ "strategy": "hybrid",
+ "targets": "P0005,P0302,P0612,P0911",
+ "wind_ne": [
+  0.0,
+  0.0
+ ],
+ "gust": 0.0,
+ "param_files": [],
+ "events": null,
+ "flight_s": 287.5,
+ "distance_m": 2412,
+ "energy_wh": 13.1,
+ "battery_used_pct": 29.6,
+ "trees_imaged": 167,
+ "trees_imaged_2plus": 167,
+ "targets_imaged_2plus": 4,
+ "target_frames_median": 34,
+ "frames_per_tree_median": 6,
+ "frames_total": 1438,
+ "min_crown_clearance_m": 5.07,
+ "max_abs_roll": 37.2,
+ "max_abs_pitch": 29.2,
+ "lift_events": 2,
+ "n_targets": 4,
+ "flight": {
+  "ok": true,
+  "landed": true,
+  "crashed": false,
+  "wall_s": 291.5,
+  "strategy": "hybrid",
+  "roundtrip_ok": true,
+  "items": 29
+ }
+}

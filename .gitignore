@@ -15,6 +15,12 @@ flight_software/demo/gz_log/
 # headless sim runs: dataflash logs and videos are large; keep summaries
 flight_software/demo/runs/**/*.BIN
 flight_software/demo/runs/**/*.mp4
+# Blender replay frames (GBs; re-render with flight_software/render/) and assembler scratch
+flight_software/demo/runs/**/render_*/
+flight_software/demo/runs/**/shots/
+flight_software/demo/runs/**/preview/
+flight_software/demo/runs/**/detections/
+flight_software/demo/runs/**/assemble_*
 flight_software/demo/captures/
 
 # Local Claude Code / MCP tooling config
@@ -24,3 +30,12 @@ flight_software/demo/captures/
 ground_station/data/
 ground_station/certs/
 ground_station/media/
+# local ML datasets (large; shared outside git)
+dataset/
+flight_software/render/assets/
+# ML training runs and weights (large; base weights download on first use)
+ml/runs/
+ml/weights/
+ml/*.pt
+ml/models/*.pt
+ml/*.log

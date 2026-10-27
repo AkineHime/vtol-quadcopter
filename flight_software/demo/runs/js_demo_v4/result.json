@@ -1,0 +1,9 @@
+{
+ "ok": true,
+ "landed": true,
+ "crashed": false,
+ "wall_s": 291.5,
+ "strategy": "hybrid",
+ "roundtrip_ok": true,
+ "items": 29
+}
