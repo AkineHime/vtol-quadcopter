@@ -1,4 +1,5 @@
-// REST helpers and the live WebSocket (telemetry + tree updates).
+// REST helpers, the live WebSocket (telemetry + tree updates), and frame grabs
+// from the drone camera for automatic tree photos.
 export async function api(path, body) {
   const res = await fetch(path, body === undefined ? {} : {
     method: "POST",
@@ -23,4 +24,23 @@ export function connectLive(onMessage, onLink) {
   };
   open();
   return () => { stopped = true; clearTimeout(retry); ws && ws.close(); };
+}
+
+// The video panel registers its <video>; a capture request grabs one frame.
+export const camera = { video: null, onShutter: null };
+
+export async function captureTree(treeId, captureId) {
+  const v = camera.video;
+  if (!v || !v.srcObject || !v.videoWidth) return false;       // no live feed here
+  const c = document.createElement("canvas");
+  c.width = v.videoWidth;
+  c.height = v.videoHeight;
+  c.getContext("2d").drawImage(v, 0, 0);
+  const blob = await new Promise((r) => c.toBlob(r, "image/jpeg", 0.9));
+  if (!blob) return false;
+  const res = await fetch(`/api/trees/${treeId}/photo?capture_id=${captureId}`, {
+    method: "POST", headers: { "Content-Type": "image/jpeg" }, body: blob,
+  });
+  if (res.ok && camera.onShutter) camera.onShutter(treeId);
+  return res.ok;
 }

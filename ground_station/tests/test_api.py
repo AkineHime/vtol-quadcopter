@@ -8,6 +8,14 @@ from backend import config
 from backend.app import create_app
 
 
+def recv(ws, kind):
+    """Next message of a given type (the socket also sends the photo pattern on connect)."""
+    while True:
+        msg = ws.receive_json()
+        if msg["type"] == kind:
+            return msg
+
+
 @pytest.fixture(scope="module")
 def client():
     with TestClient(create_app()) as c:
@@ -37,8 +45,8 @@ def test_event_broadcast(client):
     with client.websocket_connect("/ws") as ws:
         r = client.post("/api/trees/P0005/events", json={"kind": "status", "status": "target"})
         assert r.status_code == 200 and r.json()["status"] == "target"
-        msg = ws.receive_json()
-        assert msg["type"] == "tree" and msg["tree"]["id"] == "P0005" and msg["tree"]["status"] == "target"
+        msg = recv(ws, "tree")
+        assert msg["tree"]["id"] == "P0005" and msg["tree"]["status"] == "target"
     hist = client.get("/api/trees/P0005").json()["history"]
     assert hist[0]["kind"] == "status" and hist[0]["status"] == "target"
 
@@ -57,6 +65,5 @@ def test_external_write_pushed(client):
         other.execute("UPDATE trees SET status='cleared' WHERE id='P1212'")
         other.commit()
         other.close()
-        msg = ws.receive_json()
-        assert msg["type"] == "trees"
+        msg = recv(ws, "trees")
         assert next(t for t in msg["trees"] if t["id"] == "P1212")["status"] == "cleared"

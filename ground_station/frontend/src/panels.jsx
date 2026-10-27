@@ -1,172 +1,210 @@
 import { useEffect, useRef, useState } from "react";
-import { CONDITION, STATUS, colorOf, fmtNum, fmtTime } from "./theme.js";
-import { api } from "./live.js";
+import { CONDITION, PHOTO, STATUS, colorOf, fmtNum, fmtTime, photoState } from "./theme.js";
+import { api, camera } from "./live.js";
 import { startViewer } from "./videoViewer.js";
 
-// ---------- icons ----------
-const I = {
-  overview: <path d="M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z" />,
-  trees: <path d="M12 21v-8M12 13c-1-4-5-5-8-4 2-3 6-3 8 0 2-3 6-3 8 0-3-1-7 0-8 4zM12 9c0-3 2-5 5-6-1 2-2 4-5 6zm0 0c0-3-2-5-5-6 1 2 2 4 5 6z" />,
-  camera: <path d="M3 7h12v10H3zM15 10l6-3v10l-6-3z" />,
-  locate: <><circle cx="12" cy="12" r="4" /><path d="M12 2v4M12 18v4M2 12h4M18 12h4" /></>,
-  close: <path d="M6 6l12 12M18 6L6 18" />,
+// ---------- icons (SF Symbols-like strokes) ----------
+const PATHS = {
+  map: <><path d="M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6 9 4Z" /><path d="M9 4v14M15 6v14" /></>,
+  list: <><path d="M9 6h11M9 12h11M9 18h11" /><circle cx="4.5" cy="6" r="1" /><circle cx="4.5" cy="12" r="1" /><circle cx="4.5" cy="18" r="1" /></>,
+  video: <><rect x="3" y="6" width="12.5" height="12" rx="3" /><path d="m15.5 10.5 5-3v9l-5-3" /></>,
+  location: <path d="M20.5 3.5 3.5 10.6l7.1 2.8 2.8 7.1 7.1-17Z" />,
+  close: <path d="M7 7l10 10M17 7 7 17" />,
+  search: <><circle cx="10.5" cy="10.5" r="6" /><path d="m15 15 5 5" /></>,
+  chevron: <path d="m9 6 6 6-6 6" />,
+  camera: <><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.8l1.4-2h4.6l1.4 2h1.8A2.5 2.5 0 0 1 20 8.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5v-8Z" /><circle cx="12" cy="12.5" r="3.5" /></>,
 };
-const Icon = ({ name, size = 22 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"
-    strokeLinecap="round" strokeLinejoin="round">{I[name]}</svg>
+export const Icon = ({ name, size = 20, stroke = 1.7 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={stroke}
+    strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{PATHS[name]}</svg>
 );
 
+function Segmented({ options, value, onChange, small }) {
+  return (
+    <div className={"segmented" + (small ? " small" : "")} role="tablist">
+      {options.map(([v, label]) => (
+        <button key={String(v)} role="tab" aria-selected={value === v} className={value === v ? "on" : ""}
+          onClick={() => value !== v && onChange(v)}>{label}</button>
+      ))}
+    </div>
+  );
+}
+
+// ---------- rail ----------
 export function Rail({ panel, setPanel, video, setVideo, onLocate, canLocate }) {
   const btn = (name, active, onClick, title, disabled) => (
-    <button className={"rail-btn" + (active ? " active" : "")} onClick={onClick} title={title} disabled={disabled}>
+    <button className={"rail-btn" + (active ? " on" : "")} onClick={onClick} title={title} aria-label={title} disabled={disabled}>
       <Icon name={name} />
     </button>
   );
   return (
     <nav className="rail">
-      <div className="logo" title="Coconut VTOL ground station">
-        <svg viewBox="-16 -16 32 32" width="26" height="26">
-          {[0, 60, 120, 180, 240, 300].map((a) => <ellipse key={a} cx="0" cy="-7" rx="2.6" ry="6" transform={`rotate(${a})`} fill="#1a0f06" />)}
-        </svg>
-      </div>
-      {btn("overview", panel === "overview", () => setPanel("overview"), "Overview")}
-      {btn("trees", panel === "trees", () => setPanel("trees"), "Trees")}
-      <div className="rail-sep" />
-      {btn("camera", video, () => setVideo(!video), video ? "Hide camera" : "Show camera")}
-      {btn("locate", false, onLocate, "Centre on drone", !canLocate)}
+      <div className="logo" aria-hidden="true"><span /></div>
+      {btn("map", panel === "overview", () => setPanel("overview"), "Overview")}
+      {btn("list", panel === "trees", () => setPanel("trees"), "Trees")}
+      <div className="rail-gap" />
+      {btn("video", video, () => setVideo(!video), video ? "Hide camera" : "Show camera")}
+      {btn("location", false, onLocate, "Centre on drone", !canLocate)}
     </nav>
   );
 }
 
-// ---------- side panel ----------
-function Breakdown({ title, table, trees, field, onPick }) {
-  const total = trees.length || 1;
+// ---------- sidebar ----------
+function Group({ title, trailing, children }) {
   return (
-    <section className="block">
-      <h3>{title}</h3>
-      {Object.entries(table).map(([key, { label, color }]) => {
-        const n = trees.filter((t) => t[field] === key).length;
-        return (
-          <button key={key} className="bar-row" onClick={() => onPick(field, key)}>
-            <span className="dot" style={{ background: color }} />
-            <span className="bar-label">{label}</span>
-            <span className="bar-track"><span style={{ width: `${(100 * n) / total}%`, background: color }} /></span>
-            <span className="bar-num">{n}</span>
-          </button>
-        );
-      })}
+    <section className="group">
+      {title && <div className="group-title"><span>{title}</span>{trailing}</div>}
+      <div className="group-body">{children}</div>
     </section>
   );
 }
 
-export function SidePanel({ panel, info, trees, selectedId, onSelect, filter, setFilter, setPanel }) {
+function CountRow({ color, label, n, onClick }) {
+  return (
+    <button className="cell" onClick={onClick}>
+      <span className="dot" style={{ background: color }} />
+      <span className="cell-label">{label}</span>
+      <span className="cell-value">{n}</span>
+      <span className="chev"><Icon name="chevron" size={14} stroke={2} /></span>
+    </button>
+  );
+}
+
+export function SidePanel({ panel, info, trees, pattern, setPattern, selectedId, onSelect, filter, setFilter, setPanel }) {
   const lay = info?.layout;
-  const pick = (field, value) => { setFilter({ field, value, q: "" }); setPanel("trees"); };
+  const show = (field, value) => { setFilter({ field, value, q: "" }); setPanel("trees"); };
 
   if (panel === "overview") {
+    const inPattern = trees.filter((t) => photoState(t, pattern) !== "skip");
+    const done = inPattern.filter((t) => photoState(t, pattern) === "done").length;
+    const pct = inPattern.length ? (100 * done) / inPattern.length : 0;
     const targets = trees.filter((t) => t.status === "target");
     return (
-      <aside className="panel">
-        <header className="panel-head">
-          <div className="eyebrow">Plantation</div>
-          <h2>Coconut block · 1 ha</h2>
-          {lay && <p className="sub">{trees.length} palms · {lay.grid} × {lay.grid} grid · {lay.spacing} m spacing</p>}
+      <aside className="sidebar">
+        <header className="large-title">
+          <h1>Plantation</h1>
+          {lay && <p>{trees.length} palms · {lay.grid} × {lay.grid} · {lay.spacing} m spacing</p>}
         </header>
-        <Breakdown title="Status" table={STATUS} trees={trees} field="status" onPick={pick} />
-        <Breakdown title="Condition" table={CONDITION} trees={trees} field="condition" onPick={pick} />
-        <section className="block">
-          <h3>Targets <span className="count">{targets.length}</span></h3>
-          {targets.length === 0 && <p className="muted">No palms flagged yet.</p>}
-          <div className="list">
-            {targets.map((t) => <TreeRow key={t.id} t={t} active={t.id === selectedId} onSelect={onSelect} />)}
+
+        <Group title="Photo round">
+          <div className="cell static">
+            <span className="cell-label">Every</span>
+            <Segmented small value={pattern.every || 1} onChange={setPattern}
+              options={[[1, "All"], [2, "2nd"], [4, "4th"], [8, "8th"]]} />
           </div>
-        </section>
+          <div className="cell static column">
+            <div className="progress-head">
+              <span><b>{done}</b> of {inPattern.length} photographed</span>
+              <span className="secondary">{Math.round(pct)}%</span>
+            </div>
+            <div className="progress"><span style={{ width: `${pct}%` }} /></div>
+          </div>
+        </Group>
+
+        <Group title="Status">
+          {Object.entries(STATUS).map(([k, s]) => (
+            <CountRow key={k} color={s.color} label={s.label} n={trees.filter((t) => t.status === k).length}
+              onClick={() => show("status", k)} />
+          ))}
+        </Group>
+
+        <Group title="Condition">
+          {Object.entries(CONDITION).map(([k, s]) => (
+            <CountRow key={k} color={s.color} label={s.label} n={trees.filter((t) => t.condition === k).length}
+              onClick={() => show("condition", k)} />
+          ))}
+        </Group>
+
+        <Group title="Targets" trailing={<span className="secondary">{targets.length}</span>}>
+          {targets.length === 0 && <div className="cell static secondary">No palms flagged</div>}
+          {targets.map((t) => <TreeCell key={t.id} t={t} active={t.id === selectedId} onSelect={onSelect} />)}
+        </Group>
       </aside>
     );
   }
 
   const q = filter.q.trim().toUpperCase();
   const shown = trees.filter((t) => (!filter.field || t[filter.field] === filter.value) && (!q || t.id.includes(q)));
+  const statusFilter = filter.field === "status" ? filter.value : filter.field ? "other" : null;
   return (
-    <aside className="panel">
-      <header className="panel-head">
-        <div className="eyebrow">Trees</div>
-        <h2>{shown.length} of {trees.length}</h2>
+    <aside className="sidebar">
+      <header className="large-title">
+        <h1>Trees</h1>
+        <p>{filter.field === "condition" ? `${CONDITION[filter.value].label} · ` : ""}{shown.length} of {trees.length}</p>
       </header>
-      <input className="search" placeholder="Search tree ID, e.g. P0612" value={filter.q}
-        onChange={(e) => setFilter({ ...filter, q: e.target.value })} />
-      <div className="chips">
-        <button className={"chip" + (!filter.field ? " on" : "")} onClick={() => setFilter({ field: null, value: null, q: filter.q })}>All</button>
-        {Object.entries(STATUS).map(([k, s]) => (
-          <button key={k} className={"chip" + (filter.field === "status" && filter.value === k ? " on" : "")}
-            onClick={() => setFilter({ field: "status", value: k, q: filter.q })}>{s.label}</button>
-        ))}
-        {filter.field === "condition" && <button className="chip on">{CONDITION[filter.value].label}</button>}
-      </div>
-      <div className="list grow">
-        {shown.map((t) => <TreeRow key={t.id} t={t} active={t.id === selectedId} onSelect={onSelect} />)}
+      <label className="search">
+        <Icon name="search" size={16} />
+        <input placeholder="Search" value={filter.q} onChange={(e) => setFilter({ ...filter, q: e.target.value })} />
+      </label>
+      <Segmented value={statusFilter} onChange={(v) => setFilter({ field: v ? "status" : null, value: v, q: filter.q })}
+        options={[[null, "All"], ...Object.entries(STATUS).map(([k, s]) => [k, s.label])]} />
+      <div className="group-body scroll">
+        {shown.map((t) => <TreeCell key={t.id} t={t} active={t.id === selectedId} onSelect={onSelect} />)}
       </div>
     </aside>
   );
 }
 
-function TreeRow({ t, active, onSelect }) {
+function TreeCell({ t, active, onSelect }) {
   return (
-    <button className={"tree-row" + (active ? " active" : "")} onClick={() => onSelect(t.id, true)}>
-      <span className="dot" style={{ background: colorOf(t, "condition") }} title={CONDITION[t.condition]?.label} />
-      <span className="tree-id">{t.id}</span>
-      <span className="muted small">R{t.row} · C{t.col}</span>
-      <span className={"pill " + t.status}>{STATUS[t.status]?.label}</span>
+    <button className={"cell" + (active ? " active" : "")} onClick={() => onSelect(t.id, true)}>
+      <span className="dot" style={{ background: colorOf(t, "condition") }} />
+      <span className="cell-label"><b>{t.id}</b><span className="secondary"> Row {t.row}, Col {t.col}</span></span>
+      <span className="cell-value" style={{ color: t.status === "unscouted" ? undefined : STATUS[t.status].color }}>
+        {STATUS[t.status].label}
+      </span>
     </button>
   );
 }
 
-// ---------- floating cards ----------
+// ---------- floating: telemetry ----------
 export function TelemetryCard({ tel, live }) {
   const c = tel.connected;
-  const stat = (label, value) => <div className="stat"><div className="stat-v">{value}</div><div className="stat-l">{label}</div></div>;
+  const metric = (label, value, unit) => (
+    <div className="metric">
+      <div className="metric-v">{value}{value !== "—" && unit && <span className="unit">{unit}</span>}</div>
+      <div className="metric-l">{label}</div>
+    </div>
+  );
   return (
-    <div className="card telemetry">
-      <div className="tel-head">
-        <span className={"link " + (c ? "ok" : "bad")} />
+    <div className="material hud">
+      <div className="hud-head">
+        <span className={"status-dot" + (c ? " ok" : "")} />
         <div>
-          <div className="tel-title">{c ? tel.mode || "Connected" : live ? "No drone link" : "Ground station offline"}</div>
-          <div className="muted small">{c ? (tel.armed ? "Armed" : "Disarmed") : tel.url || "waiting for MAVLink"}</div>
+          <div className="hud-title">{c ? tel.mode || "Connected" : live ? "No Drone" : "Offline"}</div>
+          <div className="hud-sub">{c ? (tel.armed ? "Armed" : "Disarmed") : live ? "Waiting for MAVLink" : "Reconnecting"}</div>
         </div>
       </div>
-      {stat("Altitude", fmtNum(tel.alt, 1, " m"))}
-      {stat("Ground speed", fmtNum(tel.groundspeed, 1, " m/s"))}
-      {stat("Airspeed", fmtNum(tel.airspeed, 1, " m/s"))}
-      {stat("Heading", fmtNum(tel.heading, 0, "°"))}
-      {stat("Battery", tel.battery != null ? `${tel.battery}%` : fmtNum(tel.voltage, 1, " V"))}
-      {stat("Waypoint", tel.wp ?? "—")}
-      {tel.text && <div className="tel-text" title={tel.text}>{tel.text}</div>}
+      {metric("Altitude", fmtNum(tel.alt), "m")}
+      {metric("Ground speed", fmtNum(tel.groundspeed), "m/s")}
+      {metric("Airspeed", fmtNum(tel.airspeed), "m/s")}
+      {metric("Heading", fmtNum(tel.heading, 0), "°")}
+      {metric("Battery", tel.battery != null ? String(tel.battery) : fmtNum(tel.voltage), tel.battery != null ? "%" : "V")}
+      {metric("Waypoint", tel.wp != null ? String(tel.wp) : "—")}
     </div>
   );
 }
 
+// ---------- floating: legend ----------
 export function Legend({ colorBy, setColorBy }) {
-  const table = colorBy === "condition" ? CONDITION : STATUS;
+  const table = colorBy === "condition" ? CONDITION : colorBy === "photos" ? PHOTO : STATUS;
   return (
-    <div className="card legend">
-      <div className="seg">
-        {["status", "condition"].map((k) => (
-          <button key={k} className={colorBy === k ? "on" : ""} onClick={() => setColorBy(k)}>
-            {k === "status" ? "Status" : "Condition"}
-          </button>
+    <div className="material legend">
+      <Segmented small value={colorBy} onChange={setColorBy}
+        options={[["status", "Status"], ["condition", "Condition"], ["photos", "Photos"]]} />
+      <div className="legend-keys">
+        {Object.values(table).map((s) => (
+          <div key={s.label} className="legend-key"><span className="dot" style={{ background: s.color }} />{s.label}</div>
         ))}
       </div>
-      {Object.values(table).map((s) => (
-        <div key={s.label} className="legend-row"><span className="dot" style={{ background: s.color }} />{s.label}</div>
-      ))}
-      <div className="legend-row"><span className="drone-key" />Drone + trail</div>
     </div>
   );
 }
 
-const KIND = { seed: "Imported", status: "Status", visit: "Visit", detection: "Detection", note: "Note" };
+// ---------- floating: inspector ----------
+const KIND = { seed: "Imported", status: "Status changed", visit: "Visited", detection: "Detection", note: "Note" };
 
-export function TreeCard({ id, tree, onClose, compact }) {
+export function TreeCard({ id, tree, pattern, onClose, compact }) {
   const [hist, setHist] = useState([]);
   const [note, setNote] = useState("");
   const [cond, setCond] = useState(tree.condition);
@@ -178,124 +216,128 @@ export function TreeCard({ id, tree, onClose, compact }) {
     let alive = true;
     api(`/api/trees/${id}`).then((r) => alive && setHist(r.history)).catch(() => {});
     return () => { alive = false; };
-  }, [id, tree.updated_at, tree.status, tree.condition, tree.notes]);
+  }, [id, tree.updated_at, tree.status, tree.condition, tree.notes, tree.last_photo]);
 
   const send = async (ev) => {
     setBusy(true); setErr(null);
     try { await api(`/api/trees/${id}/events`, ev); } catch (e) { setErr(e.message); }
     setBusy(false);
   };
+  const addNote = () => { if (note.trim()) { send({ kind: "note", note: note.trim() }); setNote(""); } };
+  const photo = hist.find((h) => h.image);
+  const ps = photoState(tree, pattern);
+  const row = (label, value, mono) => (
+    <div className="cell static"><span className="cell-label secondary">{label}</span><span className={"cell-value" + (mono ? " mono" : "")}>{value}</span></div>
+  );
 
   return (
-    <div className={"card tree-card" + (compact ? " compact" : "")}>
-      <header className="tc-head">
+    <div className={"material inspector" + (compact ? " compact" : "")} key={id}>
+      <header className="insp-head">
         <div>
-          <div className="eyebrow">Palm</div>
           <h2>{tree.id}</h2>
-          <div className="muted small">Row {tree.row} · Column {tree.col}</div>
+          <p>Row {tree.row}, Column {tree.col}</p>
         </div>
-        <button className="icon-btn" onClick={onClose} title="Close"><Icon name="close" size={18} /></button>
+        <button className="close" onClick={onClose} aria-label="Close"><Icon name="close" size={14} stroke={2.4} /></button>
       </header>
 
-      <div className="tc-pills">
-        <span className={"pill big " + tree.status}>{STATUS[tree.status]?.label}</span>
-        <span className="pill big" style={{ color: CONDITION[tree.condition]?.color, borderColor: CONDITION[tree.condition]?.color }}>
-          {CONDITION[tree.condition]?.label}
-        </span>
+      <div className="tags">
+        <span className="tag" style={{ "--c": STATUS[tree.status].color }}>{STATUS[tree.status].label}</span>
+        <span className="tag" style={{ "--c": CONDITION[tree.condition].color }}>{CONDITION[tree.condition].label}</span>
+        {ps !== "skip" && <span className="tag" style={{ "--c": PHOTO[ps].color }}>{PHOTO[ps].label}</span>}
       </div>
 
-      <dl className="facts">
-        <div><dt>Height</dt><dd>{fmtNum(tree.height, 1, " m")}</dd></div>
-        <div><dt>Confidence</dt><dd>{tree.confidence != null ? `${Math.round(tree.confidence * 100)}%` : "—"}</dd></div>
-        <div><dt>Last visit</dt><dd>{fmtTime(tree.last_visit)}</dd></div>
-        <div><dt>From dock</dt><dd>{tree.n.toFixed(1)} m N, {Math.abs(tree.e).toFixed(1)} m {tree.e < 0 ? "W" : "E"}</dd></div>
-        <div className="wide"><dt>Lat / Lon</dt><dd className="mono">{tree.lat.toFixed(6)}, {tree.lon.toFixed(6)}</dd></div>
-      </dl>
+      {photo && (
+        <a className="hero" href={`/media/${photo.image}`} target="_blank" rel="noreferrer">
+          <img src={`/media/${photo.image}`} alt={`Latest photo of ${tree.id}`} />
+          <span>{fmtTime(photo.ts)}</span>
+        </a>
+      )}
 
-      <section className="tc-sec">
-        <h3>Set status</h3>
-        <div className="seg full">
-          {Object.entries(STATUS).map(([k, s]) => (
-            <button key={k} className={tree.status === k ? "on" : ""} disabled={busy || tree.status === k}
-              onClick={() => send({ kind: "status", status: k })}>{s.label}</button>
-          ))}
+      <div className="group-body">
+        {row("Height", `${fmtNum(tree.height)} m`)}
+        {row("Confidence", tree.confidence != null ? `${Math.round(tree.confidence * 100)}%` : "—")}
+        {row("Last visit", fmtTime(tree.last_visit))}
+        {row("From dock", `${tree.n.toFixed(1)} m N · ${Math.abs(tree.e).toFixed(1)} m ${tree.e < 0 ? "W" : "E"}`)}
+        {row("Coordinates", `${tree.lat.toFixed(6)}, ${tree.lon.toFixed(6)}`, true)}
+      </div>
+
+      <Group title="Status">
+        <div className="cell static pad">
+          <Segmented value={tree.status} onChange={(k) => !busy && send({ kind: "status", status: k })}
+            options={Object.entries(STATUS).map(([k, s]) => [k, s.label])} />
         </div>
-      </section>
+      </Group>
 
-      <section className="tc-sec">
-        <h3>Log a visit</h3>
-        <div className="row">
-          <select value={cond} onChange={(e) => setCond(e.target.value)}>
+      <Group title="Log visit">
+        <div className="cell static pad gap">
+          <select value={cond} onChange={(e) => setCond(e.target.value)} aria-label="Condition">
             {Object.entries(CONDITION).map(([k, c]) => <option key={k} value={k}>{c.label}</option>)}
           </select>
-          <button className="btn" disabled={busy} onClick={() => send({ kind: "visit", condition: cond })}>Log visit</button>
+          <button className="btn" disabled={busy} onClick={() => send({ kind: "visit", condition: cond })}>Log</button>
         </div>
-      </section>
+      </Group>
 
-      <section className="tc-sec">
-        <h3>Notes</h3>
-        {tree.notes && <p className="notes">{tree.notes}</p>}
-        <div className="row">
-          <input value={note} placeholder="Add a note…" maxLength={2000} onChange={(e) => setNote(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter" && note.trim()) { send({ kind: "note", note: note.trim() }); setNote(""); } }} />
-          <button className="btn" disabled={busy || !note.trim()}
-            onClick={() => { send({ kind: "note", note: note.trim() }); setNote(""); }}>Add</button>
+      <Group title="Notes">
+        {tree.notes && <div className="cell static notes">{tree.notes}</div>}
+        <div className="cell static pad gap">
+          <input value={note} placeholder="Add a note" maxLength={2000} onChange={(e) => setNote(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && addNote()} />
+          <button className="btn" disabled={busy || !note.trim()} onClick={addNote}>Add</button>
         </div>
-      </section>
+      </Group>
       {err && <p className="error">{err}</p>}
 
-      <section className="tc-sec">
-        <h3>History <span className="count">{hist.length}</span></h3>
-        <ol className="history">
-          {hist.map((h) => (
-            <li key={h.id}>
-              <div className="h-top"><b>{KIND[h.kind] || h.kind}</b><span className="muted small">{fmtTime(h.ts)}</span></div>
-              <div className="small">
-                {h.status && <span className={"pill " + h.status}>{STATUS[h.status]?.label}</span>}
-                {h.condition && <span className="h-cond" style={{ color: CONDITION[h.condition]?.color }}>{CONDITION[h.condition]?.label}</span>}
-                {h.confidence != null && <span className="muted"> {Math.round(h.confidence * 100)}%</span>}
-                {h.note && <span className="h-note">{h.note}</span>}
-              </div>
-              {h.image && <a href={`/media/${h.image}`} target="_blank" rel="noreferrer"><img className="h-img" src={`/media/${h.image}`} alt="" /></a>}
-              <div className="muted tiny">via {h.source}</div>
-            </li>
-          ))}
-        </ol>
-      </section>
+      <Group title="History" trailing={<span className="secondary">{hist.length}</span>}>
+        {hist.map((h) => (
+          <div key={h.id} className="cell static event">
+            <div className="event-top"><b>{KIND[h.kind] || h.kind}</b><span className="secondary">{fmtTime(h.ts)}</span></div>
+            <div className="event-body secondary">
+              {[h.status && STATUS[h.status]?.label, h.condition && CONDITION[h.condition]?.label,
+                h.confidence != null && `${Math.round(h.confidence * 100)}%`, h.note, `via ${h.source}`]
+                .filter(Boolean).join(" · ")}
+            </div>
+            {h.image && h !== photo && <img className="event-img" src={`/media/${h.image}`} alt="" />}
+          </div>
+        ))}
+      </Group>
     </div>
   );
 }
 
+// ---------- floating: camera ----------
 export function VideoCard() {
   const ref = useRef(null);
   const [status, setStatus] = useState("off");
   const [urls, setUrls] = useState([]);
+  const [shutter, setShutter] = useState(0);
   useEffect(() => {
+    camera.video = ref.current;
+    camera.onShutter = () => setShutter((n) => n + 1);
     api("/api/camera-urls").then(setUrls).catch(() => {});
-    return startViewer((stream) => {
+    const stop = startViewer((stream) => {
       const v = ref.current;
       if (!v) return;
       v.srcObject = stream;
       if (stream) v.play().catch(() => {});
     }, setStatus);
+    return () => { stop(); camera.video = null; camera.onShutter = null; };
   }, []);
+  const live = status === "live";
   return (
-    <div className="card video-card">
-      <div className="vc-head">
-        <span>Drone camera</span>
-        <span className={"vc-badge " + status}>{status === "live" ? "LIVE" : status === "waiting" ? "Connecting" : "Offline"}</span>
+    <div className={"material camera-card" + (live ? " live" : "")}>
+      <video ref={ref} autoPlay playsInline muted />
+      {shutter > 0 && <div key={shutter} className="shutter" />}
+      <div className="cam-label">
+        <span className={"rec" + (live ? " on" : "")} />{live ? "Live" : status === "waiting" ? "Connecting" : "Camera"}
       </div>
-      <div className="vc-frame">
-        <video ref={ref} autoPlay playsInline muted />
-        {status !== "live" && (
-          <div className="vc-empty">
-            <Icon name="camera" size={28} />
-            <p>On the phone open</p>
-            {(urls.length ? urls : ["https://<laptop-ip>:8443/camera"]).map((u) => <code key={u}>{u}</code>)}
-            <p className="muted small">and tap Start</p>
-          </div>
-        )}
-      </div>
+      {!live && (
+        <div className="cam-empty">
+          <Icon name="camera" size={26} stroke={1.5} />
+          <p>Open on the phone and tap Start</p>
+          {(urls.length ? urls : ["https://<laptop-ip>:8443/camera"]).map((u) => <code key={u}>{u}</code>)}
+        </div>
+      )}
     </div>
   );
 }
+

@@ -19,3 +19,4 @@ STATIC_DIR = Path(__file__).resolve().parent / "static"
 MAVLINK_URL = os.environ.get("MAVLINK_URL", "tcp:127.0.0.1:5762")
 HOST = os.environ.get("GS_HOST", "0.0.0.0")
 PORT = int(os.environ.get("GS_PORT", "8443"))
+CAPTURE_RADIUS = os.environ.get("GS_CAPTURE_RADIUS")   # m; default: layout.json crown_radius_m

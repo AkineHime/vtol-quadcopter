@@ -9,7 +9,11 @@ trees        one row per palm; the columns of flight_software/demo/trees.csv
              latest observation (confidence, last_visit) and free-text notes.
 tree_events  append-only history: every status change, visit, detection and
              note, newest last. Writing an event also updates the tree row.
-meta         key/value: the farm layout (layout.json) as JSON.
+meta         key/value: 'layout' (layout.json) and 'photo_pattern'
+             ({"every": N, "since": ts}), both as JSON.
+
+Trees returned by list_trees/get_tree also carry `last_photo`, derived from
+tree_events (latest event with an image); it is not a stored column.
 """
 from __future__ import annotations
 
@@ -117,13 +121,40 @@ def layout(con: sqlite3.Connection) -> dict:
     return json.loads(row[0]) if row else {}
 
 
+# last_photo is derived from tree_events (latest event with an image), not a column
+_TREE_SELECT = ("SELECT t.*, (SELECT MAX(ts) FROM tree_events ev WHERE ev.tree_id = t.id"
+                " AND ev.image IS NOT NULL) AS last_photo FROM trees t")
+
+
 def list_trees(con: sqlite3.Connection) -> list[dict]:
-    return [dict(r) for r in con.execute("SELECT * FROM trees ORDER BY row, col")]
+    return [dict(r) for r in con.execute(_TREE_SELECT + " ORDER BY t.row, t.col")]
 
 
 def get_tree(con: sqlite3.Connection, tree_id: str) -> dict | None:
-    r = con.execute("SELECT * FROM trees WHERE id=?", (tree_id,)).fetchone()
+    r = con.execute(_TREE_SELECT + " WHERE t.id=?", (tree_id,)).fetchone()
     return dict(r) if r else None
+
+
+PATTERN_STEPS = (1, 2, 4, 8)
+
+
+def get_pattern(con: sqlite3.Connection) -> dict:
+    """Photo pattern: every Nth palm (row-major order) is to be photographed.
+    A tree counts as done once it has a photo taken at or after `since`."""
+    row = con.execute("SELECT value FROM meta WHERE key='photo_pattern'").fetchone()
+    return json.loads(row[0]) if row else {"every": 1, "since": ""}
+
+
+def set_pattern(con: sqlite3.Connection, every: int) -> dict:
+    if every not in PATTERN_STEPS:
+        raise ValueError(f"every must be one of {PATTERN_STEPS}")
+    p = {"every": every, "since": now()}
+    con.execute("INSERT OR REPLACE INTO meta VALUES ('photo_pattern', ?)", (json.dumps(p),))
+    return p
+
+
+def in_pattern(tree: dict, every: int, grid: int) -> bool:
+    return (tree["row"] * grid + tree["col"]) % every == 0
 
 
 def history(con: sqlite3.Connection, tree_id: str) -> list[dict]:

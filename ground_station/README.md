@@ -10,6 +10,9 @@ serves everything over HTTPS on port **8443**:
   arrow with a trail, and a live video panel,
 - the **phone camera page** (`/camera`): a phone streams its rear camera to
   the dashboard over browser WebRTC. No app install, Android and iPhone.
+- **photo rounds**: photograph every palm, or every 2nd, 4th or 8th. Palms in
+  the pattern are highlighted; when the drone passes over one, the dashboard
+  saves a still from the live feed to that palm's history and it turns green.
 
 Telemetry comes from the autopilot over MAVLink (`pymavlink`), by default
 `tcp:127.0.0.1:5762`: the SITL's second port, so the route planner keeps 5760.
@@ -31,6 +34,7 @@ ground_station/
     telemetry.py       MAVLink reader thread
     signaling.py       WebRTC signalling relay (/ws/signal)
     certs.py           self-signed HTTPS cert
+    capture.py         when to photograph a palm (drone over a pattern palm)
     static/camera.html phone camera page
   frontend/            React + Vite dashboard (build -> frontend/dist)
   tests/               pytest suite (+ fake_vehicle.py)
@@ -92,6 +96,24 @@ Settings (environment variables):
 | `GS_DB` | `data/ground_station.db` | SQLite file |
 | `GS_CERTS` / `GS_MEDIA` | `certs/` / `media/` | cert folder / tree images |
 | `TREES_CSV` / `LAYOUT_JSON` | `flight_software/demo/…` | seed data |
+| `GS_CAPTURE_RADIUS` | `crown_radius_m` (4 m) | how close (horizontally) the drone must be to photograph a palm |
+
+### Photo rounds
+
+In the sidebar, *Photo round → Every*: **All**, **2nd**, **4th** or **8th**
+palm, counted row by row from P0000 (every 2nd = 85 palms, 4th = 43,
+8th = 22). On the map (legend set to *Photos*), palms in the pattern are copper,
+the rest are dimmed, and photographed ones turn green with a short ring pulse.
+The sidebar shows the progress.
+
+How a photo is taken: when telemetry puts the drone within the crown radius
+of a copper palm, the server asks the open dashboards for a frame. The first
+dashboard with live video grabs one from the phone feed (the camera card
+flashes like a shutter) and uploads it; it lands in
+`media/<tree id>/<timestamp>.jpg` and as a *Visited* event in the palm's
+history. While the drone stays overhead it retries every 5 s, so keep the
+dashboard open with the video live. Picking a pattern again starts a new
+round: earlier photos stay in the history but no longer count.
 
 ### With the simulator (Gazebo + ArduPilot SITL in WSL)
 
@@ -142,12 +164,13 @@ python -m pytest -v
 | File | Covers |
 |---|---|
 | `test_db.py` | schema keeps the `trees.csv` columns, 169 trees seeded exactly, idempotent seed, events update tree + history, bad values rejected |
+| `test_photo.py` | pattern membership (85/43/22), capture only over pattern palms within the radius, retry window, one answer per request, photo upload saved + history + `last_photo`, new round resets |
 | `test_api.py` | REST endpoints, validation, WebSocket push on change, and push when another process writes the DB |
 | `test_telemetry.py` | MAVLink reader against a fake vehicle: mode/armed/position/battery/waypoint, GCS heartbeat, 5 Hz throttle, waits for SITL, detects link loss |
 | `test_video.py` | signalling relay protocol, camera page, certificate, and a real WebRTC stream between two headless Chromium pages over HTTPS |
-| `test_dashboard.py` | the built dashboard in headless Chromium: 169 palm icons, no tiles, moving drone + trail, tree card actions, live video |
+| `test_dashboard.py` | the built dashboard in headless Chromium: 169 palm icons, no tiles, every-2nd pattern, moving drone + trail, live video, palms photographed automatically turn green, inspector photo + actions |
 
-Set `GS_SCREENSHOT=shot.png` to save a screenshot from the dashboard test.
+Set `GS_SCREENSHOT=/some/prefix` to save screenshots from the dashboard test.
 
 ## Database (contract with the route planner and ML pipeline)
 
@@ -183,9 +206,13 @@ or with `python -m backend.db`.
 | `status`, `condition`, `confidence` | | values set by this event (NULL if unchanged) |
 | `image` | TEXT | path under `ground_station/media/`, shown in the history |
 | `note` | TEXT | |
-| `source` | TEXT | `dashboard` · `planner` · `ml` · `seed` |
+| `source` | TEXT | `dashboard` · `camera` · `planner` · `ml` · `seed` |
 
-**`meta`**: `key='layout'` holds `layout.json`.
+**`meta`**: `key='layout'` holds `layout.json`; `key='photo_pattern'` holds
+`{"every": 1|2|4|8, "since": ts}`.
+
+The API also returns `last_photo` for each tree: the time of its latest event
+with an image. It is computed from `tree_events`, not stored.
 
 How teammates should write: preferably through the API, which also updates
 the tree row and pushes to the dashboard instantly:
@@ -208,11 +235,13 @@ the same transaction, or call `backend.db.add_event()` from Python.
 | `GET /api/trees` | all trees |
 | `GET /api/trees/{id}` | `{tree, history}` (newest first) |
 | `POST /api/trees/{id}/events` | `{kind, status?, condition?, confidence?, image?, note?, source?}` → updated tree; `kind` is `status`/`visit`/`detection`/`note` |
+| `POST /api/trees/{id}/photo?capture_id=…` | raw JPEG body answering a capture request (409 if already answered) |
+| `GET /api/pattern` · `POST /api/pattern` | `{"every": 1\|2\|4\|8}`; posting starts a new photo round |
 | `GET /api/telemetry` | latest telemetry |
 | `GET /api/camera-urls` | the phone URLs for this laptop |
 | `GET /camera` | phone camera page |
 | `GET /media/…` | tree images |
-| `WS /ws` | server → dashboard: `{"type":"telemetry", connected, mode, armed, lat, lon, alt, heading, groundspeed, airspeed, climb, battery, voltage, wp, text}` (≤ 5 Hz), `{"type":"tree", tree}`, `{"type":"trees", trees}` |
+| `WS /ws` | server → dashboard: `{"type":"telemetry", connected, mode, armed, lat, lon, alt, heading, groundspeed, airspeed, climb, battery, voltage, wp, text}` (≤ 5 Hz), `{"type":"tree", tree}`, `{"type":"trees", trees}`, `{"type":"pattern", pattern}`, `{"type":"capture", tree_id, capture_id}` |
 | `WS /ws/signal?role=camera\|viewer` | WebRTC signalling (offer/answer/ICE relay; protocol in `backend/signaling.py`) |
 
 ## Decisions made without the spec
@@ -226,7 +255,7 @@ spec and change what differs:
    CHECK constraints.
 2. **Tree actions**: set status (unscouted/target/cleared), log a visit with a
    condition, add a note. The dashboard cannot command the aircraft.
-3. **Colouring**: toggle between status and condition in the legend.
+3. **Colouring**: the legend switches between status, condition and photos (default: photos).
 4. **Map**: lat/lon from `layout.json` home, field outline, faint row lines,
    dock pad; north up.
 5. **Video**: phone-to-browser WebRTC, peer-to-peer on the LAN, no STUN; the
@@ -234,6 +263,8 @@ spec and change what differs:
    the old one), any number of dashboards.
 6. **Single port**: dashboard, API and camera page all on HTTPS 8443.
 7. **Telemetry trail**: last 3000 points (about 10 minutes at 5 Hz), not stored.
+8. **Photos**: taken from the dashboard's copy of the live feed (WebRTC
+   quality, up to 1280×720), so a dashboard must be open with video live.
 
 Tested here with headless Chromium only (fake camera, fake vehicle). The
 iPhone and Android camera pages and the live SITL link still need a run on

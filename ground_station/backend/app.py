@@ -3,15 +3,19 @@ from __future__ import annotations
 
 import asyncio
 import json
+from datetime import datetime, timezone
 from contextlib import asynccontextmanager
 from typing import Literal
 
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from . import config, db
+from .capture import Capture
+
+MAX_PHOTO_BYTES = 8 * 1024 * 1024
 
 
 class Hub:
@@ -29,10 +33,10 @@ class Hub:
             except Exception:
                 self.clients.discard(ws)
 
-    def send_threadsafe(self, msg: dict) -> None:
-        """For producers running in other threads (the MAVLink reader)."""
-        if self.loop and self.clients:
-            asyncio.run_coroutine_threadsafe(self.send_all(msg), self.loop)
+
+
+class PatternIn(BaseModel):
+    every: Literal[1, 2, 4, 8]
 
 
 class EventIn(BaseModel):
@@ -45,7 +49,7 @@ class EventIn(BaseModel):
     source: str = "dashboard"
 
 
-async def watch_external_writes(con, hub: Hub) -> None:
+async def watch_external_writes(con, hub: Hub, capture: Capture) -> None:
     """The planner / ML pipeline may write the SQLite file directly. PRAGMA
     data_version only changes on commits from *other* connections, so when it
     moves we push a fresh tree list to every dashboard."""
@@ -55,6 +59,7 @@ async def watch_external_writes(con, hub: Hub) -> None:
         v = con.execute("PRAGMA data_version").fetchone()[0]
         if v != last:
             last = v
+            capture.refresh()
             await hub.send_all({"type": "trees", "trees": db.list_trees(con)})
 
 
@@ -62,14 +67,21 @@ def create_app(telemetry=None, signaling=None) -> FastAPI:
     con = db.connect()
     db.init_db(con)
     hub = Hub()
+    capture = Capture(con, float(config.CAPTURE_RADIUS) if config.CAPTURE_RADIUS else None)
     tasks = []
+
+    async def on_telemetry(msg: dict) -> None:
+        await hub.send_all(msg)
+        req = capture.check(msg)
+        if req:
+            await hub.send_all(req)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         hub.loop = asyncio.get_running_loop()
-        tasks.append(asyncio.create_task(watch_external_writes(con, hub)))
-        if telemetry:
-            telemetry.start(hub.send_threadsafe)
+        tasks.append(asyncio.create_task(watch_external_writes(con, hub, capture)))
+        if telemetry:     # the reader thread hands each message to the event loop
+            telemetry.start(lambda m: asyncio.run_coroutine_threadsafe(on_telemetry(m), hub.loop))
         yield
         for t in tasks:
             t.cancel()
@@ -77,7 +89,7 @@ def create_app(telemetry=None, signaling=None) -> FastAPI:
             telemetry.stop()
 
     app = FastAPI(title="Coconut VTOL ground station", lifespan=lifespan)
-    app.state.con, app.state.hub = con, hub
+    app.state.con, app.state.hub, app.state.capture = con, hub, capture
 
     @app.get("/api/layout")
     def get_layout():
@@ -108,8 +120,41 @@ def create_app(telemetry=None, signaling=None) -> FastAPI:
             raise HTTPException(404, f"no tree {tree_id}")
         except ValueError as e:
             raise HTTPException(422, str(e))
+        capture.refresh()
         await hub.send_all({"type": "tree", "tree": t})
         return t
+
+    @app.post("/api/trees/{tree_id}/photo")
+    async def post_photo(tree_id: str, capture_id: str, request: Request):
+        """A dashboard answers a capture request with one JPEG frame (raw body)."""
+        if not db.get_tree(con, tree_id):
+            raise HTTPException(404, f"no tree {tree_id}")
+        body = await request.body()
+        if not body.startswith(b"\xff\xd8") or len(body) > MAX_PHOTO_BYTES:
+            raise HTTPException(422, "expected a JPEG under 8 MB")
+        if not capture.claim(capture_id, tree_id):
+            raise HTTPException(409, "capture already answered or expired")
+        folder = config.MEDIA_DIR / tree_id
+        folder.mkdir(parents=True, exist_ok=True)
+        name = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ") + ".jpg"
+        (folder / name).write_bytes(body)
+        t = db.add_event(con, tree_id, "visit", image=f"{tree_id}/{name}",
+                         note="Photo taken overhead", source="camera")
+        capture.refresh()
+        await hub.send_all({"type": "tree", "tree": t})
+        return t
+
+    @app.get("/api/pattern")
+    def get_pattern():
+        return db.get_pattern(con)
+
+    @app.post("/api/pattern")
+    async def post_pattern(p: PatternIn):
+        """Choose every Nth palm to photograph; restarts the photo round."""
+        pat = db.set_pattern(con, p.every)
+        capture.refresh()
+        await hub.send_all({"type": "pattern", "pattern": pat})
+        return pat
 
     @app.get("/api/telemetry")
     def get_telemetry():
@@ -125,6 +170,7 @@ def create_app(telemetry=None, signaling=None) -> FastAPI:
     async def ws_live(ws: WebSocket):
         await ws.accept()
         hub.clients.add(ws)
+        await ws.send_text(json.dumps({"type": "pattern", "pattern": db.get_pattern(con)}))
         if telemetry:
             await ws.send_text(json.dumps({"type": "telemetry", **telemetry.snapshot()}))
         try:
