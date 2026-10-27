@@ -19,3 +19,8 @@ flight_software/demo/captures/
 
 # Local Claude Code / MCP tooling config
 .mcp.json
+
+# ground station: local database, self-signed HTTPS cert, tree images
+ground_station/data/
+ground_station/certs/
+ground_station/media/
