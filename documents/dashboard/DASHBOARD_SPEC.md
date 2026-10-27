@@ -1,8 +1,27 @@
 # Ground-station dashboard + tree database: specification
 
 **Owner:** frontend/database teammate.
-**Status:** to build.
-**Reference design:** `reference_ui.jpg` in this folder.
+**Status:** built in `ground_station/` (2026-10-27). **The built design is the
+contract**: `ground_station/README.md` documents the database, API and WebSocket
+messages. Where it differs from this original spec, the code wins (decided
+2026-10-27):
+
+| This spec said | Built (current contract) |
+|---|---|
+| `n_m`, `e_m`, `height_m` | `n`, `e`, `height`: the `trees.csv` names, kept verbatim |
+| `observations` + `status_history` tables | one append-only `tree_events` table: `kind` = status, visit, detection or note, with `model`, `label`, `confidence`, `image`, `source` |
+| status unscouted/target/confirmed/cleared; `condition` healthy/ripe/frond/ripe+frond | status unscouted/target/confirmed/**harvested**; separate `maturity` (unknown/young/tender/mature/over-mature) and `health` (healthy/frond-damage/pest); `condition` kept read-only from the survey |
+| `missions` table, `/api/missions`, `/api/stats` | not built. The dashboard computes counts itself, and `/api/mission` shows the simulator's last mission |
+| `GET /api/farm`, `PATCH /api/trees/{id}`, `POST .../observations` | `GET /api/layout`, `POST /api/trees/{id}/events`, `POST /api/trees/{id}/image` |
+| WS `tree_update`, `rtc` on `/ws` | WS `tree`/`trees`/`plan`/`mission`; WebRTC signalling on its own `/ws/signal` |
+| (not in spec) | photo rounds; the next-mission plan from the database with ripeness prediction (`/api/plan`, `.waypoints` export); layered palm glyphs with lenses; a phone colour-card reader standing in for the classifier |
+
+The design intent below still holds. The schema and API sections (§3–§4) are
+kept for history only.
+
+**Reference design:** `reference_ui.jpg` in this folder. The 2026-10-27
+redesign also drew on dark glass control-room dashboards, on-map status chips,
+and frosted pill toolbars.
 
 This is the ground-station app for the CoconutQuadplane. It has three parts:
 - a **map of the farm**, with every palm as a clickable icon that opens its

@@ -1,5 +1,6 @@
 // REST helpers, the live WebSocket (telemetry + tree updates), and frame grabs
 // from the drone camera for automatic tree photos.
+import { CARD_MODEL, readCard } from "./cardReader.js";
 export async function api(path, body) {
   const res = await fetch(path, body === undefined ? {} : {
     method: "POST",
@@ -38,9 +39,13 @@ export async function captureTree(treeId, captureId) {
   c.getContext("2d").drawImage(v, 0, 0);
   const blob = await new Promise((r) => c.toBlob(r, "image/jpeg", 0.9));
   if (!blob) return false;
-  const res = await fetch(`/api/trees/${treeId}/photo?capture_id=${captureId}`, {
+  // stand-in classifier: read a colour card in view (green = tender, ...);
+  // no card in view -> logged as a plain photo
+  const card = readCard(c);
+  const q = card ? `&label=${card.label}&confidence=${card.confidence}&model=${CARD_MODEL}` : "";
+  const res = await fetch(`/api/trees/${treeId}/photo?capture_id=${captureId}${q}`, {
     method: "POST", headers: { "Content-Type": "image/jpeg" }, body: blob,
   });
-  if (res.ok && camera.onShutter) camera.onShutter(treeId);
+  if (res.ok && camera.onShutter) camera.onShutter(treeId, card);
   return res.ok;
 }

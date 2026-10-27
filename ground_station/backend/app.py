@@ -8,14 +8,15 @@ from contextlib import asynccontextmanager
 from typing import Literal
 
 from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from . import config, db
+from . import config, db, planner, ripeness
 from .capture import Capture
 
 MAX_PHOTO_BYTES = 8 * 1024 * 1024
+JPEG_MAGIC = bytes([0xFF, 0xD8])
 
 
 class Hub:
@@ -41,18 +42,54 @@ class PatternIn(BaseModel):
 
 class EventIn(BaseModel):
     kind: Literal["status", "visit", "detection", "note"]
-    status: Literal["unscouted", "target", "cleared"] | None = None
-    condition: Literal["healthy", "ripe", "frond", "ripe+frond"] | None = None
+    status: Literal["unscouted", "target", "confirmed", "harvested", "cleared"] | None = None   # cleared = old name
+    maturity: Literal["unknown", "young", "tender", "mature", "over-mature"] | None = None
+    health: Literal["healthy", "frond-damage", "pest"] | None = None
+    condition: Literal["healthy", "ripe", "frond", "ripe+frond"] | None = None   # survey vocabulary, older clients
     confidence: float | None = Field(None, ge=0, le=1)
     image: str | None = None
     note: str | None = Field(None, max_length=2000)
     source: str = "dashboard"
+    model: str | None = Field(None, max_length=60)
+    label: str | None = Field(None, max_length=40)
 
 
-async def watch_external_writes(con, hub: Hub, capture: Capture) -> None:
+def trees_with_scores(con) -> list[dict]:
+    """Trees plus the ripeness prediction (computed, not stored)."""
+    sc = ripeness.score_all(con)
+    return [dict(t, ripe_score=sc[t["id"]][0], ripe_reason=sc[t["id"]][1]) for t in db.list_trees(con)]
+
+
+def tree_with_score(con, tree_id: str) -> dict | None:
+    t = db.get_tree(con, tree_id)
+    if t:
+        s, why = ripeness.score(t, db.history(con, tree_id))
+        t.update(ripe_score=s, ripe_reason=why)
+    return t
+
+
+def sim_mission() -> dict | None:
+    """The mission last planned for the simulator (flight_software/demo/plan.json), shown
+    next to the database plan: what the sim flies vs what the database asks for now."""
+    if not config.SIM_PLAN.exists():
+        return None
+    p = json.loads(config.SIM_PLAN.read_text())
+    h = p["home"]
+    route = []
+    for m in p["mission"]:
+        if m["n"] is None:
+            continue
+        lat, lon = db.meters_to_latlon(m["n"], m["e"], h["lat"], h["lon"])
+        route.append({"seq": m["seq"], "label": m["label"], "lat": lat, "lon": lon, "tree": m.get("tree")})
+    return {"route": route, "targets": sorted({m["tree"] for m in p["mission"] if m.get("tree")}),
+            "items": len(p["mission"]), "mtime": config.SIM_PLAN.stat().st_mtime}
+
+
+async def watch_external_writes(con, hub: Hub, capture: Capture, state: dict) -> None:
     """The planner / ML pipeline may write the SQLite file directly. PRAGMA
     data_version only changes on commits from *other* connections, so when it
-    moves we push a fresh tree list to every dashboard."""
+    moves we push a fresh tree list (and a re-plan) to every dashboard. Also
+    pushes the simulator's mission when flight_software/demo/plan.json changes."""
     last = con.execute("PRAGMA data_version").fetchone()[0]
     while True:
         await asyncio.sleep(1.0)
@@ -60,7 +97,12 @@ async def watch_external_writes(con, hub: Hub, capture: Capture) -> None:
         if v != last:
             last = v
             capture.refresh()
-            await hub.send_all({"type": "trees", "trees": db.list_trees(con)})
+            await hub.send_all({"type": "trees", "trees": trees_with_scores(con)})
+            await state["replan"]()
+        m = config.SIM_PLAN.stat().st_mtime if config.SIM_PLAN.exists() else None
+        if m != state.get("sim_mtime"):
+            state["sim_mtime"] = m
+            await hub.send_all({"type": "mission", "mission": sim_mission()})
 
 
 def create_app(telemetry=None, signaling=None) -> FastAPI:
@@ -69,6 +111,12 @@ def create_app(telemetry=None, signaling=None) -> FastAPI:
     hub = Hub()
     capture = Capture(con, float(config.CAPTURE_RADIUS) if config.CAPTURE_RADIUS else None)
     tasks = []
+    state = {"plan": planner.plan(con)}
+
+    async def replan() -> None:
+        state["plan"] = planner.plan(con)
+        await hub.send_all({"type": "plan", "plan": planner.public(state["plan"])})
+    state["replan"] = replan
 
     async def on_telemetry(msg: dict) -> None:
         await hub.send_all(msg)
@@ -79,7 +127,7 @@ def create_app(telemetry=None, signaling=None) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         hub.loop = asyncio.get_running_loop()
-        tasks.append(asyncio.create_task(watch_external_writes(con, hub, capture)))
+        tasks.append(asyncio.create_task(watch_external_writes(con, hub, capture, state)))
         if telemetry:     # the reader thread hands each message to the event loop
             telemetry.start(lambda m: asyncio.run_coroutine_threadsafe(on_telemetry(m), hub.loop))
         yield
@@ -103,14 +151,45 @@ def create_app(telemetry=None, signaling=None) -> FastAPI:
 
     @app.get("/api/trees")
     def get_trees():
-        return db.list_trees(con)
+        return trees_with_scores(con)
 
     @app.get("/api/trees/{tree_id}")
     def get_tree(tree_id: str):
-        t = db.get_tree(con, tree_id)
+        t = tree_with_score(con, tree_id)
         if not t:
             raise HTTPException(404, f"no tree {tree_id}")
         return {"tree": t, "history": db.history(con, tree_id)}
+
+    @app.get("/api/plan")
+    def get_plan():
+        """Next mission planned from the database: targets + predicted-ripe palms
+        within the battery rule (backend/planner.py)."""
+        return planner.public(state["plan"])
+
+    @app.get("/api/plan.waypoints")
+    def get_plan_waypoints():
+        return PlainTextResponse(planner.waypoints(state["plan"]), headers={
+            "Content-Disposition": "attachment; filename=next_mission.waypoints"})
+
+    @app.get("/api/mission")
+    def get_mission():
+        """The mission last planned for the simulator, for comparison with /api/plan."""
+        return sim_mission()
+
+    @app.post("/api/trees/{tree_id}/image")
+    async def post_image(tree_id: str, request: Request):
+        """Store a JPEG for a palm (e.g. the ML pipeline's best frame); returns the
+        media path to reference from a detection event."""
+        if not db.get_tree(con, tree_id):
+            raise HTTPException(404, f"no tree {tree_id}")
+        body = await request.body()
+        if not body.startswith(JPEG_MAGIC) or len(body) > MAX_PHOTO_BYTES:
+            raise HTTPException(422, "expected a JPEG under 8 MB")
+        folder = config.MEDIA_DIR / tree_id
+        folder.mkdir(parents=True, exist_ok=True)
+        name = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ") + ".jpg"
+        (folder / name).write_bytes(body)
+        return {"image": f"{tree_id}/{name}"}
 
     @app.post("/api/trees/{tree_id}/events")
     async def post_event(tree_id: str, ev: EventIn):
@@ -121,12 +200,19 @@ def create_app(telemetry=None, signaling=None) -> FastAPI:
         except ValueError as e:
             raise HTTPException(422, str(e))
         capture.refresh()
+        t = tree_with_score(con, tree_id)
         await hub.send_all({"type": "tree", "tree": t})
+        await replan()
         return t
 
     @app.post("/api/trees/{tree_id}/photo")
-    async def post_photo(tree_id: str, capture_id: str, request: Request):
-        """A dashboard answers a capture request with one JPEG frame (raw body)."""
+    async def post_photo(tree_id: str, capture_id: str, request: Request, label: str | None = None,
+                         confidence: float | None = None, model: str | None = None):
+        """A dashboard answers a capture request with one JPEG frame (raw body).
+        With `label` (the colour-card reader's or another classifier's result,
+        e.g. pre-mature) the photo is logged as a detection, else as a visit."""
+        if label is not None and (len(label) > 40 or confidence is None or not 0 <= confidence <= 1):
+            raise HTTPException(422, "label needs a confidence between 0 and 1")
         if not db.get_tree(con, tree_id):
             raise HTTPException(404, f"no tree {tree_id}")
         body = await request.body()
@@ -138,10 +224,15 @@ def create_app(telemetry=None, signaling=None) -> FastAPI:
         folder.mkdir(parents=True, exist_ok=True)
         name = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ") + ".jpg"
         (folder / name).write_bytes(body)
-        t = db.add_event(con, tree_id, "visit", image=f"{tree_id}/{name}",
-                         note="Photo taken overhead", source="camera")
+        if label:
+            db.add_event(con, tree_id, "detection", image=f"{tree_id}/{name}", label=label, confidence=confidence,
+                         model=(model or "")[:60] or None, note="Photo taken overhead", source="camera")
+        else:
+            db.add_event(con, tree_id, "visit", image=f"{tree_id}/{name}", note="Photo taken overhead", source="camera")
         capture.refresh()
+        t = tree_with_score(con, tree_id)
         await hub.send_all({"type": "tree", "tree": t})
+        await replan()
         return t
 
     @app.get("/api/pattern")
@@ -171,6 +262,8 @@ def create_app(telemetry=None, signaling=None) -> FastAPI:
         await ws.accept()
         hub.clients.add(ws)
         await ws.send_text(json.dumps({"type": "pattern", "pattern": db.get_pattern(con)}))
+        await ws.send_text(json.dumps({"type": "plan", "plan": planner.public(state["plan"])}))
+        await ws.send_text(json.dumps({"type": "mission", "mission": sim_mission()}))
         if telemetry:
             await ws.send_text(json.dumps({"type": "telemetry", **telemetry.snapshot()}))
         try:

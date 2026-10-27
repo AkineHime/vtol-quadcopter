@@ -9,5 +9,6 @@ os.environ["GS_DB"] = str(_tmp / "test.db")
 os.environ["GS_CERTS"] = str(_tmp / "certs")
 os.environ["GS_MEDIA"] = str(_tmp / "media")
 os.environ["MAVLINK_URL"] = "none"          # tests start their own fake MAVLink source
+os.environ["GS_HTTP_PORT"] = "0"            # no plain-HTTP mirror (8080 may be in use by a running dashboard)
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))

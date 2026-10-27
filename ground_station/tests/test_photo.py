@@ -53,15 +53,24 @@ def test_photographed_tree_not_asked_again_until_new_round(con):
     assert cap.check(tel_over(con, "P0004"))["tree_id"] == "P0004"
 
 
+def recv(ws, kind):
+    """Next message of a given type (on connect the socket also sends the plan and mission)."""
+    while True:
+        msg = ws.receive_json()
+        if msg["type"] == kind:
+            return msg
+
+
 def test_pattern_and_photo_api():
     with TestClient(create_app()) as client:
         app = client.app
         assert client.post("/api/pattern", json={"every": 3}).status_code == 422
         with client.websocket_connect("/ws") as ws:
-            assert ws.receive_json()["type"] == "pattern"
+            recv(ws, "pattern")
+            recv(ws, "mission")                                  # last of the connect-time messages
             p = client.post("/api/pattern", json={"every": 8}).json()
             assert p["every"] == 8 and p["since"]
-            msg = ws.receive_json()
+            msg = recv(ws, "pattern")
             assert msg == {"type": "pattern", "pattern": p}
         assert client.get("/api/pattern").json() == p
 
@@ -72,13 +81,13 @@ def test_pattern_and_photo_api():
         hdr = {"Content-Type": "image/jpeg"}
         assert client.post(url, content=b"not a jpeg", headers=hdr).status_code == 422
         with client.websocket_connect("/ws") as ws:
-            ws.receive_json()
+            recv(ws, "mission")
             r = client.post(url, content=JPEG, headers=hdr)
             assert r.status_code == 200
             t = r.json()
             assert t["last_photo"] >= p["since"] and t["last_visit"]
-            msg = ws.receive_json()
-            assert msg["type"] == "tree" and msg["tree"]["last_photo"] == t["last_photo"]
+            msg = recv(ws, "tree")
+            assert msg["tree"]["last_photo"] == t["last_photo"]
         assert client.post(url, content=JPEG, headers=hdr).status_code == 409
         hist = client.get("/api/trees/P0008").json()["history"]
         assert hist[0]["image"].startswith("P0008/") and hist[0]["source"] == "camera"

@@ -17,6 +17,12 @@ seconds since the track start):
      (pre-mature = tender coconut, decided 2026-10-27) at >= --conf.
 Writes RUN/detections/: observations.json (rows in the dashboard `observations`
 format), trees.csv (per-palm summary) and annotated frames.
+
+With --post https://localhost:8443 the results also go to the ground-station
+dashboard (ground_station/): per palm seen with detections, its best frame
+(POST /api/trees/{id}/image) and one `detection` event with model, label and
+confidence; palms passing the target rule also get status `target`, which puts
+them on the dashboard's next-mission plan.
 """
 from __future__ import annotations
 
@@ -26,7 +32,9 @@ import csv
 import datetime as dt
 import json
 import math
+import ssl
 import sys
+import urllib.request
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
@@ -93,6 +101,32 @@ def load_items(a, tr):
     return items
 
 
+def post(base: str, path: str, data: bytes, ctype: str, insecure: bool) -> dict:
+    req = urllib.request.Request(base.rstrip("/") + path, data=data, headers={"Content-Type": ctype}, method="POST")
+    ctx = ssl._create_unverified_context() if insecure else None      # the dashboard's self-signed local cert
+    with urllib.request.urlopen(req, context=ctx, timeout=10) as r:
+        return json.loads(r.read())
+
+
+def post_results(base: str, rows: list[dict], best: dict, model: str, insecure: bool) -> int:
+    """One detection event per palm with detections (+ its best frame), and status
+    'target' for palms passing the rule. Returns the number of palms posted."""
+    n = 0
+    for r in rows:
+        b = best.get(r["tree_id"])
+        if not b:
+            continue
+        img = post(base, f"/api/trees/{r['tree_id']}/image", Path(b["frame"]).read_bytes(), "image/jpeg", insecure)["image"]
+        ev = {"kind": "detection", "label": b["label"], "confidence": round(b["conf"], 3), "model": model,
+              "image": img, "source": "ml", "note": f"{r['frames_harvest']} of {r['frames_in_view']} frames tender"}
+        post(base, f"/api/trees/{r['tree_id']}/events", json.dumps(ev).encode(), "application/json", insecure)
+        if r["status"] == "target":
+            post(base, f"/api/trees/{r['tree_id']}/events",
+                 json.dumps({"kind": "status", "status": "target", "source": "ml"}).encode(), "application/json", insecure)
+        n += 1
+    return n
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("run", type=Path)
@@ -102,6 +136,8 @@ def main() -> None:
     ap.add_argument("--conf", type=float, default=0.35)
     ap.add_argument("--source", default="confirm", choices=["scout", "confirm"])
     ap.add_argument("--start-utc", help="ISO-8601 time of track t=0 (default: now)")
+    ap.add_argument("--post", help="ground-station URL, e.g. https://localhost:8443: send results to the dashboard")
+    ap.add_argument("--insecure", action="store_true", help="accept the dashboard's self-signed certificate")
     a = ap.parse_args()
     import cv2
     from ultralytics import YOLO
@@ -115,7 +151,7 @@ def main() -> None:
     model = YOLO(str(a.model))
     out = a.run / "detections"
     (out / "frames").mkdir(parents=True, exist_ok=True)
-    obs, per_tree = [], {}
+    obs, per_tree, best = [], {}, {}            # best: tree -> its highest-confidence detection + frame
     for k, (path, t) in enumerate(items):
         f = tr["frames"][min(max(bisect.bisect(times, t) - 1, 0), len(times) - 1)]
         img = cv2.imread(str(path))
@@ -146,8 +182,12 @@ def main() -> None:
             cv2.putText(img, f"{lab} {s:.2f}", (int(b[0]), int(b[1]) - 4), cv2.FONT_HERSHEY_SIMPLEX, 0.45, col, 1)
         ann = out / "frames" / f"{k:05d}.jpg"
         cv2.imwrite(str(ann), img)
+        for _, lab, s, tid in dets:
+            rank = (lab == HARVEST_CLASS, s)
+            if tid and rank > best.get(tid, {}).get("rank", (False, -1.0)):
+                best[tid] = {"rank": rank, "label": lab, "conf": s, "frame": str(ann)}
         when = (t0 + dt.timedelta(seconds=t)).isoformat()
-        obs += [{"tree_id": tid, "captured_at": when, "source": a.source, "model": f"ripeness-{a.model.stem}",
+        obs += [{"tree_id": tid, "captured_at": when, "source": a.source, "model": a.model.stem.replace("_", "-"),
                  "label": lab, "confidence": round(s, 3), "image_path": ann.relative_to(a.run).as_posix()}
                 for _, lab, s, tid in dets if tid]
     rows = [{"tree_id": tid, "frames_in_view": pt["frames_in_view"], "frames_harvest": pt["frames_harvest"],
@@ -163,6 +203,9 @@ def main() -> None:
         wr.writerows(rows)
     print(f"[pipeline] {len(items)} frames, {len(obs)} detections on palms, "
           f"{sum(r['status'] == 'target' for r in rows)} targets / {len(rows)} palms in view -> {out}")
+    if a.post:
+        n = post_results(a.post, rows, best, a.model.stem.replace("_", "-"), a.insecure)
+        print(f"[pipeline] posted {n} palms to {a.post}")
 
 
 if __name__ == "__main__":

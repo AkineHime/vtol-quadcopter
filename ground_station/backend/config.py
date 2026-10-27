@@ -10,6 +10,7 @@ DEMO = REPO / "flight_software" / "demo"
 
 TREES_CSV = Path(os.environ.get("TREES_CSV", DEMO / "trees.csv"))
 LAYOUT_JSON = Path(os.environ.get("LAYOUT_JSON", DEMO / "layout.json"))
+SIM_PLAN = Path(os.environ.get("SIM_PLAN", DEMO / "plan.json"))      # the simulator's last planned mission
 DB_PATH = Path(os.environ.get("GS_DB", GS_DIR / "data" / "ground_station.db"))
 CERT_DIR = Path(os.environ.get("GS_CERTS", GS_DIR / "certs"))
 MEDIA_DIR = Path(os.environ.get("GS_MEDIA", GS_DIR / "media"))
@@ -19,4 +20,5 @@ STATIC_DIR = Path(__file__).resolve().parent / "static"
 MAVLINK_URL = os.environ.get("MAVLINK_URL", "tcp:127.0.0.1:5762")
 HOST = os.environ.get("GS_HOST", "0.0.0.0")
 PORT = int(os.environ.get("GS_PORT", "8443"))
+HTTP_PORT = int(os.environ.get("GS_HTTP_PORT", "8080"))   # plain HTTP on 127.0.0.1 only; 0 = off
 CAPTURE_RADIUS = os.environ.get("GS_CAPTURE_RADIUS")   # m; default: layout.json crown_radius_m

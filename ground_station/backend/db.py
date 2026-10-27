@@ -5,10 +5,18 @@ tables directly. Do not rename tables or columns without agreeing it with the
 team (see ground_station/README.md, "Database").
 
 trees        one row per palm; the columns of flight_software/demo/trees.csv
-             (id,row,col,n,e,height,condition,status) plus lat/lon and the
-             latest observation (confidence, last_visit) and free-text notes.
+             (id,row,col,n,e,height,condition,status) plus lat/lon, the palm's
+             classification and the latest observation:
+               maturity  unknown | young | tender | mature | over-mature
+                         (tender = 7-8 month nuts = the harvest target)
+               health    healthy | frond-damage | pest
+               status    unscouted | target | confirmed | harvested
+               condition the farm survey's original value, kept read-only
+                         (healthy | ripe | frond | ripe+frond) for trees.csv
 tree_events  append-only history: every status change, visit, detection and
              note, newest last. Writing an event also updates the tree row.
+             Detections carry the model name and its label; the ML labels map
+             to maturity (pre-mature -> tender, mature, over-mature).
 meta         key/value: 'layout' (layout.json) and 'photo_pattern'
              ({"every": N, "since": ts}), both as JSON.
 
@@ -26,9 +34,22 @@ from pathlib import Path
 
 from . import config
 
-CONDITIONS = ("healthy", "ripe", "frond", "ripe+frond")
-STATUSES = ("unscouted", "target", "cleared")
+CONDITIONS = ("healthy", "ripe", "frond", "ripe+frond")       # survey vocabulary (trees.csv)
+MATURITIES = ("unknown", "young", "tender", "mature", "over-mature")
+HEALTHS = ("healthy", "frond-damage", "pest")
+STATUSES = ("unscouted", "target", "confirmed", "harvested")  # confirmed: a confirm stop saw tender nuts
 EVENT_KINDS = ("seed", "status", "visit", "detection", "note")
+STATUS_ALIASES = {"cleared": "harvested"}                      # the old name, still accepted
+LABEL_MATURITY = {"pre-mature": "tender", "tender": "tender", "young": "young",
+                  "mature": "mature", "over-mature": "over-mature"}
+
+
+def from_condition(cond: str) -> tuple[str, str]:
+    """Survey condition -> (maturity, health). The survey's 'ripe' marks the
+    palms to harvest, i.e. tender nuts."""
+    return ("tender" if cond in ("ripe", "ripe+frond") else "unknown",
+            "frond-damage" if cond in ("frond", "ripe+frond") else "healthy")
+
 
 SCHEMA = f"""
 CREATE TABLE IF NOT EXISTS trees (
@@ -40,9 +61,12 @@ CREATE TABLE IF NOT EXISTS trees (
     height      REAL,                           -- m
     condition   TEXT NOT NULL DEFAULT 'healthy' CHECK (condition IN {CONDITIONS}),
     status      TEXT NOT NULL DEFAULT 'unscouted' CHECK (status IN {STATUSES}),
+    maturity    TEXT NOT NULL DEFAULT 'unknown' CHECK (maturity IN {MATURITIES}),
+    health      TEXT NOT NULL DEFAULT 'healthy' CHECK (health IN {HEALTHS}),
     lat         REAL NOT NULL,
     lon         REAL NOT NULL,
     confidence  REAL,                           -- 0..1, latest detection
+    label       TEXT,                           -- latest detection label, e.g. pre-mature
     last_visit  TEXT,                           -- ISO-8601 UTC
     notes       TEXT NOT NULL DEFAULT '',
     updated_at  TEXT NOT NULL
@@ -53,11 +77,15 @@ CREATE TABLE IF NOT EXISTS tree_events (
     ts          TEXT NOT NULL,                  -- ISO-8601 UTC
     kind        TEXT NOT NULL CHECK (kind IN {EVENT_KINDS}),
     status      TEXT,                           -- status after the event, if it set one
-    condition   TEXT,                           -- condition after the event, if it set one
+    condition   TEXT,                           -- survey condition (seed events only)
+    maturity    TEXT,                           -- maturity after the event, if it set one
+    health      TEXT,                           -- health after the event, if it set one
     confidence  REAL,
+    model       TEXT,                           -- detector that produced it, e.g. ripeness-yolo26s
+    label       TEXT,                           -- detector label, e.g. pre-mature
     image       TEXT,                           -- path relative to ground_station/media
     note        TEXT,
-    source      TEXT NOT NULL DEFAULT 'dashboard'  -- dashboard | planner | ml | seed
+    source      TEXT NOT NULL DEFAULT 'dashboard'  -- dashboard | camera | planner | ml | seed
 );
 CREATE INDEX IF NOT EXISTS idx_events_tree ON tree_events (tree_id, ts);
 CREATE TABLE IF NOT EXISTS meta (
@@ -92,6 +120,7 @@ def init_db(con: sqlite3.Connection, trees_csv: Path | None = None,
             layout_json: Path | None = None) -> int:
     """Create tables; seed the trees if the table is empty. Returns rows inserted."""
     con.executescript(SCHEMA)
+    _migrate(con)
     if con.execute("SELECT COUNT(*) FROM trees").fetchone()[0]:
         return 0
     layout = json.loads(Path(layout_json or config.LAYOUT_JSON).read_text())
@@ -103,17 +132,58 @@ def init_db(con: sqlite3.Connection, trees_csv: Path | None = None,
     for r in rows:
         n, e = float(r["n"]), float(r["e"])
         lat, lon = meters_to_latlon(n, e, lat0, lon0)
+        mat, hea = from_condition(r["condition"])
+        status = STATUS_ALIASES.get(r["status"], r["status"])
         con.execute(
-            "INSERT INTO trees (id,row,col,n,e,lat,lon,height,condition,status,updated_at)"
-            " VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+            "INSERT INTO trees (id,row,col,n,e,lat,lon,height,condition,status,maturity,health,updated_at)"
+            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
             (r["id"], int(r["row"]), int(r["col"]), n, e, round(lat, 8), round(lon, 8),
-             float(r["height"]), r["condition"], r["status"], ts))
+             float(r["height"]), r["condition"], status, mat, hea, ts))
         con.execute(
-            "INSERT INTO tree_events (tree_id,ts,kind,status,condition,note,source)"
-            " VALUES (?,?,'seed',?,?,'Imported from farm layout','seed')",
-            (r["id"], ts, r["status"], r["condition"]))
+            "INSERT INTO tree_events (tree_id,ts,kind,status,condition,maturity,health,note,source)"
+            " VALUES (?,?,'seed',?,?,?,?,'Imported from farm survey','seed')",
+            (r["id"], ts, status, r["condition"], mat, hea))
     con.execute("COMMIT")
     return len(rows)
+
+
+def _migrate(con: sqlite3.Connection) -> None:
+    """Bring a database made by an older version up to SCHEMA: new columns on
+    tree_events; and, when the trees table predates the maturity/health
+    classification (its CHECK constraints can't be altered), rebuild it,
+    deriving maturity and health from the survey condition and renaming the
+    status 'cleared' to 'harvested'."""
+    cols = {r[1] for r in con.execute("PRAGMA table_info(tree_events)")}
+    for c in ("model", "label", "maturity", "health"):
+        if c not in cols:
+            con.execute(f"ALTER TABLE tree_events ADD COLUMN {c} TEXT")
+    con.execute("UPDATE tree_events SET status='harvested' WHERE status='cleared'")
+    # seed events from before the classification: derive it from their survey condition
+    con.execute("UPDATE tree_events SET maturity='tender' WHERE kind='seed' AND maturity IS NULL"
+                " AND condition IN ('ripe','ripe+frond')")
+    con.execute("UPDATE tree_events SET health='frond-damage' WHERE kind='seed' AND health IS NULL"
+                " AND condition IN ('frond','ripe+frond')")
+    sql = con.execute("SELECT sql FROM sqlite_master WHERE name='trees'").fetchone()[0]
+    if "'harvested'" in sql and "maturity" in sql:
+        return
+    old = [r[1] for r in con.execute("PRAGMA table_info(trees)")]
+    con.execute("PRAGMA foreign_keys=OFF")
+    con.execute("PRAGMA legacy_alter_table=ON")      # keep tree_events' foreign key pointing at "trees"
+    con.execute("BEGIN")
+    con.execute("ALTER TABLE trees RENAME TO trees_old")
+    con.execute(SCHEMA.split("CREATE TABLE IF NOT EXISTS tree_events")[0].strip().rstrip(";"))
+    keep = [c for c in old if c not in ("status", "maturity", "health")]
+    for r in con.execute(f"SELECT {', '.join(old)} FROM trees_old").fetchall():
+        d = dict(zip(old, r))
+        mat, hea = from_condition(d["condition"])
+        vals = {**{c: d[c] for c in keep}, "status": STATUS_ALIASES.get(d["status"], d["status"]),
+                "maturity": d.get("maturity") or mat, "health": d.get("health") or hea}
+        con.execute(f"INSERT INTO trees ({', '.join(vals)}) VALUES ({', '.join('?' * len(vals))})",
+                    tuple(vals.values()))
+    con.execute("DROP TABLE trees_old")
+    con.execute("COMMIT")
+    con.execute("PRAGMA legacy_alter_table=OFF")
+    con.execute("PRAGMA foreign_keys=ON")
 
 
 def layout(con: sqlite3.Connection) -> dict:
@@ -163,42 +233,55 @@ def history(con: sqlite3.Connection, tree_id: str) -> list[dict]:
 
 
 def add_event(con: sqlite3.Connection, tree_id: str, kind: str, *, status: str | None = None,
-              condition: str | None = None, confidence: float | None = None,
-              image: str | None = None, note: str | None = None,
-              source: str = "dashboard") -> dict:
+              maturity: str | None = None, health: str | None = None, confidence: float | None = None,
+              image: str | None = None, note: str | None = None, source: str = "dashboard",
+              model: str | None = None, label: str | None = None, condition: str | None = None) -> dict:
     """Log an event and apply it to the tree row. Returns the updated tree.
 
-    status/condition/confidence, when given, become the tree's current values;
-    'visit' and 'detection' events also set last_visit; a 'note' is appended
-    to the tree's notes."""
+    status/maturity/health/confidence, when given, become the tree's current
+    values; a detection label that names a maturity stage sets maturity too;
+    a survey `condition` (older clients) sets health, and maturity when it says
+    ripe; 'visit' and 'detection' events also set last_visit; a 'note' is
+    appended to the tree's notes."""
+    status = STATUS_ALIASES.get(status, status)
+    if label is not None and maturity is None:
+        maturity = LABEL_MATURITY.get(label)
+    if condition is not None:
+        if condition not in CONDITIONS:
+            raise ValueError(f"condition must be one of {CONDITIONS}")
+        m, h = from_condition(condition)
+        health = health or h
+        maturity = maturity or (m if m != "unknown" else None)
     if kind not in EVENT_KINDS:
         raise ValueError(f"kind must be one of {EVENT_KINDS}")
     if status is not None and status not in STATUSES:
         raise ValueError(f"status must be one of {STATUSES}")
-    if condition is not None and condition not in CONDITIONS:
-        raise ValueError(f"condition must be one of {CONDITIONS}")
+    if maturity is not None and maturity not in MATURITIES:
+        raise ValueError(f"maturity must be one of {MATURITIES}")
+    if health is not None and health not in HEALTHS:
+        raise ValueError(f"health must be one of {HEALTHS}")
     if confidence is not None and not 0.0 <= confidence <= 1.0:
         raise ValueError("confidence must be between 0 and 1")
+    if label is not None and not (0 < len(label) <= 40):
+        raise ValueError("label must be 1-40 characters")
     tree = get_tree(con, tree_id)
     if tree is None:
         raise KeyError(tree_id)
     ts = now()
     sets = {"updated_at": ts}
-    if status is not None:
-        sets["status"] = status
-    if condition is not None:
-        sets["condition"] = condition
-    if confidence is not None:
-        sets["confidence"] = confidence
+    for k, v in (("status", status), ("maturity", maturity), ("health", health), ("condition", condition),
+                 ("confidence", confidence), ("label", label)):
+        if v is not None:
+            sets[k] = v
     if kind in ("visit", "detection"):
         sets["last_visit"] = ts
     if kind == "note" and note:
         sets["notes"] = (tree["notes"] + "\n" if tree["notes"] else "") + note
     con.execute("BEGIN")
     con.execute(
-        "INSERT INTO tree_events (tree_id,ts,kind,status,condition,confidence,image,note,source)"
-        " VALUES (?,?,?,?,?,?,?,?,?)",
-        (tree_id, ts, kind, status, condition, confidence, image, note, source))
+        "INSERT INTO tree_events (tree_id,ts,kind,status,condition,maturity,health,confidence,model,label,image,note,source)"
+        " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        (tree_id, ts, kind, status, condition, maturity, health, confidence, model, label, image, note, source))
     con.execute(f"UPDATE trees SET {', '.join(f'{k}=?' for k in sets)} WHERE id=?",
                 (*sets.values(), tree_id))
     con.execute("COMMIT")
@@ -208,7 +291,7 @@ def add_event(con: sqlite3.Connection, tree_id: str, kind: str, *, status: str |
 if __name__ == "__main__":       # python -m backend.db  -> create + seed, print a summary
     c = connect()
     added = init_db(c)
-    counts = c.execute("SELECT status, condition, COUNT(*) FROM trees GROUP BY 1, 2").fetchall()
+    counts = c.execute("SELECT status, maturity, health, COUNT(*) FROM trees GROUP BY 1, 2, 3").fetchall()
     print(f"{config.DB_PATH}: {added} trees seeded" if added else f"{config.DB_PATH}: already seeded")
-    for s, cond, k in counts:
-        print(f"  {s:10s} {cond:11s} {k}")
+    for s, m, h, k in counts:
+        print(f"  {s:10s} {m:11s} {h:13s} {k}")

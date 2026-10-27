@@ -34,6 +34,8 @@ def test_reads_vehicle_state():
         assert s["alt"] == pytest.approx(30.0) and s["heading"] == pytest.approx(90.0)
         assert wait_for(lambda: tel.snapshot().get("battery") == 87 and tel.snapshot().get("wp") == 7)
         assert tel.snapshot()["voltage"] == pytest.approx(15.8)
+        assert wait_for(lambda: tel.snapshot().get("wp_total") == 29), "MISSION_COUNT minus home"
+        assert tel.snapshot()["phase"] == "fixed-wing"                  # pusher on, lift rotors off
         assert v.got_gcs_heartbeat.wait(5), "bridge should send GCS heartbeats"
         n = len(got)
         time.sleep(1.0)
@@ -43,6 +45,12 @@ def test_reads_vehicle_state():
     finally:
         v.stop.set()
         tel.stop()
+
+
+def test_phase_from_motor_outputs():
+    from backend.telemetry import phase
+    assert phase(True, False, 10) == "vtol" and phase(True, True, 20) == "transition"
+    assert phase(False, True, 30) == "fixed-wing" and phase(False, False, 0.2) == "ground"
 
 
 def test_waits_for_sitl_then_connects():

@@ -62,8 +62,8 @@ def test_external_write_pushed(client):
     """A teammate's script writing straight to SQLite reaches the dashboard."""
     with client.websocket_connect("/ws") as ws:
         other = sqlite3.connect(config.DB_PATH)
-        other.execute("UPDATE trees SET status='cleared' WHERE id='P1212'")
+        other.execute("UPDATE trees SET status='harvested' WHERE id='P1212'")
         other.commit()
         other.close()
         msg = recv(ws, "trees")
-        assert next(t for t in msg["trees"] if t["id"] == "P1212")["status"] == "cleared"
+        assert next(t for t in msg["trees"] if t["id"] == "P1212")["status"] == "harvested"

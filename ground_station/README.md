@@ -13,6 +13,28 @@ serves everything over HTTPS on port **8443**:
 - **photo rounds**: photograph every palm, or every 2nd, 4th or 8th. Palms in
   the pattern are highlighted; when the drone passes over one, the dashboard
   saves a still from the live feed to that palm's history and it turns green.
+- **next mission planned from the database**: flagged targets plus palms the
+  ripeness model predicts are tender, within the 80% battery rule, drawn as a
+  dashed route with numbered stops, re-planned live whenever the database
+  changes, exportable as a QGroundControl `.waypoints` file. The simulator's
+  last mission is drawn faintly next to it for comparison.
+- **ripeness prediction**: a per-palm probability of tender nuts from
+  bunch-cycle rules (`backend/ripeness.py`), shown on the map and in the tree
+  card, with the reason.
+- **ML results**: `ml/detect_pipeline.py --post` sends detections (model,
+  label, confidence, best frame) into the palm histories.
+- **palm classification**: each palm has a *maturity* (not seen yet · young ·
+  **tender** = harvest target · mature · over-mature), a *health* (healthy ·
+  frond damage · pest) and a *harvest status* (unscouted → target → confirmed →
+  harvested). On the map one glyph shows them together: fill = maturity, ring =
+  status, red notch = health issue. Lenses switch the fill to Prediction (heat),
+  Health or Photos. Hovering a palm shows a peek card; row/column numbers run
+  along the field edges; a strip shows the flying mission's stop progress.
+- **phone colour-card reader** (stand-in classifier): during a photo round,
+  each automatic photo is checked for a coloured card on white paper — green =
+  tender, light green = young, yellow = mature, brown = over-mature — and logged
+  as a detection (`model` `colour-card-v1`). Only colour is read: nothing
+  detects health yet.
 
 Telemetry comes from the autopilot over MAVLink (`pymavlink`), by default
 `tcp:127.0.0.1:5762`: the SITL's second port, so the route planner keeps 5760.
@@ -72,8 +94,9 @@ It prints:
   Telemetry     tcp:127.0.0.1:5762
 ```
 
-1. Open **https://localhost:8443** on the laptop. The certificate is
-   self-signed, so accept the warning once (Chrome/Edge: *Advanced → Proceed*).
+1. Open **https://localhost:8443** on the laptop (accept the self-signed
+   certificate once: Chrome/Edge *Advanced → Proceed*), or **http://localhost:8080**,
+   which needs no certificate (plain HTTP, this computer only; `GS_HTTP_PORT`, 0 = off).
 2. On the phone, on the **same Wi-Fi**, open the *Phone camera* URL, accept
    the certificate warning, tap **Start** and allow the camera.
    - **Android (Chrome):** *Advanced → Proceed to 192.168.x.x (unsafe)*.
@@ -164,6 +187,8 @@ python -m pytest -v
 | File | Covers |
 |---|---|
 | `test_db.py` | schema keeps the `trees.csv` columns, 169 trees seeded exactly, idempotent seed, events update tree + history, bad values rejected |
+| `test_card_reader.py` | the colour-card reader on synthetic frames (Node): green/light green/yellow/brown → stage, tiny card and blank paper ignored |
+| `test_plan.py` | ripeness rules (fresh/stale sightings, harvest cycle, health, survey, visits), migration to maturity/health/harvested, photo with a card reading, planner battery cap + targets first + stop order + WPL export, confirmed palms dropped, plan/export/image endpoints, ML label/model fields, live re-plan |
 | `test_photo.py` | pattern membership (85/43/22), capture only over pattern palms within the radius, retry window, one answer per request, photo upload saved + history + `last_photo`, new round resets |
 | `test_api.py` | REST endpoints, validation, WebSocket push on change, and push when another process writes the DB |
 | `test_telemetry.py` | MAVLink reader against a fake vehicle: mode/armed/position/battery/waypoint, GCS heartbeat, 5 Hz throttle, waits for SITL, detects link loss |
@@ -187,10 +212,13 @@ or with `python -m backend.db`.
 | `row`, `col` | INTEGER | grid index, row 0 = south |
 | `n`, `e` | REAL | metres north / east of the dock |
 | `height` | REAL | m |
-| `condition` | TEXT | `healthy` · `ripe` · `frond` · `ripe+frond` |
-| `status` | TEXT | `unscouted` · `target` · `cleared` |
+| `condition` | TEXT | the survey's `healthy` · `ripe` · `frond` · `ripe+frond`, kept read-only for `trees.csv` (use `maturity`/`health`) |
+| `status` | TEXT | `unscouted` · `target` · `confirmed` · `harvested` (confirmed: a confirm stop saw tender nuts; the old name `cleared` is still accepted on input) |
+| `maturity` | TEXT | `unknown` · `young` · `tender` · `mature` · `over-mature` (tender = harvest target); seeded from the survey's `ripe` |
+| `health` | TEXT | `healthy` · `frond-damage` · `pest`; seeded from the survey's `frond` |
 | `lat`, `lon` | REAL | from `layout.json` home, same conversion as `upload_mission.py` |
 | `confidence` | REAL | 0–1, latest detection |
+| `label` | TEXT | latest detection label (`pre-mature` = tender, `mature`, `over-mature`) |
 | `last_visit` | TEXT | ISO-8601 UTC |
 | `notes` | TEXT | |
 | `updated_at` | TEXT | ISO-8601 UTC |
@@ -204,6 +232,8 @@ or with `python -m backend.db`.
 | `ts` | TEXT | ISO-8601 UTC |
 | `kind` | TEXT | `seed` · `status` · `visit` · `detection` · `note` |
 | `status`, `condition`, `confidence` | | values set by this event (NULL if unchanged) |
+| `model`, `label` | TEXT | detector name and its label, for `detection` events; a label naming a stage (`pre-mature` → tender, `mature`, `over-mature`, `young`) also sets the tree's maturity |
+| `maturity`, `health` | TEXT | values set by this event |
 | `image` | TEXT | path under `ground_station/media/`, shown in the history |
 | `note` | TEXT | |
 | `source` | TEXT | `dashboard` · `camera` · `planner` · `ml` · `seed` |
@@ -238,11 +268,50 @@ the same transaction, or call `backend.db.add_event()` from Python.
 | `POST /api/trees/{id}/photo?capture_id=…` | raw JPEG body answering a capture request (409 if already answered) |
 | `GET /api/pattern` · `POST /api/pattern` | `{"every": 1\|2\|4\|8}`; posting starts a new photo round |
 | `GET /api/telemetry` | latest telemetry |
+| `GET /api/plan` | next mission from the database: `{stops: [{tree, order, kind: target\|predicted, score, reason, lat, lon}], route: [{seq, label, lat, lon, alt, tree}], dropped, n_targets, n_predicted, distance_m, energy_wh, battery_pct, budget_pct, max_stops}` |
+| `GET /api/plan.waypoints` | the same mission as a QGroundControl WPL 110 file |
+| `GET /api/mission` | the simulator's last planned mission (`flight_software/demo/plan.json`): `{route, targets, items}` |
+| `POST /api/trees/{id}/photo?capture_id=…&label=…&confidence=…&model=…` | the capture answer can carry a classifier result (the colour-card reader's): then it is logged as a `detection` |
+| `POST /api/trees/{id}/image` | raw JPEG body → `{"image": path}` to reference from an event (used by the ML pipeline) |
 | `GET /api/camera-urls` | the phone URLs for this laptop |
 | `GET /camera` | phone camera page |
 | `GET /media/…` | tree images |
-| `WS /ws` | server → dashboard: `{"type":"telemetry", connected, mode, armed, lat, lon, alt, heading, groundspeed, airspeed, climb, battery, voltage, wp, text}` (≤ 5 Hz), `{"type":"tree", tree}`, `{"type":"trees", trees}`, `{"type":"pattern", pattern}`, `{"type":"capture", tree_id, capture_id}` |
+| `WS /ws` | server → dashboard: `{"type":"telemetry", connected, mode, armed, phase, lat, lon, alt, heading, groundspeed, airspeed, climb, battery, voltage, wp, wp_total, text}` (≤ 5 Hz; `phase` = `vtol`/`transition`/`fixed-wing`/`ground` from the motor outputs), `{"type":"tree", tree}`, `{"type":"trees", trees}`, `{"type":"pattern", pattern}`, `{"type":"capture", tree_id, capture_id}`, `{"type":"plan", plan}` (after every change), `{"type":"mission", mission}` |
+| `GET /api/trees` | each tree also carries `ripe_score` (0–1) and `ripe_reason`, computed, not stored |
 | `WS /ws/signal?role=camera\|viewer` | WebRTC signalling (offer/answer/ICE relay; protocol in `backend/signaling.py`) |
+
+## Next mission, prediction and ML
+
+**Planner** (`backend/planner.py`). Picks, in order: every `target` palm, then
+`unscouted` palms with `ripe_score >= 0.5`, best first, adding hover stops while
+the mission stays within 80% of the 44.4 Wh battery. Confirmed palms go to the
+harvest crew and cleared ones were just harvested, so neither is revisited. The
+route itself is `flight_software/route_planner.py`, the same planner the
+simulator flies: racetrack sweep from the dock, U-turn into the stops, stops
+flowing back to the dock. Energy model from the JSBSim runs: 7.3 Wh sweep +
+0.9 Wh back-transition/return/landing + 1.2 Wh per stop. Re-planning takes a few
+milliseconds, so it runs after every change and is pushed to all dashboards.
+Checked in JSBSim (2026-10-27): the seeded farm's 22-stop plan, estimated at
+34.6 Wh (78%), flew 2.76 km in 555 s on 32.4 Wh (73%), imaged all 22 targets and
+landed on the dock, so the estimate is about 7% conservative.
+
+**Ripeness prediction** (`backend/ripeness.py`). A palm opens a new bunch about
+monthly and a bunch is tender for about a month, so: a fresh tender detection
+scores its confidence and fades after the tender window; a harvest (status
+`cleared`) makes the palm due again one bunch interval later; mature or
+over-mature sightings mean a younger bunch is probably tender; the survey's
+"ripe" counts as a tender sighting; frond damage x0.7. These are rules, not a
+fitted model: every constant is named in the file, ready to fit once flights
+build up history in `tree_events`.
+
+**ML pipeline** (`ml/detect_pipeline.py`):
+```bash
+python ml/detect_pipeline.py RUN --frames manifest.csv --post https://<laptop>:8443 --insecure
+```
+Per palm with detections it uploads the best frame, posts a `detection` event
+(model, label, confidence), and sets `target` when >= 2 frames saw tender nuts.
+The palm then joins the next mission. From WSL, use the Windows host IP
+(`ip route | awk '/default/ {print $3}'`) rather than localhost.
 
 ## Decisions made without the spec
 

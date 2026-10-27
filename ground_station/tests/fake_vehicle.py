@@ -1,8 +1,10 @@
 """A fake ArduPlane on a TCP port, for tests (and for trying the dashboard
 without the simulator):   python tests/fake_vehicle.py   -> tcp:127.0.0.1:5762
 
-It circles the plantation at 30 m and streams HEARTBEAT, GLOBAL_POSITION_INT,
-VFR_HUD, SYS_STATUS and MISSION_CURRENT at 10 Hz."""
+It circles the plantation at 30 m in fixed-wing flight (pusher on, lift rotors
+off) and streams HEARTBEAT, GLOBAL_POSITION_INT, VFR_HUD, SYS_STATUS,
+MISSION_CURRENT and SERVO_OUTPUT_RAW at 10 Hz; it answers a mission list request
+with a MISSION_COUNT of 30 (home + 29 items)."""
 from __future__ import annotations
 
 import math
@@ -71,12 +73,15 @@ class FakeVehicle:
                 enc.vfr_hud_encode(16.0, 5.0, int(hdg), 40, 30.0, 0.5),
                 enc.sys_status_encode(0, 0, 0, 500, 15800, -1, 87, 0, 0, 0, 0, 0, 0),
                 enc.mission_current_encode(7),
+                enc.servo_output_raw_encode(k, 0, 1500, 1500, 1650, 1500, 1000, 1000, 1000, 1000),
             ]
             try:
                 conn.sendall(b"".join(m.pack(enc) for m in msgs))
                 for m in dec.parse_buffer(conn.recv(4096)) or []:
                     if m.get_type() == "HEARTBEAT" and m.type == MAV.MAV_TYPE_GCS:
                         self.got_gcs_heartbeat.set()
+                    elif m.get_type() == "MISSION_REQUEST_LIST":
+                        conn.sendall(enc.mission_count_encode(255, 190, 30).pack(enc))
             except socket.timeout:
                 pass
             except OSError:

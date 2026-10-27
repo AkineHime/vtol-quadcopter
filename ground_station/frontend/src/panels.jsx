@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { CONDITION, PHOTO, STATUS, colorOf, fmtNum, fmtTime, photoState } from "./theme.js";
+import { HEALTH, LABEL_STAGE, LENSES, MATURITY, PHOTO, STATUS, colorOf, fmtNum, fmtPct, fmtTime, heat, photoState } from "./theme.js";
 import { api, camera } from "./live.js";
 import { startViewer } from "./videoViewer.js";
 
@@ -13,6 +13,8 @@ const PATHS = {
   search: <><circle cx="10.5" cy="10.5" r="6" /><path d="m15 15 5 5" /></>,
   chevron: <path d="m9 6 6 6-6 6" />,
   camera: <><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.8l1.4-2h4.6l1.4 2h1.8A2.5 2.5 0 0 1 20 8.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5v-8Z" /><circle cx="12" cy="12.5" r="3.5" /></>,
+  download: <><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5" /><path d="M5 19h14" /></>,
+  fit: <><path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4" /></>,
 };
 export const Icon = ({ name, size = 20, stroke = 1.7 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={stroke}
@@ -70,7 +72,68 @@ function CountRow({ color, label, n, onClick }) {
   );
 }
 
-export function SidePanel({ panel, info, trees, pattern, setPattern, selectedId, onSelect, filter, setFilter, setPanel }) {
+// stacked bar of counts (a status overview strip)
+function StackBar({ parts }) {
+  const total = parts.reduce((a, p) => a + p.n, 0) || 1;
+  return (
+    <div className="stackbar">
+      {parts.filter((p) => p.n).map((p) => (
+        <span key={p.label} title={`${p.label}: ${p.n}`} style={{ flexGrow: p.n / total, background: p.color }} />
+      ))}
+    </div>
+  );
+}
+
+// next mission planned from the database (backend/planner.py)
+function MissionPlan({ plan, mission, onSelect, setColorBy }) {
+  const [all, setAll] = useState(false);
+  if (!plan) return null;
+  const stops = all ? plan.stops : plan.stops.slice(0, 5);
+  const used = Math.min(100, plan.battery_pct);
+  const simOnly = mission ? mission.targets.filter((t) => !plan.stops.some((s) => s.tree === t)) : [];
+  return (
+    <Group title="Next mission" trailing={<span className="secondary">from database</span>}>
+      <div className="cell static column plan-head">
+        <div className="plan-figs">
+          <div><b className="num">{plan.stops.length}</b><span>stops</span></div>
+          <div><b className="num">{(plan.distance_m / 1000).toFixed(2)}</b><span>km</span></div>
+          <div><b className="num">{plan.energy_wh}</b><span>Wh</span></div>
+        </div>
+        <div className="energy" title={`Battery used: ${plan.battery_pct}% (limit ${plan.budget_pct}%)`}>
+          <span className="energy-fill" style={{ width: `${used}%` }} />
+          <span className="energy-limit" style={{ left: `${plan.budget_pct}%` }} />
+        </div>
+        <div className="plan-sub secondary">
+          {plan.n_targets} target · {plan.n_predicted} predicted · {plan.battery_pct}% battery
+          {plan.dropped.length > 0 && <> · <span className="warn">{plan.dropped.length} over the battery limit</span></>}
+        </div>
+      </div>
+      {stops.map((s) => (
+        <button key={s.tree} className="cell stop-row" onClick={() => onSelect(s.tree, true)} title={s.reason}>
+          <span className={"stop-badge " + s.kind}>{s.order}</span>
+          <span className="cell-label"><b>{s.tree}</b><span className="secondary"> {s.kind === "target" ? "target" : s.reason}</span></span>
+          <span className="score"><span style={{ width: `${s.score * 100}%` }} /></span>
+        </button>
+      ))}
+      <div className="cell static plan-actions">
+        {plan.stops.length > 5 && <button className="link" onClick={() => setAll(!all)}>{all ? "Fewer" : `All ${plan.stops.length}`}</button>}
+        <button className="link" onClick={() => setColorBy("prediction")}>Show prediction</button>
+        <a className="btn btn-sm" href="/api/plan.waypoints" download="next_mission.waypoints">
+          <Icon name="download" size={15} stroke={2} />Export
+        </a>
+      </div>
+      {mission && (
+        <div className="cell static secondary sim-note">
+          Simulator mission: {mission.targets.length} stops
+          {simOnly.length > 0 && <> · {simOnly.length} no longer in the plan</>}
+        </div>
+      )}
+    </Group>
+  );
+}
+
+export function SidePanel({ panel, info, trees, pattern, setPattern, selectedId, onSelect, filter, setFilter, setPanel,
+  plan, mission, setColorBy }) {
   const lay = info?.layout;
   const show = (field, value) => { setFilter({ field, value, q: "" }); setPanel("trees"); };
 
@@ -85,6 +148,8 @@ export function SidePanel({ panel, info, trees, pattern, setPattern, selectedId,
           <h1>Plantation</h1>
           {lay && <p>{trees.length} palms · {lay.grid} × {lay.grid} · {lay.spacing} m spacing</p>}
         </header>
+
+        <MissionPlan plan={plan} mission={mission} onSelect={onSelect} setColorBy={setColorBy} />
 
         <Group title="Photo round">
           <div className="cell static">
@@ -102,16 +167,27 @@ export function SidePanel({ panel, info, trees, pattern, setPattern, selectedId,
         </Group>
 
         <Group title="Status">
+          <div className="cell static"><StackBar parts={Object.entries(STATUS).map(([k, s]) => (
+            { label: s.label, color: s.color, n: trees.filter((t) => t.status === k).length }))} /></div>
           {Object.entries(STATUS).map(([k, s]) => (
             <CountRow key={k} color={s.color} label={s.label} n={trees.filter((t) => t.status === k).length}
               onClick={() => show("status", k)} />
           ))}
         </Group>
 
-        <Group title="Condition">
-          {Object.entries(CONDITION).map(([k, s]) => (
-            <CountRow key={k} color={s.color} label={s.label} n={trees.filter((t) => t.condition === k).length}
-              onClick={() => show("condition", k)} />
+        <Group title="Maturity">
+          <div className="cell static"><StackBar parts={Object.entries(MATURITY).map(([k, s]) => (
+            { label: s.label, color: s.color, n: trees.filter((t) => t.maturity === k).length }))} /></div>
+          {Object.entries(MATURITY).map(([k, s]) => (
+            <CountRow key={k} color={s.color} label={s.label} n={trees.filter((t) => t.maturity === k).length}
+              onClick={() => show("maturity", k)} />
+          ))}
+        </Group>
+
+        <Group title="Health">
+          {Object.entries(HEALTH).map(([k, s]) => (
+            <CountRow key={k} color={s.color} label={s.label} n={trees.filter((t) => t.health === k).length}
+              onClick={() => show("health", k)} />
           ))}
         </Group>
 
@@ -130,13 +206,13 @@ export function SidePanel({ panel, info, trees, pattern, setPattern, selectedId,
     <aside className="sidebar">
       <header className="large-title">
         <h1>Trees</h1>
-        <p>{filter.field === "condition" ? `${CONDITION[filter.value].label} · ` : ""}{shown.length} of {trees.length}</p>
+        <p>{filter.field === "maturity" ? `${MATURITY[filter.value].label} · ` : filter.field === "health" ? `${HEALTH[filter.value].label} · ` : ""}{shown.length} of {trees.length}</p>
       </header>
       <label className="search">
         <Icon name="search" size={16} />
         <input placeholder="Search" value={filter.q} onChange={(e) => setFilter({ ...filter, q: e.target.value })} />
       </label>
-      <Segmented value={statusFilter} onChange={(v) => setFilter({ field: v ? "status" : null, value: v, q: filter.q })}
+      <Segmented small value={statusFilter} onChange={(v) => setFilter({ field: v ? "status" : null, value: v, q: filter.q })}
         options={[[null, "All"], ...Object.entries(STATUS).map(([k, s]) => [k, s.label])]} />
       <div className="group-body scroll">
         {shown.map((t) => <TreeCell key={t.id} t={t} active={t.id === selectedId} onSelect={onSelect} />)}
@@ -148,7 +224,7 @@ export function SidePanel({ panel, info, trees, pattern, setPattern, selectedId,
 function TreeCell({ t, active, onSelect }) {
   return (
     <button className={"cell" + (active ? " active" : "")} onClick={() => onSelect(t.id, true)}>
-      <span className="dot" style={{ background: colorOf(t, "condition") }} />
+      <span className="dot" style={{ background: colorOf(t, "harvest") }} />
       <span className="cell-label"><b>{t.id}</b><span className="secondary"> Row {t.row}, Col {t.col}</span></span>
       <span className="cell-value" style={{ color: t.status === "unscouted" ? undefined : STATUS[t.status].color }}>
         {STATUS[t.status].label}
@@ -158,7 +234,21 @@ function TreeCell({ t, active, onSelect }) {
 }
 
 // ---------- floating: telemetry ----------
-export function TelemetryCard({ tel, live }) {
+const PHASE = { vtol: "VTOL", transition: "Transition", "fixed-wing": "Fixed-wing", ground: "On ground", glide: "Gliding" };
+
+function Spark({ values }) {
+  if (values.length < 2) return <svg className="spark" viewBox="0 0 100 28" />;
+  const lo = Math.min(...values), hi = Math.max(...values, lo + 1);
+  const pts = values.map((v, i) => `${(100 * i) / (values.length - 1)},${26 - (24 * (v - lo)) / (hi - lo)}`).join(" ");
+  return (
+    <svg className="spark" viewBox="0 0 100 28" preserveAspectRatio="none">
+      <polyline points={`0,28 ${pts} 100,28`} className="spark-fill" />
+      <polyline points={pts} className="spark-line" />
+    </svg>
+  );
+}
+
+export function TelemetryCard({ tel, live, altHist = [] }) {
   const c = tel.connected;
   const metric = (label, value, unit) => (
     <div className="metric">
@@ -174,28 +264,57 @@ export function TelemetryCard({ tel, live }) {
           <div className="hud-title">{c ? tel.mode || "Connected" : live ? "No Drone" : "Offline"}</div>
           <div className="hud-sub">{c ? (tel.armed ? "Armed" : "Disarmed") : live ? "Waiting for MAVLink" : "Reconnecting"}</div>
         </div>
+        {c && tel.phase && <span className={"phase " + tel.phase}>{PHASE[tel.phase] || tel.phase}</span>}
       </div>
+      <div className="metric spark-metric"><Spark values={altHist} /><div className="metric-l">Altitude trend</div></div>
       {metric("Altitude", fmtNum(tel.alt), "m")}
       {metric("Ground speed", fmtNum(tel.groundspeed), "m/s")}
       {metric("Airspeed", fmtNum(tel.airspeed), "m/s")}
       {metric("Heading", fmtNum(tel.heading, 0), "°")}
       {metric("Battery", tel.battery != null ? String(tel.battery) : fmtNum(tel.voltage), tel.battery != null ? "%" : "V")}
-      {metric("Waypoint", tel.wp != null ? String(tel.wp) : "—")}
+      {metric("Waypoint", tel.wp != null ? (tel.wp_total ? `${tel.wp}/${tel.wp_total}` : String(tel.wp)) : "—")}
     </div>
   );
 }
 
 // ---------- floating: legend ----------
+export function MapBar({ layers, setLayers, onFit }) {
+  const pill = (k, label) => (
+    <button key={k} className={"pill" + (layers[k] ? " on" : "")} aria-pressed={layers[k]}
+      onClick={() => setLayers({ ...layers, [k]: !layers[k] })}>{label}</button>
+  );
+  return (
+    <div className="material mapbar">
+      {pill("plan", "Plan")}{pill("sim", "Sim route")}{pill("trail", "Trail")}{pill("chips", "Labels")}
+      <span className="bar-sep" />
+      <button className="icon-btn" onClick={onFit} title="Fit field" aria-label="Fit field"><Icon name="fit" size={16} stroke={2} /></button>
+    </div>
+  );
+}
+
+const RINGS = Object.values(STATUS).filter((s) => s.ring);
+
 export function Legend({ colorBy, setColorBy }) {
-  const table = colorBy === "condition" ? CONDITION : colorBy === "photos" ? PHOTO : STATUS;
+  const table = colorBy === "health" ? HEALTH : colorBy === "photos" ? PHOTO : colorBy === "prediction" ? null : MATURITY;
+  const rings = colorBy === "harvest" || colorBy === "prediction";
   return (
     <div className="material legend">
-      <Segmented small value={colorBy} onChange={setColorBy}
-        options={[["status", "Status"], ["condition", "Condition"], ["photos", "Photos"]]} />
+      <Segmented small value={colorBy} onChange={setColorBy} options={LENSES} />
       <div className="legend-keys">
-        {Object.values(table).map((s) => (
+        {table ? Object.values(table).map((s) => (
           <div key={s.label} className="legend-key"><span className="dot" style={{ background: s.color }} />{s.label}</div>
-        ))}
+        )) : (
+          <div className="legend-heat">
+            <span className="heat-bar" style={{ background: `linear-gradient(90deg, ${[0, 0.35, 0.5, 0.75, 1].map(heat).join(",")})` }} />
+            <div className="heat-ticks secondary"><span>0%</span><span>tender chance</span><span>100%</span></div>
+          </div>
+        )}
+        {rings && (
+          <div className="legend-rings">
+            {RINGS.map((s) => <span key={s.label} className="legend-key"><span className="ring-swatch" style={{ "--r": s.ring }} />{s.label}</span>)}
+            <span className="legend-key"><span className="notch-swatch" />Health issue</span>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -204,14 +323,15 @@ export function Legend({ colorBy, setColorBy }) {
 // ---------- floating: inspector ----------
 const KIND = { seed: "Imported", status: "Status changed", visit: "Visited", detection: "Detection", note: "Note" };
 
-export function TreeCard({ id, tree, pattern, onClose, compact }) {
+export function TreeCard({ id, tree, pattern, onClose, compact, plan }) {
   const [hist, setHist] = useState([]);
   const [note, setNote] = useState("");
-  const [cond, setCond] = useState(tree.condition);
+  const [stage, setStage] = useState(tree.maturity);
+  const [hea, setHea] = useState(tree.health);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState(null);
 
-  useEffect(() => { setCond(tree.condition); setErr(null); }, [id, tree.condition]);
+  useEffect(() => { setStage(tree.maturity); setHea(tree.health); setErr(null); }, [id, tree.maturity, tree.health]);
   useEffect(() => {
     let alive = true;
     api(`/api/trees/${id}`).then((r) => alive && setHist(r.history)).catch(() => {});
@@ -225,6 +345,7 @@ export function TreeCard({ id, tree, pattern, onClose, compact }) {
   };
   const addNote = () => { if (note.trim()) { send({ kind: "note", note: note.trim() }); setNote(""); } };
   const photo = hist.find((h) => h.image);
+  const stop = plan?.stops?.find((x) => x.tree === id);
   const ps = photoState(tree, pattern);
   const row = (label, value, mono) => (
     <div className="cell static"><span className="cell-label secondary">{label}</span><span className={"cell-value" + (mono ? " mono" : "")}>{value}</span></div>
@@ -242,8 +363,16 @@ export function TreeCard({ id, tree, pattern, onClose, compact }) {
 
       <div className="tags">
         <span className="tag" style={{ "--c": STATUS[tree.status].color }}>{STATUS[tree.status].label}</span>
-        <span className="tag" style={{ "--c": CONDITION[tree.condition].color }}>{CONDITION[tree.condition].label}</span>
+        <span className="tag" style={{ "--c": (MATURITY[tree.maturity] || MATURITY.unknown).color }}>{(MATURITY[tree.maturity] || MATURITY.unknown).label}</span>
+        {tree.health !== "healthy" && <span className="tag" style={{ "--c": HEALTH[tree.health]?.color }}>{HEALTH[tree.health]?.label}</span>}
         {ps !== "skip" && <span className="tag" style={{ "--c": PHOTO[ps].color }}>{PHOTO[ps].label}</span>}
+        {stop && <span className="tag" style={{ "--c": "#ffcf99" }}>Stop {stop.order} of next mission</span>}
+      </div>
+
+      <div className="ripe-meter">
+        <div className="ripe-top"><span>Tender-nut prediction</span><b>{fmtPct(tree.ripe_score)}</b></div>
+        <div className="score big"><span style={{ width: `${(tree.ripe_score ?? 0) * 100}%` }} /></div>
+        <div className="secondary ripe-why">{tree.ripe_reason || "—"}</div>
       </div>
 
       {photo && (
@@ -255,7 +384,7 @@ export function TreeCard({ id, tree, pattern, onClose, compact }) {
 
       <div className="group-body">
         {row("Height", `${fmtNum(tree.height)} m`)}
-        {row("Confidence", tree.confidence != null ? `${Math.round(tree.confidence * 100)}%` : "—")}
+        {row("Last detection", tree.label ? `${MATURITY[LABEL_STAGE[tree.label]]?.label || tree.label} · ${fmtPct(tree.confidence)}` : "—")}
         {row("Last visit", fmtTime(tree.last_visit))}
         {row("From dock", `${tree.n.toFixed(1)} m N · ${Math.abs(tree.e).toFixed(1)} m ${tree.e < 0 ? "W" : "E"}`)}
         {row("Coordinates", `${tree.lat.toFixed(6)}, ${tree.lon.toFixed(6)}`, true)}
@@ -270,10 +399,13 @@ export function TreeCard({ id, tree, pattern, onClose, compact }) {
 
       <Group title="Log visit">
         <div className="cell static pad gap">
-          <select value={cond} onChange={(e) => setCond(e.target.value)} aria-label="Condition">
-            {Object.entries(CONDITION).map(([k, c]) => <option key={k} value={k}>{c.label}</option>)}
+          <select value={stage} onChange={(e) => setStage(e.target.value)} aria-label="Maturity">
+            {Object.entries(MATURITY).map(([k, c]) => <option key={k} value={k}>{c.label}</option>)}
           </select>
-          <button className="btn" disabled={busy} onClick={() => send({ kind: "visit", condition: cond })}>Log</button>
+          <select value={hea} onChange={(e) => setHea(e.target.value)} aria-label="Health">
+            {Object.entries(HEALTH).map(([k, c]) => <option key={k} value={k}>{c.label}</option>)}
+          </select>
+          <button className="btn" disabled={busy} onClick={() => send({ kind: "visit", maturity: stage, health: hea })}>Log</button>
         </div>
       </Group>
 
@@ -292,8 +424,10 @@ export function TreeCard({ id, tree, pattern, onClose, compact }) {
           <div key={h.id} className="cell static event">
             <div className="event-top"><b>{KIND[h.kind] || h.kind}</b><span className="secondary">{fmtTime(h.ts)}</span></div>
             <div className="event-body secondary">
-              {[h.status && STATUS[h.status]?.label, h.condition && CONDITION[h.condition]?.label,
-                h.confidence != null && `${Math.round(h.confidence * 100)}%`, h.note, `via ${h.source}`]
+              {[h.status && STATUS[h.status]?.label, h.maturity && MATURITY[h.maturity]?.label,
+                h.health && h.health !== "healthy" && HEALTH[h.health]?.label,
+                h.label && !h.maturity && (MATURITY[LABEL_STAGE[h.label]]?.label || h.label),
+                h.confidence != null && `${Math.round(h.confidence * 100)}%`, h.model, h.note, `via ${h.source}`]
                 .filter(Boolean).join(" · ")}
             </div>
             {h.image && h !== photo && <img className="event-img" src={`/media/${h.image}`} alt="" />}
@@ -310,9 +444,10 @@ export function VideoCard() {
   const [status, setStatus] = useState("off");
   const [urls, setUrls] = useState([]);
   const [shutter, setShutter] = useState(0);
+  const [reading, setReading] = useState(null);
   useEffect(() => {
     camera.video = ref.current;
-    camera.onShutter = () => setShutter((n) => n + 1);
+    camera.onShutter = (treeId, card) => { setShutter((n) => n + 1); setReading({ treeId, card }); };
     api("/api/camera-urls").then(setUrls).catch(() => {});
     const stop = startViewer((stream) => {
       const v = ref.current;
@@ -330,6 +465,14 @@ export function VideoCard() {
       <div className="cam-label">
         <span className={"rec" + (live ? " on" : "")} />{live ? "Live" : status === "waiting" ? "Connecting" : "Camera"}
       </div>
+      {live && reading && (
+        <div className="cam-reading" key={shutter}>
+          <b>{reading.treeId}</b>
+          {reading.card
+            ? <><i style={{ background: MATURITY[reading.card.stage].color }} />{MATURITY[reading.card.stage].label} · {fmtPct(reading.card.confidence)}</>
+            : <span className="secondary">no card in view: photo only</span>}
+        </div>
+      )}
       {!live && (
         <div className="cam-empty">
           <Icon name="camera" size={26} stroke={1.5} />
@@ -341,3 +484,48 @@ export function VideoCard() {
   );
 }
 
+
+// ---------- floating: mission progress ----------
+// The stops of the mission being flown (the simulator's / uploaded plan) as
+// done / current / next, with a rough time and energy to landing from the
+// JSBSim figures (planner.py): ~18 s and 1.2 Wh per stop, 40 s / 0.9 Wh to land.
+const STOP_S = 18, STOP_WH = 1.2, LAND_S = 40, LAND_WH = 0.9, SWEEP_S = 150, SWEEP_WH = 7.3;
+
+export function MissionStrip({ mission, plan, tel, onSelect }) {
+  const route = mission?.route || [];
+  const stops = route.filter((r) => r.tree);
+  if (!stops.length) return null;
+  const flying = tel.connected && tel.armed && tel.wp != null && tel.wp > 0;
+  const wp = flying ? tel.wp : 0;
+  const firstStop = stops[0].seq;
+  const left = stops.filter((s) => s.seq >= wp);
+  const sweepLeft = wp < firstStop ? (firstStop - wp) / Math.max(1, firstStop - 1) : 0;
+  const secs = left.length * STOP_S + LAND_S + sweepLeft * SWEEP_S;
+  const wh = left.length * STOP_WH + LAND_WH + sweepLeft * SWEEP_WH;
+  const current = stops.find((s) => s.seq >= wp);
+  const sameAsPlan = plan && plan.stops.length === stops.length && plan.stops.every((p) => stops.some((s) => s.tree === p.tree));
+  return (
+    <div className="material strip">
+      <div className="strip-head">
+        <b>{flying ? "Mission in flight" : "Loaded mission"}</b>
+        <span className="secondary">{stops.length - left.length}/{stops.length} stops
+          {sameAsPlan ? " · matches the plan" : plan ? " · differs from the plan" : ""}</span>
+      </div>
+      <div className="strip-stops">
+        {stops.map((s) => {
+          const st = !flying ? "next" : s.seq < wp ? "done" : s === current ? "current" : "next";
+          return (
+            <button key={s.tree} className={"strip-stop " + st} title={s.tree} onClick={() => onSelect(s.tree, true)}>
+              <span />
+            </button>
+          );
+        })}
+      </div>
+      <div className="strip-figs">
+        <span>{current ? <>next <b>{current.tree}</b></> : "landing"}</span>
+        <span>≈ <b>{Math.floor(secs / 60)}:{String(Math.round(secs % 60)).padStart(2, "0")}</b> to landing</span>
+        <span>≈ <b>{wh.toFixed(1)} Wh</b> still needed</span>
+      </div>
+    </div>
+  );
+}
