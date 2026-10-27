@@ -63,6 +63,32 @@ def test_cert(tmp_path):
     mtime = cert.stat().st_mtime_ns
     ensure_cert(tmp_path)
     assert cert.stat().st_mtime_ns == mtime, "cert is reused while the IPs are unchanged"
+    # signed by the ground station's own CA (trust the CA once: no browser warning)
+    ca = x509.load_pem_x509_certificate((tmp_path / "ca.pem").read_bytes())
+    assert c.issuer == ca.subject and c.issuer != c.subject
+    ca.public_key().verify(c.signature, c.tbs_certificate_bytes,
+                           __import__("cryptography.hazmat.primitives.asymmetric.padding", fromlist=["PKCS1v15"]).PKCS1v15(),
+                           c.signature_hash_algorithm)
+    assert ca.extensions.get_extension_for_class(x509.BasicConstraints).value.ca
+    assert not c.extensions.get_extension_for_class(x509.BasicConstraints).value.ca
+    # an old self-signed server cert is replaced by a CA-signed one
+    (tmp_path / "cert.pem").write_bytes(ca.public_bytes(__import__("cryptography.hazmat.primitives.serialization",
+                                                                 fromlist=["Encoding"]).Encoding.PEM))
+    ensure_cert(tmp_path)
+    assert x509.load_pem_x509_certificate(cert.read_bytes()).issuer == ca.subject
+
+
+def test_phone_setup_endpoints():
+    from fastapi.testclient import TestClient
+    from backend.app import create_app
+    with TestClient(create_app()) as client:
+        r = client.get("/ca.crt")
+        assert r.status_code == 200 and r.headers["content-type"] == "application/x-x509-ca-cert"
+        assert x509.load_der_x509_certificate(r.content).extensions.get_extension_for_class(x509.BasicConstraints).value.ca
+        q = client.get("/api/qr", params={"text": "https://192.168.1.7:8443/phone"})
+        assert q.status_code == 200 and q.headers["content-type"].startswith("image/svg") and b"<svg" in q.content
+        assert client.get("/api/qr", params={"text": "x" * 300}).status_code == 422
+        assert "Download certificate" in client.get("/phone").text
 
 
 def _free_port():

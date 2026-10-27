@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 from typing import Literal
 
 from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
-from fastapi.responses import FileResponse, PlainTextResponse
+from fastapi.responses import FileResponse, PlainTextResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -255,7 +255,10 @@ def create_app(telemetry=None, signaling=None) -> FastAPI:
     def camera_urls():
         """Where to point the phone, shown in the dashboard's video card."""
         from .certs import local_ips
-        return [f"https://{ip}:{config.PORT}/camera" for ip in local_ips() if not ip.startswith("127.")]
+        # Wi-Fi/LAN addresses first: 172.16-31.x is usually a virtual adapter (WSL, Hyper-V) a phone can't reach
+        rank = lambda ip: (0 if ip.startswith("192.168.") else 1 if ip.startswith("10.") else 2, ip)
+        ips = sorted((ip for ip in local_ips() if not ip.startswith("127.")), key=rank)
+        return [f"https://{ip}:{config.PORT}/camera" for ip in ips]
 
     @app.websocket("/ws")
     async def ws_live(ws: WebSocket):
@@ -280,6 +283,29 @@ def create_app(telemetry=None, signaling=None) -> FastAPI:
     @app.get("/camera")
     def camera_page():
         return FileResponse(config.STATIC_DIR / "camera.html")
+
+    @app.get("/phone")
+    def phone_page():
+        """Phone setup: trust the ground station's certificate, then open the camera."""
+        return FileResponse(config.STATIC_DIR / "phone.html")
+
+    @app.get("/ca.crt")
+    def ca_cert():
+        """The ground station's local CA (backend/certs.py), for phones and laptops to trust once."""
+        from .certs import ca_der
+        return Response(ca_der(config.CERT_DIR), media_type="application/x-x509-ca-cert",
+                        headers={"Content-Disposition": 'attachment; filename="coconut-ground-station-ca.crt"'})
+
+    @app.get("/api/qr")
+    def qr(text: str):
+        """QR code (SVG) of a short text, e.g. the phone setup link shown on the dashboard."""
+        import io
+        import segno
+        if len(text) > 200:
+            raise HTTPException(422, "text too long")
+        buf = io.BytesIO()
+        segno.make(text, error="m").save(buf, kind="svg", scale=6, border=2, dark="#111", light="#fff")
+        return Response(buf.getvalue(), media_type="image/svg+xml")
 
     config.MEDIA_DIR.mkdir(parents=True, exist_ok=True)
     app.mount("/media", StaticFiles(directory=config.MEDIA_DIR), name="media")

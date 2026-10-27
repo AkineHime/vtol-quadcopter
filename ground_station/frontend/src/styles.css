@@ -353,3 +353,11 @@ path.route-sim { opacity: .9; }
   animation: pop .35s var(--ease) both; }
 .cam-reading b { font-family: var(--mono); }
 .cam-reading i { width: 8px; height: 8px; border-radius: 50%; }
+
+/* camera card: connect-a-phone */
+.cam-empty:has(.qr) { flex-direction: row; gap: 14px; justify-content: flex-start; text-align: left; padding: 14px; }
+.qr { width: 104px; height: 104px; border-radius: 10px; flex: none; background: #fff; }
+.cam-help { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.cam-help b { color: var(--label); font-size: 14px; }
+.cam-help p { margin: 0; font-size: 12px; }
+.cam-help code { font-size: 11px; word-break: break-all; color: var(--secondary); font-weight: 500; }

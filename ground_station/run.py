@@ -34,6 +34,8 @@ def main() -> None:
         print(f"                http://localhost:{config.HTTP_PORT}  (this computer only)")
     for ip in lan:
         print(f"  Phone camera  https://{ip}:{config.PORT}/camera")
+        print(f"  Phone setup   https://{ip}:{config.PORT}/phone   (or scan the QR code on the dashboard)")
+    print(f"  No warnings:  certutil -user -addstore Root \"{config.CERT_DIR / 'ca.pem'}\"   (once; see README)")
     print(f"  Telemetry     {config.MAVLINK_URL}")
     if not config.FRONTEND_DIST.exists():
         print("  (frontend not built yet: cd frontend && npm install && npm run build)")

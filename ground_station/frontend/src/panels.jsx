@@ -475,9 +475,21 @@ export function VideoCard() {
       )}
       {!live && (
         <div className="cam-empty">
-          <Icon name="camera" size={26} stroke={1.5} />
-          <p>Open on the phone and tap Start</p>
-          {(urls.length ? urls : ["https://<laptop-ip>:8443/camera"]).map((u) => <code key={u}>{u}</code>)}
+          {urls.length > 0 ? (
+            <>
+              <img className="qr" alt="QR code: phone setup" src={`/api/qr?text=${encodeURIComponent(urls[0].replace(/\/camera$/, "/phone"))}`} />
+              <div className="cam-help">
+                <b>Connect a phone camera</b>
+                <p>Same Wi-Fi as this laptop. Scan, then follow the two steps.</p>
+                <code>{urls[0].replace(/\/camera$/, "/phone")}</code>
+              </div>
+            </>
+          ) : (
+            <>
+              <Icon name="camera" size={26} stroke={1.5} />
+              <p>No network: connect the laptop to Wi-Fi to add a phone camera</p>
+            </>
+          )}
         </div>
       )}
     </div>

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import L from "leaflet";
 import { MapContainer, Marker, Polygon, Polyline, ScaleControl, Tooltip, ZoomControl, useMap } from "react-leaflet";
 import { colorOf, fmtPct, HEALTH, MATURITY, photoState, PREDICT_MIN, STATUS } from "./theme.js";
+import { chaikin, smoothRoute } from "./geo.js";
 
 // A palm canopy seen from above, as one layered glyph: the disc's fill is the
 // lens colour (maturity by default), a ring shows the harvest status, a red
@@ -90,8 +91,11 @@ function FlyTo({ target }) {
   return null;
 }
 
-// The drone glides between 5 Hz telemetry fixes instead of jumping: an
-// imperative Leaflet marker eased toward the latest fix every animation frame.
+// The drone moves continuously between 5 Hz telemetry fixes: each frame it is
+// dead-reckoned from the last fix along its ground track (speed + heading, at
+// most MAX_EXTRAP s ahead) and eased toward that point, so it neither jumps nor
+// stops and starts. An imperative Leaflet marker, so React never re-creates it.
+const MAX_EXTRAP = 0.6;
 function Drone({ telemetry }) {
   const map = useMap();
   const ref = useRef(null);
@@ -104,13 +108,15 @@ function Drone({ telemetry }) {
           <path d="M0,-9 L7,8 L0,4 L-7,8 Z" fill="currentColor" stroke-linejoin="round"/></svg></div>`,
       }),
     });
-    const st = { m, cur: null, goal: null, hdg: 0, goalHdg: 0, raf: 0, added: false };
+    const st = { m, cur: null, fix: null, hdg: 0, goalHdg: 0, raf: 0, added: false };
     const tick = () => {
-      if (st.goal) {
-        if (!st.cur) st.cur = st.goal.slice();
-        st.cur[0] += (st.goal[0] - st.cur[0]) * 0.18;
-        st.cur[1] += (st.goal[1] - st.cur[1]) * 0.18;
-        st.hdg += (((st.goalHdg - st.hdg + 540) % 360) - 180) * 0.18;
+      if (st.fix) {
+        const f = st.fix, dt = Math.min(MAX_EXTRAP, (performance.now() - f.t) / 1000);
+        const goal = [f.lat + f.vn * dt / 111320, f.lon + f.ve * dt / (111320 * Math.cos((f.lat * Math.PI) / 180))];
+        if (!st.cur) st.cur = goal.slice();
+        st.cur[0] += (goal[0] - st.cur[0]) * 0.25;
+        st.cur[1] += (goal[1] - st.cur[1]) * 0.25;
+        st.hdg += (((st.goalHdg - st.hdg + 540) % 360) - 180) * 0.15;
         m.setLatLng(st.cur);
         if (!st.added) { m.addTo(map); st.added = true; }
         const svg = m.getElement()?.querySelector("svg");
@@ -125,7 +131,9 @@ function Drone({ telemetry }) {
   useEffect(() => {
     const st = ref.current;
     if (!st || telemetry?.lat == null) return;
-    st.goal = [telemetry.lat, telemetry.lon];
+    const gs = telemetry.groundspeed || 0, h = ((telemetry.heading || 0) * Math.PI) / 180;
+    st.fix = { lat: telemetry.lat, lon: telemetry.lon, t: performance.now(),
+      vn: gs * Math.cos(h), ve: gs * Math.sin(h) };
     st.goalHdg = telemetry.heading || 0;
     st.m.getElement()?.classList.toggle("stale", !telemetry.connected);
   }, [telemetry]);
@@ -142,7 +150,10 @@ export default function FarmMap({ info, trees, colorBy, pattern, selectedId, onS
   const extentKey = extent.length ? [Math.min(...extent.map((p) => p[0])), Math.max(...extent.map((p) => p[0])),
     Math.min(...extent.map((p) => p[1])), Math.max(...extent.map((p) => p[1]))].map((v) => v.toFixed(5)).join() : "";
   const bounds = useMemo(() => (extent.length ? L.latLngBounds(extent) : null), [extentKey]);
-  const simRoute = useMemo(() => mission?.route?.map((p) => [p.lat, p.lon]) || [], [mission]);
+  // drawn the way the aircraft flies them: corners rounded (geo.js)
+  const plannedSmooth = useMemo(() => (plan?.route ? smoothRoute(plan.route) : []), [plan]);
+  const simRoute = useMemo(() => (mission?.route ? smoothRoute(mission.route) : []), [mission]);
+  const trailSmooth = useMemo(() => chaikin(trail), [trail]);
   const stops = plan?.stops || [];
   // the route chip sits at the far end of the first lane, out of the way of the palms
   const chipAt = planned.length > 2 ? planned[1] : null;
@@ -177,9 +188,9 @@ export default function FarmMap({ info, trees, colorBy, pattern, selectedId, onS
       )}
       {layers.plan && planned.length > 1 && (
         <>
-          <Polyline positions={planned} interactive={false}
+          <Polyline positions={plannedSmooth} interactive={false}
             pathOptions={{ color: "#ffcf99", weight: 6, opacity: 0.12, lineCap: "round", lineJoin: "round" }} />
-          <Polyline positions={planned} interactive={false}
+          <Polyline positions={plannedSmooth} interactive={false}
             pathOptions={{ color: "#ffcf99", weight: 2, dashArray: "6 8", lineCap: "round", lineJoin: "round", className: "route-plan" }} />
         </>
       )}
@@ -207,7 +218,7 @@ export default function FarmMap({ info, trees, colorBy, pattern, selectedId, onS
       ))}
       {layers.plan && chipAt && plan && <Marker position={chipAt} icon={routeChip(plan)} interactive={false} zIndexOffset={1800} />}
       {layers.trail && trail.length > 1 && (
-        <Polyline positions={trail} interactive={false}
+        <Polyline positions={trailSmooth} interactive={false}
           pathOptions={{ color: "#e3a06a", weight: 3, opacity: 0.9, lineCap: "round", lineJoin: "round" }} />
       )}
       <Drone telemetry={telemetry} />

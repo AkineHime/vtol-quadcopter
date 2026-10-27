@@ -97,17 +97,43 @@ It prints:
 1. Open **https://localhost:8443** on the laptop (accept the self-signed
    certificate once: Chrome/Edge *Advanced → Proceed*), or **http://localhost:8080**,
    which needs no certificate (plain HTTP, this computer only; `GS_HTTP_PORT`, 0 = off).
-2. On the phone, on the **same Wi-Fi**, open the *Phone camera* URL, accept
-   the certificate warning, tap **Start** and allow the camera.
-   - **Android (Chrome):** *Advanced → Proceed to 192.168.x.x (unsafe)*.
-   - **iPhone (Safari):** *Show Details → visit this website → Visit Website*.
-   The dashboard's video card switches to **LIVE**. The phone keeps its screen
-   awake while streaming.
+2. **Connect the phone camera.** Put the phone on the **same Wi-Fi** as the
+   laptop and scan the QR code in the dashboard's camera card (or open the
+   *Phone setup* URL that `run.py` prints, `https://<laptop-wifi-ip>:8443/phone`).
+   The page has two steps:
+   - **Trust the ground station** (once; optional): *Download certificate* and
+     install it: Android *Settings → Security → Encryption & credentials →
+     Install a certificate → CA certificate*; iPhone (Safari) *Settings →
+     Profile Downloaded → Install*, then *General → About → Certificate Trust
+     Settings* → turn it on. Skipped? Then tap through the warning instead
+     (Android *Advanced → Proceed*, iPhone *Show Details → visit this website*).
+   - **Open camera**, tap **Start**, allow the camera. The dashboard's camera
+     card switches to **Live**; the phone keeps its screen awake while streaming.
 3. If the phone can't load the page, allow Python through the firewall on
-   private networks (Windows asks the first time `run.py` starts).
+   **private** networks (Windows asks the first time `run.py` starts), and make
+   sure the phone isn't on a guest network that isolates devices. The phone
+   needs the laptop's Wi-Fi address (192.168.x.x or 10.x.x.x), not a
+   172.x.x.x one, which is usually the WSL/Hyper-V virtual adapter.
 
-The certificate is created in `certs/` on first run and regenerated
-automatically when the laptop's IP addresses change.
+### No security warning
+
+`run.py` signs its HTTPS certificate with the ground station's own small
+certificate authority, created once in `certs/ca.pem` (10 years). Trust that CA
+once per device and the warning is gone for good, also after the laptop's IP
+changes (the server certificate is re-issued automatically):
+
+- **Windows (Chrome, Edge):** in a terminal, `certutil -user -addstore Root
+  ground_station\certs\ca.pem`, confirm the dialog, restart the browser.
+  To undo: `certutil -user -delstore Root "Coconut VTOL ground station local CA"`.
+- **Firefox:** *Settings → Privacy & Security → Certificates → View
+  Certificates → Authorities → Import* `certs/ca.pem`, tick "identify websites".
+- **Phones:** step 2 above.
+- Or skip HTTPS on the laptop: **http://localhost:8080** works without any
+  certificate (this computer only).
+
+Keep `certs/ca-key.pem` private: anyone with it could make certificates your
+devices trust. It never leaves the laptop and is git-ignored. Delete the
+`certs/` folder to start over with a new CA (then trust the new one).
 
 Settings (environment variables):
 
@@ -275,6 +301,9 @@ the same transaction, or call `backend.db.add_event()` from Python.
 | `POST /api/trees/{id}/image` | raw JPEG body → `{"image": path}` to reference from an event (used by the ML pipeline) |
 | `GET /api/camera-urls` | the phone URLs for this laptop |
 | `GET /camera` | phone camera page |
+| `GET /phone` | phone setup page: trust the certificate, then open the camera (the dashboard shows it as a QR code) |
+| `GET /ca.crt` | the ground station's local CA certificate (DER), to install on phones and laptops |
+| `GET /api/qr?text=…` | QR code (SVG) of a short text |
 | `GET /media/…` | tree images |
 | `WS /ws` | server → dashboard: `{"type":"telemetry", connected, mode, armed, phase, lat, lon, alt, heading, groundspeed, airspeed, climb, battery, voltage, wp, wp_total, text}` (≤ 5 Hz; `phase` = `vtol`/`transition`/`fixed-wing`/`ground` from the motor outputs), `{"type":"tree", tree}`, `{"type":"trees", trees}`, `{"type":"pattern", pattern}`, `{"type":"capture", tree_id, capture_id}`, `{"type":"plan", plan}` (after every change), `{"type":"mission", mission}` |
 | `GET /api/trees` | each tree also carries `ripe_score` (0–1) and `ripe_reason`, computed, not stored |
