@@ -1,0 +1,38 @@
+{
+ "name": "js_hover_ripe",
+ "physics": "jsbsim",
+ "test": null,
+ "strategy": "hover",
+ "targets": "ripe",
+ "wind_ne": [
+  0.0,
+  0.0
+ ],
+ "gust": 0.0,
+ "param_files": [],
+ "events": null,
+ "flight_s": 484.9,
+ "distance_m": 727,
+ "energy_wh": 34.9,
+ "battery_used_pct": 78.6,
+ "trees_imaged": 97,
+ "trees_imaged_2plus": 94,
+ "targets_imaged_2plus": 28,
+ "target_frames_median": 32,
+ "frames_per_tree_median": 4,
+ "frames_total": 2425,
+ "min_crown_clearance_m": 5.37,
+ "max_abs_roll": 14.8,
+ "max_abs_pitch": 15.7,
+ "lift_events": 0,
+ "n_targets": 29,
+ "flight": {
+  "ok": true,
+  "landed": true,
+  "crashed": false,
+  "wall_s": 484.3,
+  "strategy": "hover",
+  "roundtrip_ok": true,
+  "items": 62
+ }
+}

@@ -68,14 +68,15 @@
 </metrics>
 
 <mass_balance>
-  <!-- 1.4 kg AUW; inertias are engineering estimates for a 1.3 m foam UAV -->
-  <ixx unit="KG*M2">  0.045 </ixx>
-  <iyy unit="KG*M2">  0.030 </iyy>
-  <izz unit="KG*M2">  0.070 </izz>
-  <emptywt unit="KG"> 1.10  </emptywt>   <!-- + 0.30 kg pack tank = 1.40 AUW -->
+  <!-- PRINTED BUILD (airframe/out/mass_properties.json, LW-PLA config):
+       1.858 kg AUW incl. battery and tail-elevator kit, CG 33.9% MAC, inertia from the part list. -->
+  <ixx unit="KG*M2">  0.0686 </ixx>
+  <iyy unit="KG*M2">  0.0977 </iyy>
+  <izz unit="KG*M2">  0.1593 </izz>
+  <emptywt unit="KG"> 1.858 </emptywt>   <!-- whole aircraft; the tank below is empty -->
   <location name="CG" unit="M">
-    <!-- 33% MAC aft of wing-LE-MAC; wing AC (ref) is at 25% MAC -->
-    <x> 0.0189 </x> <y> 0.0 </y> <z> 0.0 </z>
+    <!-- 33.9% MAC (battery at the tray front); wing AC (ref) at 25% MAC; 40 mm below the wing chord line -->
+    <x> 0.0209 </x> <y> 0.0 </y> <z> -0.0403 </z>
   </location>
 </mass_balance>
 
@@ -84,7 +85,7 @@
        Soft springs — this is a 1.4 kg foam UAV. Previous 3-point layout
        (single fwd point) tipped the model over on the ground. -->
   <contact type="BOGEY" name="LEG_FL">
-    <location unit="M"> <x>-0.22</x> <y>-0.26</y> <z>-0.13</z> </location>
+    <location unit="M"> <x>-0.2932</x> <y>-0.300</y> <z>-0.262</z> </location>
     <static_friction>0.9</static_friction><dynamic_friction>0.6</dynamic_friction>
     <rolling_friction>0.5</rolling_friction>
     <spring_coeff unit="N/M">700</spring_coeff>
@@ -92,7 +93,7 @@
     <max_steer unit="DEG">0.0</max_steer><brake_group>NONE</brake_group><retractable>0</retractable>
   </contact>
   <contact type="BOGEY" name="LEG_FR">
-    <location unit="M"> <x>-0.22</x> <y> 0.26</y> <z>-0.13</z> </location>
+    <location unit="M"> <x>-0.2932</x> <y> 0.300</y> <z>-0.262</z> </location>
     <static_friction>0.9</static_friction><dynamic_friction>0.6</dynamic_friction>
     <rolling_friction>0.5</rolling_friction>
     <spring_coeff unit="N/M">700</spring_coeff>
@@ -100,7 +101,7 @@
     <max_steer unit="DEG">0.0</max_steer><brake_group>NONE</brake_group><retractable>0</retractable>
   </contact>
   <contact type="BOGEY" name="LEG_RL">
-    <location unit="M"> <x> 0.28</x> <y>-0.26</y> <z>-0.13</z> </location>
+    <location unit="M"> <x> 0.3308</x> <y>-0.300</y> <z>-0.262</z> </location>
     <static_friction>0.9</static_friction><dynamic_friction>0.6</dynamic_friction>
     <rolling_friction>0.5</rolling_friction>
     <spring_coeff unit="N/M">700</spring_coeff>
@@ -108,7 +109,7 @@
     <max_steer unit="DEG">0.0</max_steer><brake_group>NONE</brake_group><retractable>0</retractable>
   </contact>
   <contact type="BOGEY" name="LEG_RR">
-    <location unit="M"> <x> 0.28</x> <y> 0.26</y> <z>-0.13</z> </location>
+    <location unit="M"> <x> 0.3308</x> <y> 0.300</y> <z>-0.262</z> </location>
     <static_friction>0.9</static_friction><dynamic_friction>0.6</dynamic_friction>
     <rolling_friction>0.5</rolling_friction>
     <spring_coeff unit="N/M">700</spring_coeff>
@@ -134,7 +135,7 @@
   <tank type="FUEL" number="0">   <!-- stand-in for the LiPo pack -->
     <location unit="M"> <x>0.0</x> <y>0.0</y> <z>0.0</z> </location>
     <capacity unit="KG"> 0.30 </capacity>
-    <contents unit="KG"> 0.30 </contents>
+    <contents unit="KG"> 0.00 </contents>   <!-- battery mass is in emptywt -->
   </tank>
 </propulsion>
 
@@ -143,32 +144,31 @@
      The bridge (flight_software/jsbsim/jsbsim_bridge.py) sets each
      external_reactions/*/magnitude (in LBF) every frame from the PWM
      ArduPilot sends. The <propulsion> engine above is NOT started by the
-     bridge — all thrust comes from here. Thrust models are SIMPLE
-     (calibrated, not measured — see PROPULSION_NOTES.md): trust the
-     fixed-wing cruise/aero, treat hover/transition thrust as indicative.
+     bridge — all thrust comes from here. Thrust comes from rotor_model.py:
+     A2212 1400KV + measured APC 10x4.7 CT/CP data, motor/rotor dynamics, 3S pack.
        location = structural frame (X aft+, Y right+, Z up+)
        direction = body frame (X fwd+, Y right+, Z down+)
      Lift-motor order follows ArduPilot quad-X: M1 FR, M2 RL, M3 FL, M4 RR.
      ============================================================ -->
 <external_reactions>
   <force name="liftM1" frame="BODY">   <!-- front-right -->
-    <location unit="M"><x>-0.13</x><y> 0.42</y><z>0.03</z></location>
-    <direction><x>0</x><y>0</y><z>-1</z></direction>
+    <location unit="M"><x>-0.2932</x><y> 0.300</y><z>-0.002</z></location>
+    <direction><x>-0.0604</x><y> 0.0628</y><z>-0.9962</z></direction>  <!-- 5 deg tangential yaw tilt -->
   </force>
   <force name="liftM2" frame="BODY">   <!-- rear-left -->
-    <location unit="M"><x> 0.17</x><y>-0.42</y><z>0.03</z></location>
-    <direction><x>0</x><y>0</y><z>-1</z></direction>
+    <location unit="M"><x> 0.3308</x><y>-0.300</y><z>-0.002</z></location>
+    <direction><x> 0.0604</x><y>-0.0628</y><z>-0.9962</z></direction>  <!-- 5 deg tangential yaw tilt -->
   </force>
   <force name="liftM3" frame="BODY">   <!-- front-left -->
-    <location unit="M"><x>-0.13</x><y>-0.42</y><z>0.03</z></location>
-    <direction><x>0</x><y>0</y><z>-1</z></direction>
+    <location unit="M"><x>-0.2932</x><y>-0.300</y><z>-0.002</z></location>
+    <direction><x>-0.0604</x><y>-0.0628</y><z>-0.9962</z></direction>  <!-- 5 deg tangential yaw tilt -->
   </force>
   <force name="liftM4" frame="BODY">   <!-- rear-right -->
-    <location unit="M"><x> 0.17</x><y> 0.42</y><z>0.03</z></location>
-    <direction><x>0</x><y>0</y><z>-1</z></direction>
+    <location unit="M"><x> 0.3308</x><y> 0.300</y><z>-0.002</z></location>
+    <direction><x> 0.0604</x><y> 0.0628</y><z>-0.9962</z></direction>  <!-- 5 deg tangential yaw tilt -->
   </force>
   <force name="fwdMotor" frame="BODY">   <!-- rear pusher -->
-    <location unit="M"><x>0.50</x><y>0</y><z>0.02</z></location>
+    <location unit="M"><x>0.6347</x><y>0</y><z>-0.062</z></location>
     <direction><x>1</x><y>0</y><z>0</z></direction>
   </force>
   <!-- yaw-reaction couple: two opposed side forces fore/aft => pure M_z.
@@ -184,8 +184,7 @@
 </external_reactions>
 
 <flight_control name="FCS: CoconutQuadplane">
-  <!-- real airframe uses 2 wing elevons; here elevator = symmetric elevon,
-       aileron = differential elevon (JSBSim standard split). -->
+  <!-- 2 wing ailerons (the former elevons) + 1 tail elevator on the H-stab. -->
   <channel name="Pitch">
     <aerosurface_scale name="Elevator Control">
       <input>fcs/elevator-cmd-norm</input>
@@ -278,12 +277,14 @@
       </product>
     </function>
     <function name="aero/coefficient/CLde">
-      <description>Lift from symmetric elevon — large (full-span 28%c flap),
-                   CL_de ~ 3.16 /rad (aero/control_authority.py)</description>
+      <description>Lift from the TAIL ELEVATOR (2026-10-27 design change: wing
+        elevons -> ailerons + H-stab elevator, 30% chord, full stab span).
+        CL_de = eta (S_h/S_w) CL_alpha_h tau = 0.9 x 0.21 x 4.06 x 0.52 = 0.40 /rad
+        (tau = flap effectiveness at cf/c 0.30). Positive = TE down.</description>
       <product>
         <property>aero/qbar-area</property>
         <property>fcs/elevator-pos-rad</property>
-        <value> 3.16 </value>
+        <value> 0.40 </value>
       </product>
     </function>
   </axis>
@@ -306,11 +307,11 @@
       </product>
     </function>
     <function name="aero/coefficient/CDde">
-      <description>Drag due to elevon deflection</description>
+      <description>Drag due to tail-elevator deflection (tail-area scaled)</description>
       <product>
         <property>aero/qbar-area</property>
         <abs><property>fcs/elevator-pos-rad</property></abs>
-        <value> 0.10 </value>
+        <value> 0.05 </value>
       </product>
     </function>
   </axis>
@@ -365,15 +366,17 @@
       </product>
     </function>
     <function name="aero/coefficient/Cmde">
-      <description>Pitch control power (symmetric elevon) — |Cm_de| = 0.38 /rad
-                   about CG 33% MAC (aero/control_authority.py). Sign is JSBSim
-                   convention (TE-down elevator -> nose down); confirm against
-                   the ArduPilot elevon mixing at the SITL-bridge step.</description>
+      <description>Pitch power of the TAIL ELEVATOR about the wing-AC ref:
+        Cm_de = -CL_de x l / cbar = -0.40 x 0.500 / 0.236 = -0.85 /rad
+        (l = tail AC aft of the wing AC; about the CG -0.82). JSBSim sign:
+        TE-down -> nose down. The old symmetric-elevon pitch control
+        (CL_de 3.16 vs Cm_de -0.38) mostly dumped lift and reversed the
+        flight-path response -- see documents/sim_results.md.</description>
       <product>
         <property>aero/qbar-area</property>
         <property>metrics/cbarw-ft</property>
         <property>fcs/elevator-pos-rad</property>
-        <value> -0.38 </value>
+        <value> -0.85 </value>
       </product>
     </function>
   </axis>
@@ -410,15 +413,14 @@
       </product>
     </function>
     <function name="aero/coefficient/Clda">
-      <description>Roll control power (differential elevon) — |Cl_da| = 0.72 /rad
-                   (full-span elevons, aero/control_authority.py). Roll authority
-                   is very high (~650 deg/s at full throw); ArduPilot rate/expo
-                   limiting expected. Confirm sign at the SITL-bridge step.</description>
+      <description>Roll power of the wing AILERONS (former elevons; outboard of the
+        boom node, Y 312-645 mm of 650, 25% chord): full-span 0.72 /rad x 0.755
+        (span-moment fraction) x 0.95 (chord) = 0.52 /rad.</description>
       <product>
         <property>aero/qbar-area</property>
         <property>metrics/bw-ft</property>
         <property>fcs/aileron-pos-rad</property>
-        <value> 0.72 </value>
+        <value> 0.52 </value>
       </product>
     </function>
   </axis>
@@ -460,7 +462,7 @@
         <property>aero/qbar-area</property>
         <property>metrics/bw-ft</property>
         <property>fcs/aileron-pos-rad</property>
-        <value> -0.006 </value>
+        <value> -0.0045 </value>
       </product>
     </function>
   </axis>

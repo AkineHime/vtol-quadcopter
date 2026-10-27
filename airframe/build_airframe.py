@@ -375,10 +375,19 @@ def h_wire(y):
 X_STAB_SPAR = P.X_LE_H + 0.3 * P.C_ROOT_H
 
 
+def _mid_z(shape, x):
+    """Mid-thickness z of a stab piece at station x (for the joiner bore)."""
+    bb = shape.intersect(box(x - 0.5, x + 0.5, -300, 300, -50, 80)).BoundingBox()
+    return (bb.zmin + bb.zmax) / 2
+
+
 def stab_parts():
+    """Fixed stab (centre + 2 tips) and the tail elevator (4 pieces: split at
+    the tips and around the boom), cut along a straight hinge line."""
     centre = loft([h_wire(-100), h_wire(0), h_wire(100)])
-    keel = cyl(P.TAILBOOM_OD / 2 + 3, (P.X_LE_H + 4, 0, P.Z_TAIL), (1, 0, 0), P.C_ROOT_H - 8)
-    keel = keel.fuse(box(P.X_LE_H + 4, P.X_LE_H + P.C_ROOT_H - 8, -4, 4, P.Z_TAIL, P.Z_STAB))
+    keel_end = P.ELEV_HINGE_X - 4          # the boom saddle stops ahead of the hinge
+    keel = cyl(P.TAILBOOM_OD / 2 + 3, (P.X_LE_H + 4, 0, P.Z_TAIL), (1, 0, 0), keel_end - P.X_LE_H - 4)
+    keel = keel.fuse(box(P.X_LE_H + 4, keel_end, -4, 4, P.Z_TAIL, P.Z_STAB))
     centre = centre.fuse(keel)
     centre = centre.cut(cyl(P.TAILBOOM_OD / 2 + P.CLEAR, (P.X_LE_H - 10, 0, P.Z_TAIL), (1, 0, 0), P.C_ROOT_H + 20))
     centre = centre.cut(y_cyl(P.STAB_SPAR_OD / 2 + P.CLEAR, X_STAB_SPAR, P.Z_STAB, -101, 101))
@@ -386,8 +395,24 @@ def stab_parts():
     for s, nm in ((1, "R"), (-1, "L")):
         tip = loft([h_wire(s * 100), h_wire(s * 250)])
         tip = tip.cut(y_cyl(P.STAB_SPAR_OD / 2 + P.CLEAR, X_STAB_SPAR, P.Z_STAB, s * 99, s * 240))
-        tips[f"stab_tip_{nm}"] = tip
-    return centre, tips
+        tips[nm] = tip
+
+    xh, g = P.ELEV_HINGE_X, P.ELEV_GAP / 2
+    aft = box(xh + g, P.X_LE_H + P.C_ROOT_H + 20, -300, 300, -60, 80)
+    fwd = box(P.X_LE_H - 20, xh - g, -300, 300, -60, 80)
+    x_j = xh + 4.0                                   # joiner rod station, in the elevator LE
+    z_j = _mid_z(centre.intersect(aft), x_j)
+    joiner = y_cyl(P.ELEV_JOINER_OD / 2 + P.CLEAR, x_j, z_j, -150, 150)
+    slot = box(xh - 5, P.X_LE_H + P.C_ROOT_H + 20, -P.ELEV_BOOM_SLOT, P.ELEV_BOOM_SLOT, -60, 80)
+    fixed, elev = {"stab_centre": centre.intersect(fwd)}, {}
+    c_el = centre.intersect(aft).cut(slot).cut(joiner)
+    for s, nm in ((1, "R"), (-1, "L")):
+        half = c_el.intersect(box(xh, P.X_LE_H + P.C_ROOT_H + 20, 0 if s > 0 else -300,
+                                  300 if s > 0 else 0, -60, 80))
+        elev[f"elevator_centre_{nm}"] = half
+        fixed[f"stab_tip_{nm}"] = tips[nm].intersect(fwd)
+        elev[f"elevator_tip_{nm}"] = tips[nm].intersect(aft).cut(joiner)
+    return fixed, elev
 
 
 def fin(side):
@@ -486,9 +511,8 @@ def build_parts():
     for nm, sh in sections.items():
         add(nm, sh, "shell")
     add("hatch", hatch, "shell")
-    centre, tips = stab_parts()
-    add("stab_centre", centre, "skin")
-    for nm, sh in tips.items():
+    fixed, elev = stab_parts()
+    for nm, sh in {**fixed, **elev}.items():
         add(nm, sh, "skin")
     corners = [("FR", P.X_ROTOR_FRONT, 1, +1), ("RL", P.X_ROTOR_REAR, -1, +1),
                ("FL", P.X_ROTOR_FRONT, -1, -1), ("RR", P.X_ROTOR_REAR, 1, -1)]

@@ -9,12 +9,14 @@ numbers live in the documents linked from each section.
 A 1.3 m-span VTOL quadplane that scouts a coconut plantation and finds ripe
 bunches for the harvest crew. The October work added three things:
 
-1. **A print-ready airframe** (`airframe/`): 40 parts, all fitting a 220 mm
+1. **A print-ready airframe** (`airframe/`): 44 parts, all fitting a 220 mm
    bed.
    - Detachable wing halves on a carbon spar.
    - An openable electronics hatch.
-   - LW-PLA skins. The airframe weighs **1843 g** with the CG at
-     **33% MAC**.
+   - LW-PLA skins. The airframe weighs **1858 g** with the CG at
+     **33.9% MAC**.
+   - **A tail elevator** (servo in the pod). The wing surfaces are now
+     ailerons only; see finding 5 below.
 2. **A Gazebo + ArduPilot simulation** (`flight_software/gazebo/`). It flies
    the real ArduPilot QuadPlane firmware in SITL over a **1 ha plantation of
    169 palms**, using a physics model generated from the airframe's CAD.
@@ -25,6 +27,11 @@ bunches for the harvest crew. The October work added three things:
    - how the aircraft copes with wind, sensor faults, bird strikes and a
      motor failure;
    - a week of simulated operations.
+4. **A real-physics cross-check** (`flight_software/jsbsim/`): the same
+   firmware flown in JSBSim, with stability-derivative aerodynamics, measured
+   A2212 1400KV / APC 10×4.7 rotor data, battery sag and an airspeed sensor.
+5. **A Blender review video** (`flight_software/render/`), replayed from the
+   flight log: `demo/runs/js_demo_v4/js_demo_v4_review.mp4`, 3:07, 1080p.
 
 **The one-line conclusion:** fly a fixed-wing scout sweep every morning (4
 minutes, 16% battery, 4–6 photos of every palm). Hover only over palms where
@@ -44,6 +51,9 @@ at least 2 photos agree on "ripe". Never hover at every tree.
 | `flight_software/report_runs.py` | Pass/fail table over all runs |
 | `flight_software/schedule_sim.py` | Week-of-operations Monte-Carlo; compares inspection policies |
 | `flight_software/demo/` | Plantation layout (`trees.csv`, `layout.json`), disturbance `scenarios/`, `run_batch.sh`, results in `runs/` |
+| `flight_software/jsbsim/` | JSBSim aircraft (`aircraft/CoconutQuadplane/`), `jsbsim_bridge.py` (ArduPilot JSON link, 1000 Hz), `rotor_model.py`, `coconut_jsbsim.param`, `test_physics.py` |
+| `flight_software/render/` | Blender replay: `extract_track.py` (log → track.json), `blender_replay.py` (scene + main cut, or `--shots`), `make_video.py` (encode main cut), `assemble_video.py` (final review cut) |
+| `flight_software/reanalyze.py` | Re-scores every run, e.g. after changing the camera rate |
 | `documents/sim_results.md` | **Results and recommendations** |
 | `documents/build_sim_progress.md` | Running log of the work, decisions and fixes |
 
@@ -140,6 +150,42 @@ Notes:
   freezes WSL mid-run. A run whose `wall_s` is far larger than its
   `flight_s` was frozen; repeat it.
 
+### …fly with real physics (JSBSim)
+
+```bash
+cd flight_software
+python jsbsim/test_physics.py          # rest, hover throttle, yaw sign, glide L/D: must ALL PASS
+python sim_runner.py js_demo_v4 --physics jsbsim --strategy hybrid --targets P0005,P0302,P0612,P0911
+```
+- Every `sim_runner.py` option works with `--physics jsbsim` except `--record`.
+- `--test hover|transition` runs the short flight tests instead of a mission.
+- The planner now faces the dock along lane 1 (the dock can be anywhere):
+  racetrack lanes from the dock, a fixed-wing U-turn whose exit points at the
+  first stop, then stops flowing back to the dock.
+
+### …render the review video (Blender)
+
+Needs Blender 5.2 (portable zip from download.blender.org; we use
+`C:	oolslender-5.2.3-windows-x64`). The sky HDRI and dirt texture go in
+`flight_software/render/assets/` (Poly Haven `qwantani_morning_puresky_4k.exr`
+and `dirt_floor_4k`, git-ignored).
+
+```bash
+# WSL: flight log -> track.json (interpolated to 30 fps, imaging times, telemetry)
+python render/extract_track.py demo/runs/js_demo_v4
+# Windows: main cut, then only the inserted shots listed in RUN/shots.json
+blender -b -P render/blender_replay.py -- --track demo/runs/js_demo_v4/track.json --out demo/runs/js_demo_v4/render_A
+blender -b -P render/blender_replay.py -- --track demo/runs/js_demo_v4/track.json --out demo/runs/js_demo_v4/shots --shots demo/runs/js_demo_v4/shots.json
+# WSL: splice + captions, telemetry HUD, title and summary cards
+cd render && python assemble_video.py ../demo/runs/js_demo_v4
+```
+- The main cut is ~4,900 frames, about 50 min at ~0.6 s/frame on the RTX 3050.
+  The 7 shots are 1,770 frames, about 37 min.
+- `--frames A:B[:STEP]` renders part of it or a quick preview. `--only NAME,...`
+  renders a subset of the shots.
+- Change a shot by editing `shots.json` and re-rendering only it. The
+  assembler reuses every other frame.
+
 ### …compare operating policies
 
 ```bash
@@ -186,10 +232,12 @@ sensor**.
 
 ## ArduPilot settings that came out of the sim
 
-They live in `flight_software/gazebo/coconut_gazebo.param`, and each is
-commented with why. Carry them to the real aircraft as starting points:
-- `MIXING_GAIN 1.0`, with roll gains halved: pitch authority from the
-  elevons.
+They live in `flight_software/jsbsim/coconut_jsbsim.param` (the current
+airframe with the elevator) and `flight_software/gazebo/coconut_gazebo.param`.
+Each is commented with why. Carry them to the real aircraft as starting points:
+- `SERVO1/2_FUNCTION 4` (ailerons), `SERVO4_FUNCTION 19` (elevator). The old
+  elevon setup (`MIXING_GAIN`) is gone.
+- `ARSPD_TYPE` + `ARSPD_USE 1`, for a real airspeed sensor.
 - `ROLL_LIMIT_DEG 35`.
 - `AIRSPEED_CRUISE 15`, `AIRSPEED_MIN 12`, `Q_ASSIST_SPEED 9`.
 - `Q_WVANE_ENABLE 1`, `Q_WVANE_GAIN 4`: the nose points along travel in
@@ -206,20 +254,24 @@ Mission rules the planner already handles:
 | # | Item | Notes |
 |---|---|---|
 | 1 | **Lift-motor failure handling** | Check ESC telemetry/RPM before every back-transition and abort to a fixed-wing belly landing if one fails. Alternative: an X8 coaxial lift set (about +150 g). |
-| 2 | Airspeed sensor | Add an MS4525/DLVR to the BOM and nose, then enable `ARSPD_*`. That fixes assist cycling in wind. |
-| 3 | Camera trigger at 5 fps | Gets 97% of palms to ≥ 2 photos in 5 m/s wind (3 fps gives 92%). Check the ESP32-CAM can sustain it at SVGA. |
+| 2 | Airspeed sensor | Add an MS4525/DLVR to the BOM and nose. In JSBSim it fixed assist cycling in wind (12 → 2 lift on/off events). |
+| 3 | Camera trigger at 5 fps | Now the analysis default. Check the ESP32-CAM can sustain it at SVGA. |
 | 4 | Ripe-bunch detector | Train on real oblique crown photos; measure per-photo recall and false-alarm rate; feed them into `schedule_sim.py`. |
 | 5 | Weight cuts | `BUILD_NOTES.md` lists them. All-PLA isn't viable: CG ends up at 41% MAC. |
 | 6 | Hover misses | 2 of 29 hover targets still miss the frame in calm air, and 4 of 29 in wind. |
-| 7 | Demo visual polish | A tracking overview camera, a non-rolling chase camera, phase captions on the video. |
+| 7 | Elevator in the Gazebo model | The CAD and JSBSim have it; `gazebo/gen_sdf.py` and `coconut_gazebo.param` still model elevons. |
 | 8 | Real-world trim | Glide tests for the stab incidence; then AUTOTUNE in FBWA/QHOVER. |
 
 ## Caveats
 
 The simulation is a design tool, not proof:
 - **Aerodynamics:** Gazebo LiftDrag, which has no downwash, prop wash or
-  ground effect.
-- **Airspeed:** synthetic.
+  ground effect. JSBSim uses our own estimated stability derivatives, not
+  wind-tunnel data.
+- **Airspeed:** synthetic in Gazebo; a simulated pitot in JSBSim.
+- **The review video** replays the logged flight exactly. The ESP32 view is a
+  Blender render, sharper than a real OV2640, and its box comes from camera
+  geometry, not a detector.
 - **Energy:** estimated from momentum theory and drag.
 
 Treat the numbers as ±20% and the comparisons between options as the
