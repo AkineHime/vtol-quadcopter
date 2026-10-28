@@ -29,6 +29,10 @@ const blank = classifyPixels(...frame([235, 232, 225], 0.2));                // 
 out.push({ name: "blank paper", ok: blank === null, got: blank });
 const small = classifyPixels(...frame([40, 160, 60], 0.045));                // partial confidence
 out.push({ name: "small card lower confidence", ok: small && small.confidence < 0.9 && small.confidence >= 0.6, got: small });
+const desk = classifyPixels(...frame([40, 160, 60], 0.10, 160, 120, [60, 52, 45]));      // card on a brown desk
+out.push({ name: "brown desk is not over-mature", ok: desk === null || desk.stage === "tender", got: desk });
+const dimYoung = classifyPixels(...frame([131, 172, 112], 0.12, 160, 120, [176, 174, 169]));   // young card, dim light
+out.push({ name: "young card in dim light", ok: dimYoung && dimYoung.stage === "young", got: dimYoung });
 const far = classifyPixels(...frame([40, 160, 60], 0.03));                   // too far off to trust
 out.push({ name: "far card ignored", ok: far === null, got: far });
 const noPaper = classifyPixels(...frame([40, 160, 60], 0.12, 160, 120, [40, 44, 42]));   // dark screen, no paper

@@ -30,9 +30,10 @@ function hsv(r, g, b) {
 export function stageOf(r, g, b) {
   const [h, s, v] = hsv(r, g, b);
   if (s < 0.2 || v < 0.18) return null;                   // white paper (s ~0.05), grey, black
-  if (h >= 10 && h < 45 && v < 0.62) return "over-mature";  // brown = dark orange
+  if (h >= 10 && h < 45 && v < 0.62) return s >= 0.5 ? "over-mature" : null;   // brown card; not dull desks or soil
   if (h >= 38 && h < 70) return "mature";                  // yellow
-  if (h >= 70 && h < 170) return v > 0.72 && s < 0.5 ? "young" : "tender";
+  // light vs deep green by saturation, which (unlike brightness) holds in dim or bright light
+  if (h >= 70 && h < 170) return s < 0.55 ? "young" : "tender";
   return null;
 }
 
@@ -47,7 +48,7 @@ export function classifyPixels(data, w, h) {
     if (st) { counts[st] = (counts[st] || 0) + 1; coloured++; }
     else {
       const [, sat, val] = hsv(r, g, b);
-      if (sat < 0.2 && val > 0.7) paper++;
+      if (sat < 0.2 && val > 0.55) paper++;                  // white or dimly lit paper, not a dark screen
     }
   }
   const best = Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0];

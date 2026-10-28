@@ -34,7 +34,11 @@ serves everything over HTTPS on port **8443**:
   each automatic photo is checked for a coloured card on white paper — green =
   tender, light green = young, yellow = mature, brown = over-mature — and logged
   as a detection (`model` `colour-card-v1`). Only colour is read: nothing
-  detects health yet.
+  detects health yet. A reading needs white paper in view (>= 15% of the frame)
+  and confidence >= 0.6; otherwise the photo is kept as a plain visit. Light
+  vs deep green is told apart by saturation, so it holds in dim or bright light.
+  **Printable cards:** `documents/dashboard/colour_cards.pdf` (instructions + four
+  A5 cards; regenerate with `python tools/colour_cards.py`, needs `reportlab`).
 
 Telemetry comes from the autopilot over MAVLink (`pymavlink`), by default
 `tcp:127.0.0.1:5762`: the SITL's second port, so the route planner keeps 5760.
@@ -307,7 +311,7 @@ python -m pytest -v
 | `test_flights.py` | flight recorder: start on arm, track, end on disarm / link loss, crash recovery, summary (distance, stops reached and missed, photos, tender found, battery, phases), flights API |
 | `test_camera.py` | camera address checks (private network only, IP Webcam default path), the MJPEG relay against a fake IP Webcam, errors |
 | `test_checks.py` | go/no-go thresholds, wind source, landing projection and every alert rule (Node) |
-| `test_card_reader.py` | the colour-card reader on synthetic frames (Node): green/light green/yellow/brown → stage, tiny card and blank paper ignored |
+| `test_card_reader.py` | the colour-card reader on synthetic frames (Node): green/light green/yellow/brown → stage; tiny, far-off, mixed-colour cards, blank paper, no paper and a brown desk give no reading; young card in dim light |
 | `test_plan.py` | ripeness rules (fresh/stale sightings, harvest cycle, health, survey, visits), migration to maturity/health/harvested, photo with a card reading, planner battery cap + targets first + stop order + WPL export, confirmed palms dropped, plan/export/image endpoints, ML label/model fields, live re-plan |
 | `test_photo.py` | pattern membership (85/43/22), capture only over pattern palms within the radius, retry window, one answer per request, photo upload saved + history + `last_photo`, new round resets |
 | `test_api.py` | REST endpoints, validation, WebSocket push on change, and push when another process writes the DB |
