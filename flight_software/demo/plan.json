@@ -13,7 +13,7 @@
   "dock": {
    "n": 0.0,
    "e": 0.0,
-   "heading_deg": 180.0
+   "heading_deg": 0.0
   },
   "home": {
    "lat": 10.6609,
@@ -1383,7 +1383,7 @@
    "cmd": 84,
    "n": 0.0,
    "e": 0.0,
-   "alt": 30.0,
+   "alt": 36.0,
    "tree": null
   },
   {
@@ -1397,141 +1397,150 @@
   },
   {
    "seq": 3,
-   "label": "line-up before lane 1",
+   "label": "FW lane 1 end",
    "cmd": 16,
-   "n": -70.0,
-   "e": -45.0,
+   "n": 155.0,
+   "e": 0.0,
    "alt": 36.0,
    "tree": null
   },
   {
    "seq": 4,
-   "label": "FW lane 1 start",
+   "label": "FW lane 2 start",
    "cmd": 16,
-   "n": -25.0,
+   "n": 155.0,
    "e": -45.0,
    "alt": 36.0,
    "tree": null
   },
   {
    "seq": 5,
-   "label": "FW lane 1 end",
+   "label": "FW lane 2 end",
    "cmd": 16,
-   "n": 155.0,
+   "n": -25.0,
    "e": -45.0,
    "alt": 36.0,
    "tree": null
   },
   {
    "seq": 6,
-   "label": "FW lane 2 start",
+   "label": "FW lane 3 start",
    "cmd": 16,
-   "n": 155.0,
+   "n": -25.0,
    "e": 15.0,
    "alt": 36.0,
    "tree": null
   },
   {
    "seq": 7,
-   "label": "FW lane 2 end",
+   "label": "FW lane 3 end",
    "cmd": 16,
-   "n": -25.0,
+   "n": 155.0,
    "e": 15.0,
    "alt": 36.0,
    "tree": null
   },
   {
    "seq": 8,
-   "label": "FW lane 3 start",
+   "label": "FW lane 4 start",
    "cmd": 16,
-   "n": -25.0,
+   "n": 155.0,
    "e": -30.0,
    "alt": 36.0,
    "tree": null
   },
   {
    "seq": 9,
-   "label": "FW lane 3 end",
+   "label": "FW lane 4 end",
    "cmd": 16,
-   "n": 155.0,
+   "n": -25.0,
    "e": -30.0,
    "alt": 36.0,
    "tree": null
   },
   {
    "seq": 10,
-   "label": "FW lane 4 start",
+   "label": "FW lane 5 start",
    "cmd": 16,
-   "n": 155.0,
+   "n": -25.0,
    "e": 30.0,
    "alt": 36.0,
    "tree": null
   },
   {
    "seq": 11,
-   "label": "FW lane 4 end",
+   "label": "FW lane 5 end",
    "cmd": 16,
-   "n": -25.0,
+   "n": 155.0,
    "e": 30.0,
    "alt": 36.0,
    "tree": null
   },
   {
    "seq": 12,
-   "label": "FW lane 5 start",
+   "label": "FW lane 6 start",
    "cmd": 16,
-   "n": -25.0,
+   "n": 155.0,
    "e": -15.0,
    "alt": 36.0,
    "tree": null
   },
   {
    "seq": 13,
-   "label": "FW lane 5 end",
+   "label": "FW lane 6 end",
    "cmd": 16,
-   "n": 155.0,
+   "n": -25.0,
    "e": -15.0,
    "alt": 36.0,
    "tree": null
   },
   {
    "seq": 14,
-   "label": "FW lane 6 start",
+   "label": "FW lane 7 start",
    "cmd": 16,
-   "n": 155.0,
+   "n": -25.0,
    "e": 45.0,
    "alt": 36.0,
    "tree": null
   },
   {
    "seq": 15,
-   "label": "FW lane 6 end",
+   "label": "FW lane 7 end",
    "cmd": 16,
-   "n": -25.0,
+   "n": 155.0,
    "e": 45.0,
    "alt": 36.0,
    "tree": null
   },
   {
    "seq": 16,
-   "label": "FW lane 7 start",
+   "label": "U-turn after the sweep",
    "cmd": 16,
-   "n": -25.0,
-   "e": 0.0,
-   "alt": 36.0,
+   "n": 190.0,
+   "e": 10.0,
+   "alt": 26.0,
    "tree": null
   },
   {
    "seq": 17,
-   "label": "FW lane 7 end",
+   "label": "U-turn exit",
    "cmd": 16,
    "n": 155.0,
-   "e": 0.0,
-   "alt": 36.0,
+   "e": -25.0,
+   "alt": 26.0,
    "tree": null
   },
   {
    "seq": 18,
+   "label": "approach first stop",
+   "cmd": 16,
+   "n": 117.42603548496565,
+   "e": -26.66995397844597,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 19,
    "label": "transition -> VTOL over the field",
    "cmd": 3000,
    "n": null,
@@ -1540,79 +1549,79 @@
    "tree": null
   },
   {
-   "seq": 19,
-   "label": "lead-in P0911",
+   "seq": 20,
+   "label": "lead-in P0302",
    "cmd": 16,
-   "n": 106.06306447959774,
-   "e": 27.187186400223478,
+   "n": 63.772118798945996,
+   "e": -29.054572497824623,
    "alt": 26.0,
    "tree": null
-  },
-  {
-   "seq": 20,
-   "label": "inspect P0911 (ripe)",
-   "cmd": 19,
-   "n": 92.95070533777468,
-   "e": 34.47183036790296,
-   "alt": 26.0,
-   "tree": "P0911"
   },
   {
    "seq": 21,
-   "label": "lead-in P0612",
-   "cmd": 16,
-   "n": 86.00699679401075,
-   "e": 37.08731146368015,
-   "alt": 26.0,
-   "tree": null
-  },
-  {
-   "seq": 22,
-   "label": "inspect P0612 (ripe)",
-   "cmd": 19,
-   "n": 71.96977744035567,
-   "e": 42.37469955397306,
-   "alt": 26.0,
-   "tree": "P0612"
-  },
-  {
-   "seq": 23,
-   "label": "lead-in P0005",
-   "cmd": 16,
-   "n": 36.48769801193603,
-   "e": 8.323023018055101,
-   "alt": 26.0,
-   "tree": null
-  },
-  {
-   "seq": 24,
-   "label": "inspect P0005 (ripe)",
-   "cmd": 19,
-   "n": 25.665193922217632,
-   "e": -2.0631892476377516,
-   "alt": 26.0,
-   "tree": "P0005"
-  },
-  {
-   "seq": 25,
-   "label": "lead-in P0302",
-   "cmd": 16,
-   "n": 31.50989471020003,
-   "e": -11.762279279541211,
-   "alt": 26.0,
-   "tree": null
-  },
-  {
-   "seq": 26,
    "label": "inspect P0302 (ripe)",
    "cmd": 19,
-   "n": 39.251906934839,
-   "e": -24.609895662105753,
+   "n": 48.78691170195286,
+   "e": -29.72058170213543,
    "alt": 26.0,
    "tree": "P0302"
   },
   {
+   "seq": 22,
+   "label": "lead-in P0005",
+   "cmd": 16,
+   "n": 38.08966498396592,
+   "e": -21.463390130286346,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 23,
+   "label": "inspect P0005 (ripe)",
+   "cmd": 19,
+   "n": 26.21563180305261,
+   "e": -12.297838536488523,
+   "alt": 26.0,
+   "tree": "P0005"
+  },
+  {
+   "seq": 24,
+   "label": "lead-in P0612",
+   "cmd": 16,
+   "n": 52.41692098862462,
+   "e": 26.410468624253337,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 25,
+   "label": "inspect P0612 (ripe)",
+   "cmd": 19,
+   "n": 60.825140495632326,
+   "e": 38.8322979871924,
+   "alt": 26.0,
+   "tree": "P0612"
+  },
+  {
+   "seq": 26,
+   "label": "lead-in P0911",
+   "cmd": 16,
+   "n": 66.2910543837747,
+   "e": 38.55929838357137,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
    "seq": 27,
+   "label": "inspect P0911 (ripe)",
+   "cmd": 19,
+   "n": 81.2723799211068,
+   "e": 37.81104365122335,
+   "alt": 26.0,
+   "tree": "P0911"
+  },
+  {
+   "seq": 28,
    "label": "return to dock (VTOL)",
    "cmd": 16,
    "n": 60.0,
@@ -1621,7 +1630,7 @@
    "tree": null
   },
   {
-   "seq": 28,
+   "seq": 29,
    "label": "VTOL land (dock)",
    "cmd": 85,
    "n": 0.0,

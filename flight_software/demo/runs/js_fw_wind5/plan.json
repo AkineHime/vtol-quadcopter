@@ -1,0 +1,1552 @@
+{
+ "strategy": "fw_sweep",
+ "home": {
+  "lat": 10.6609,
+  "lon": 77.0047999
+ },
+ "layout": {
+  "spacing": 7.5,
+  "grid": 13,
+  "field_m": 100.0,
+  "field_n0": 15.0,
+  "field_e0": -50.0,
+  "dock": {
+   "n": 0.0,
+   "e": 0.0,
+   "heading_deg": 180.0
+  },
+  "home": {
+   "lat": 10.6609,
+   "lon": 77.0048
+  },
+  "crown_radius_m": 4.0,
+  "seed": 7
+ },
+ "trees": [
+  {
+   "id": "P0000",
+   "n": 20.0,
+   "e": -45.0,
+   "height": 12.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0001",
+   "n": 20.0,
+   "e": -37.5,
+   "height": 12.3,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0002",
+   "n": 20.0,
+   "e": -30.0,
+   "height": 13.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0003",
+   "n": 20.0,
+   "e": -22.5,
+   "height": 14.0,
+   "condition": "ripe",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0004",
+   "n": 20.0,
+   "e": -15.0,
+   "height": 13.7,
+   "condition": "ripe",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0005",
+   "n": 20.0,
+   "e": -7.5,
+   "height": 12.4,
+   "condition": "ripe",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0006",
+   "n": 20.0,
+   "e": 0.0,
+   "height": 15.3,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0007",
+   "n": 20.0,
+   "e": 7.5,
+   "height": 12.9,
+   "condition": "frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0008",
+   "n": 20.0,
+   "e": 15.0,
+   "height": 15.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0009",
+   "n": 20.0,
+   "e": 22.5,
+   "height": 13.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0010",
+   "n": 20.0,
+   "e": 30.0,
+   "height": 12.2,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0011",
+   "n": 20.0,
+   "e": 37.5,
+   "height": 13.2,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0012",
+   "n": 20.0,
+   "e": 45.0,
+   "height": 12.5,
+   "condition": "frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0100",
+   "n": 27.5,
+   "e": -45.0,
+   "height": 15.3,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0101",
+   "n": 27.5,
+   "e": -37.5,
+   "height": 14.3,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0102",
+   "n": 27.5,
+   "e": -30.0,
+   "height": 13.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0103",
+   "n": 27.5,
+   "e": -22.5,
+   "height": 12.3,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0104",
+   "n": 27.5,
+   "e": -15.0,
+   "height": 12.8,
+   "condition": "ripe",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0105",
+   "n": 27.5,
+   "e": -7.5,
+   "height": 13.7,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0106",
+   "n": 27.5,
+   "e": 0.0,
+   "height": 14.3,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0107",
+   "n": 27.5,
+   "e": 7.5,
+   "height": 13.2,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0108",
+   "n": 27.5,
+   "e": 15.0,
+   "height": 14.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0109",
+   "n": 27.5,
+   "e": 22.5,
+   "height": 14.3,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0110",
+   "n": 27.5,
+   "e": 30.0,
+   "height": 15.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0111",
+   "n": 27.5,
+   "e": 37.5,
+   "height": 13.2,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0112",
+   "n": 27.5,
+   "e": 45.0,
+   "height": 12.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0200",
+   "n": 35.0,
+   "e": -45.0,
+   "height": 15.0,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0201",
+   "n": 35.0,
+   "e": -37.5,
+   "height": 14.0,
+   "condition": "frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0202",
+   "n": 35.0,
+   "e": -30.0,
+   "height": 14.7,
+   "condition": "ripe",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0203",
+   "n": 35.0,
+   "e": -22.5,
+   "height": 14.3,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0204",
+   "n": 35.0,
+   "e": -15.0,
+   "height": 13.3,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0205",
+   "n": 35.0,
+   "e": -7.5,
+   "height": 14.4,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0206",
+   "n": 35.0,
+   "e": 0.0,
+   "height": 13.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0207",
+   "n": 35.0,
+   "e": 7.5,
+   "height": 15.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0208",
+   "n": 35.0,
+   "e": 15.0,
+   "height": 14.7,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0209",
+   "n": 35.0,
+   "e": 22.5,
+   "height": 14.8,
+   "condition": "ripe",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0210",
+   "n": 35.0,
+   "e": 30.0,
+   "height": 16.0,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0211",
+   "n": 35.0,
+   "e": 37.5,
+   "height": 13.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0212",
+   "n": 35.0,
+   "e": 45.0,
+   "height": 14.7,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0300",
+   "n": 42.5,
+   "e": -45.0,
+   "height": 13.8,
+   "condition": "ripe",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0301",
+   "n": 42.5,
+   "e": -37.5,
+   "height": 12.5,
+   "condition": "ripe+frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0302",
+   "n": 42.5,
+   "e": -30.0,
+   "height": 15.1,
+   "condition": "ripe",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0303",
+   "n": 42.5,
+   "e": -22.5,
+   "height": 13.0,
+   "condition": "frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0304",
+   "n": 42.5,
+   "e": -15.0,
+   "height": 15.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0305",
+   "n": 42.5,
+   "e": -7.5,
+   "height": 13.8,
+   "condition": "ripe",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0306",
+   "n": 42.5,
+   "e": 0.0,
+   "height": 15.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0307",
+   "n": 42.5,
+   "e": 7.5,
+   "height": 15.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0308",
+   "n": 42.5,
+   "e": 15.0,
+   "height": 13.7,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0309",
+   "n": 42.5,
+   "e": 22.5,
+   "height": 15.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0310",
+   "n": 42.5,
+   "e": 30.0,
+   "height": 12.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0311",
+   "n": 42.5,
+   "e": 37.5,
+   "height": 12.9,
+   "condition": "ripe+frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0312",
+   "n": 42.5,
+   "e": 45.0,
+   "height": 13.9,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0400",
+   "n": 50.0,
+   "e": -45.0,
+   "height": 13.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0401",
+   "n": 50.0,
+   "e": -37.5,
+   "height": 13.7,
+   "condition": "ripe",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0402",
+   "n": 50.0,
+   "e": -30.0,
+   "height": 14.3,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0403",
+   "n": 50.0,
+   "e": -22.5,
+   "height": 14.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0404",
+   "n": 50.0,
+   "e": -15.0,
+   "height": 14.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0405",
+   "n": 50.0,
+   "e": -7.5,
+   "height": 12.2,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0406",
+   "n": 50.0,
+   "e": 0.0,
+   "height": 15.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0407",
+   "n": 50.0,
+   "e": 7.5,
+   "height": 15.2,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0408",
+   "n": 50.0,
+   "e": 15.0,
+   "height": 13.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0409",
+   "n": 50.0,
+   "e": 22.5,
+   "height": 14.5,
+   "condition": "frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0410",
+   "n": 50.0,
+   "e": 30.0,
+   "height": 12.3,
+   "condition": "ripe",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0411",
+   "n": 50.0,
+   "e": 37.5,
+   "height": 12.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0412",
+   "n": 50.0,
+   "e": 45.0,
+   "height": 12.2,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0500",
+   "n": 57.5,
+   "e": -45.0,
+   "height": 12.6,
+   "condition": "ripe",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0501",
+   "n": 57.5,
+   "e": -37.5,
+   "height": 13.5,
+   "condition": "frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0502",
+   "n": 57.5,
+   "e": -30.0,
+   "height": 15.5,
+   "condition": "ripe",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0503",
+   "n": 57.5,
+   "e": -22.5,
+   "height": 12.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0504",
+   "n": 57.5,
+   "e": -15.0,
+   "height": 13.4,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0505",
+   "n": 57.5,
+   "e": -7.5,
+   "height": 12.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0506",
+   "n": 57.5,
+   "e": 0.0,
+   "height": 16.0,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0507",
+   "n": 57.5,
+   "e": 7.5,
+   "height": 13.9,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0508",
+   "n": 57.5,
+   "e": 15.0,
+   "height": 12.4,
+   "condition": "ripe",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0509",
+   "n": 57.5,
+   "e": 22.5,
+   "height": 13.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0510",
+   "n": 57.5,
+   "e": 30.0,
+   "height": 12.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0511",
+   "n": 57.5,
+   "e": 37.5,
+   "height": 15.8,
+   "condition": "ripe",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0512",
+   "n": 57.5,
+   "e": 45.0,
+   "height": 12.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0600",
+   "n": 65.0,
+   "e": -45.0,
+   "height": 12.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0601",
+   "n": 65.0,
+   "e": -37.5,
+   "height": 15.9,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0602",
+   "n": 65.0,
+   "e": -30.0,
+   "height": 14.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0603",
+   "n": 65.0,
+   "e": -22.5,
+   "height": 13.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0604",
+   "n": 65.0,
+   "e": -15.0,
+   "height": 15.1,
+   "condition": "ripe+frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0605",
+   "n": 65.0,
+   "e": -7.5,
+   "height": 15.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0606",
+   "n": 65.0,
+   "e": 0.0,
+   "height": 12.9,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0607",
+   "n": 65.0,
+   "e": 7.5,
+   "height": 15.9,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0608",
+   "n": 65.0,
+   "e": 15.0,
+   "height": 15.2,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0609",
+   "n": 65.0,
+   "e": 22.5,
+   "height": 15.0,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0610",
+   "n": 65.0,
+   "e": 30.0,
+   "height": 14.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0611",
+   "n": 65.0,
+   "e": 37.5,
+   "height": 12.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0612",
+   "n": 65.0,
+   "e": 45.0,
+   "height": 13.1,
+   "condition": "ripe",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0700",
+   "n": 72.5,
+   "e": -45.0,
+   "height": 14.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0701",
+   "n": 72.5,
+   "e": -37.5,
+   "height": 13.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0702",
+   "n": 72.5,
+   "e": -30.0,
+   "height": 16.0,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0703",
+   "n": 72.5,
+   "e": -22.5,
+   "height": 13.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0704",
+   "n": 72.5,
+   "e": -15.0,
+   "height": 12.9,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0705",
+   "n": 72.5,
+   "e": -7.5,
+   "height": 12.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0706",
+   "n": 72.5,
+   "e": 0.0,
+   "height": 15.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0707",
+   "n": 72.5,
+   "e": 7.5,
+   "height": 13.9,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0708",
+   "n": 72.5,
+   "e": 15.0,
+   "height": 15.2,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0709",
+   "n": 72.5,
+   "e": 22.5,
+   "height": 14.6,
+   "condition": "ripe",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0710",
+   "n": 72.5,
+   "e": 30.0,
+   "height": 15.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0711",
+   "n": 72.5,
+   "e": 37.5,
+   "height": 13.9,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0712",
+   "n": 72.5,
+   "e": 45.0,
+   "height": 15.2,
+   "condition": "ripe+frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0800",
+   "n": 80.0,
+   "e": -45.0,
+   "height": 15.2,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0801",
+   "n": 80.0,
+   "e": -37.5,
+   "height": 13.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0802",
+   "n": 80.0,
+   "e": -30.0,
+   "height": 15.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0803",
+   "n": 80.0,
+   "e": -22.5,
+   "height": 12.7,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0804",
+   "n": 80.0,
+   "e": -15.0,
+   "height": 12.6,
+   "condition": "frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0805",
+   "n": 80.0,
+   "e": -7.5,
+   "height": 15.2,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0806",
+   "n": 80.0,
+   "e": 0.0,
+   "height": 15.3,
+   "condition": "frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0807",
+   "n": 80.0,
+   "e": 7.5,
+   "height": 14.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0808",
+   "n": 80.0,
+   "e": 15.0,
+   "height": 14.2,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0809",
+   "n": 80.0,
+   "e": 22.5,
+   "height": 12.1,
+   "condition": "frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0810",
+   "n": 80.0,
+   "e": 30.0,
+   "height": 14.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0811",
+   "n": 80.0,
+   "e": 37.5,
+   "height": 15.7,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0812",
+   "n": 80.0,
+   "e": 45.0,
+   "height": 15.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0900",
+   "n": 87.5,
+   "e": -45.0,
+   "height": 12.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0901",
+   "n": 87.5,
+   "e": -37.5,
+   "height": 13.2,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0902",
+   "n": 87.5,
+   "e": -30.0,
+   "height": 14.3,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0903",
+   "n": 87.5,
+   "e": -22.5,
+   "height": 13.7,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0904",
+   "n": 87.5,
+   "e": -15.0,
+   "height": 15.6,
+   "condition": "frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0905",
+   "n": 87.5,
+   "e": -7.5,
+   "height": 13.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0906",
+   "n": 87.5,
+   "e": 0.0,
+   "height": 15.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0907",
+   "n": 87.5,
+   "e": 7.5,
+   "height": 15.7,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0908",
+   "n": 87.5,
+   "e": 15.0,
+   "height": 14.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0909",
+   "n": 87.5,
+   "e": 22.5,
+   "height": 12.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0910",
+   "n": 87.5,
+   "e": 30.0,
+   "height": 12.7,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0911",
+   "n": 87.5,
+   "e": 37.5,
+   "height": 15.2,
+   "condition": "ripe",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0912",
+   "n": 87.5,
+   "e": 45.0,
+   "height": 13.9,
+   "condition": "ripe+frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1000",
+   "n": 95.0,
+   "e": -45.0,
+   "height": 14.2,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1001",
+   "n": 95.0,
+   "e": -37.5,
+   "height": 14.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1002",
+   "n": 95.0,
+   "e": -30.0,
+   "height": 15.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1003",
+   "n": 95.0,
+   "e": -22.5,
+   "height": 14.2,
+   "condition": "frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1004",
+   "n": 95.0,
+   "e": -15.0,
+   "height": 13.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1005",
+   "n": 95.0,
+   "e": -7.5,
+   "height": 14.0,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1006",
+   "n": 95.0,
+   "e": 0.0,
+   "height": 15.0,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1007",
+   "n": 95.0,
+   "e": 7.5,
+   "height": 13.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1008",
+   "n": 95.0,
+   "e": 15.0,
+   "height": 14.0,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1009",
+   "n": 95.0,
+   "e": 22.5,
+   "height": 14.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1010",
+   "n": 95.0,
+   "e": 30.0,
+   "height": 14.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1011",
+   "n": 95.0,
+   "e": 37.5,
+   "height": 15.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1012",
+   "n": 95.0,
+   "e": 45.0,
+   "height": 15.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1100",
+   "n": 102.5,
+   "e": -45.0,
+   "height": 13.0,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1101",
+   "n": 102.5,
+   "e": -37.5,
+   "height": 15.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1102",
+   "n": 102.5,
+   "e": -30.0,
+   "height": 12.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1103",
+   "n": 102.5,
+   "e": -22.5,
+   "height": 13.8,
+   "condition": "frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1104",
+   "n": 102.5,
+   "e": -15.0,
+   "height": 13.0,
+   "condition": "ripe",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1105",
+   "n": 102.5,
+   "e": -7.5,
+   "height": 14.7,
+   "condition": "ripe",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1106",
+   "n": 102.5,
+   "e": 0.0,
+   "height": 15.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1107",
+   "n": 102.5,
+   "e": 7.5,
+   "height": 14.9,
+   "condition": "frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1108",
+   "n": 102.5,
+   "e": 15.0,
+   "height": 12.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1109",
+   "n": 102.5,
+   "e": 22.5,
+   "height": 15.9,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1110",
+   "n": 102.5,
+   "e": 30.0,
+   "height": 15.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1111",
+   "n": 102.5,
+   "e": 37.5,
+   "height": 13.9,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1112",
+   "n": 102.5,
+   "e": 45.0,
+   "height": 15.3,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1200",
+   "n": 110.0,
+   "e": -45.0,
+   "height": 13.7,
+   "condition": "ripe+frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1201",
+   "n": 110.0,
+   "e": -37.5,
+   "height": 13.4,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1202",
+   "n": 110.0,
+   "e": -30.0,
+   "height": 13.3,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1203",
+   "n": 110.0,
+   "e": -22.5,
+   "height": 12.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1204",
+   "n": 110.0,
+   "e": -15.0,
+   "height": 13.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1205",
+   "n": 110.0,
+   "e": -7.5,
+   "height": 13.3,
+   "condition": "ripe",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1206",
+   "n": 110.0,
+   "e": 0.0,
+   "height": 14.0,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1207",
+   "n": 110.0,
+   "e": 7.5,
+   "height": 15.9,
+   "condition": "ripe",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1208",
+   "n": 110.0,
+   "e": 15.0,
+   "height": 15.9,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1209",
+   "n": 110.0,
+   "e": 22.5,
+   "height": 13.1,
+   "condition": "frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1210",
+   "n": 110.0,
+   "e": 30.0,
+   "height": 15.1,
+   "condition": "ripe",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1211",
+   "n": 110.0,
+   "e": 37.5,
+   "height": 12.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1212",
+   "n": 110.0,
+   "e": 45.0,
+   "height": 15.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  }
+ ],
+ "mission": [
+  {
+   "seq": 1,
+   "label": "VTOL takeoff (dock)",
+   "cmd": 84,
+   "n": 0.0,
+   "e": 0.0,
+   "alt": 30.0,
+   "tree": null
+  },
+  {
+   "seq": 2,
+   "label": "transition -> fixed-wing",
+   "cmd": 3000,
+   "n": null,
+   "e": null,
+   "alt": 0.0,
+   "tree": null
+  },
+  {
+   "seq": 3,
+   "label": "line-up before lane 1",
+   "cmd": 16,
+   "n": 20.0,
+   "e": -135.0,
+   "alt": 36.0,
+   "tree": null
+  },
+  {
+   "seq": 4,
+   "label": "FW lane 1 start",
+   "cmd": 16,
+   "n": 20.0,
+   "e": -90.0,
+   "alt": 36.0,
+   "tree": null
+  },
+  {
+   "seq": 5,
+   "label": "FW lane 1 end",
+   "cmd": 16,
+   "n": 20.0,
+   "e": 90.0,
+   "alt": 36.0,
+   "tree": null
+  },
+  {
+   "seq": 6,
+   "label": "FW lane 2 start",
+   "cmd": 16,
+   "n": 80.0,
+   "e": 90.0,
+   "alt": 36.0,
+   "tree": null
+  },
+  {
+   "seq": 7,
+   "label": "FW lane 2 end",
+   "cmd": 16,
+   "n": 80.0,
+   "e": -90.0,
+   "alt": 36.0,
+   "tree": null
+  },
+  {
+   "seq": 8,
+   "label": "FW lane 3 start",
+   "cmd": 16,
+   "n": 35.0,
+   "e": -90.0,
+   "alt": 36.0,
+   "tree": null
+  },
+  {
+   "seq": 9,
+   "label": "FW lane 3 end",
+   "cmd": 16,
+   "n": 35.0,
+   "e": 90.0,
+   "alt": 36.0,
+   "tree": null
+  },
+  {
+   "seq": 10,
+   "label": "FW lane 4 start",
+   "cmd": 16,
+   "n": 95.0,
+   "e": 90.0,
+   "alt": 36.0,
+   "tree": null
+  },
+  {
+   "seq": 11,
+   "label": "FW lane 4 end",
+   "cmd": 16,
+   "n": 95.0,
+   "e": -90.0,
+   "alt": 36.0,
+   "tree": null
+  },
+  {
+   "seq": 12,
+   "label": "FW lane 5 start",
+   "cmd": 16,
+   "n": 50.0,
+   "e": -90.0,
+   "alt": 36.0,
+   "tree": null
+  },
+  {
+   "seq": 13,
+   "label": "FW lane 5 end",
+   "cmd": 16,
+   "n": 50.0,
+   "e": 90.0,
+   "alt": 36.0,
+   "tree": null
+  },
+  {
+   "seq": 14,
+   "label": "FW lane 6 start",
+   "cmd": 16,
+   "n": 110.0,
+   "e": 90.0,
+   "alt": 36.0,
+   "tree": null
+  },
+  {
+   "seq": 15,
+   "label": "FW lane 6 end",
+   "cmd": 16,
+   "n": 110.0,
+   "e": -90.0,
+   "alt": 36.0,
+   "tree": null
+  },
+  {
+   "seq": 16,
+   "label": "FW lane 7 start",
+   "cmd": 16,
+   "n": 65.0,
+   "e": -90.0,
+   "alt": 36.0,
+   "tree": null
+  },
+  {
+   "seq": 17,
+   "label": "FW lane 7 end",
+   "cmd": 16,
+   "n": 65.0,
+   "e": 90.0,
+   "alt": 36.0,
+   "tree": null
+  },
+  {
+   "seq": 18,
+   "label": "landing approach",
+   "cmd": 16,
+   "n": 90.0,
+   "e": 0.0,
+   "alt": 36.0,
+   "tree": null
+  },
+  {
+   "seq": 19,
+   "label": "VTOL land (dock)",
+   "cmd": 85,
+   "n": 0.0,
+   "e": 0.0,
+   "alt": 0.0,
+   "tree": null
+  }
+ ]
+}
