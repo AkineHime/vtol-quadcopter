@@ -4,14 +4,17 @@
 #   its HTTPS certificate. Safe to run again: it skips what is already there.
 #
 #   Run:  double-click SETUP-1-dashboard.cmd   (or)
-#         powershell -ExecutionPolicy Bypass -File 1_setup_dashboard.ps1 [-Dir C:\coconut] [-Branch name]
+#         powershell -ExecutionPolicy Bypass -File 1_setup_dashboard.ps1 [-Repo path] [-Branch name]
+#   Repo: the clone these scripts are in, else a vtol-quadcopter folder next to
+#   this folder (see paths.ps1); -Repo picks another (relative paths are fine).
 param(
-    [string]$Dir = "C:\coconut",
+    [string]$Repo = "",
     [string]$Branch = "dashboard-ml-mission-link"
 )
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "paths.ps1")
 $RepoUrl = "https://github.com/AkineHime/vtol-quadcopter.git"
-$Repo = Join-Path $Dir "vtol-quadcopter"
+$Repo = Resolve-Repo $Repo
 $GS = Join-Path $Repo "ground_station"
 
 function Step($m) { Write-Host "`n== $m" -ForegroundColor Cyan }
@@ -60,7 +63,7 @@ if (Test-Path (Join-Path $Repo ".git")) {
     Run git @("-C", $Repo, "checkout", $Branch)
     Run git @("-C", $Repo, "pull", "--ff-only")
 } else {
-    New-Item -ItemType Directory -Force $Dir | Out-Null
+    New-Item -ItemType Directory -Force (Split-Path $Repo -Parent) | Out-Null
     Run git @("clone", "--branch", $Branch, $RepoUrl, $Repo)
 }
 

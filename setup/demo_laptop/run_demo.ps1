@@ -3,12 +3,13 @@
 #   RUN-demo-fake.cmd       + a fake aircraft circling the field (no WSL needed)
 #   RUN-demo-with-sim.cmd   + the real autopilot in JSBSim flying the dashboard's plan (~10 min)
 param(
-    [string]$Dir = "C:\coconut",
+    [string]$Repo = "",             # default: see paths.ps1
     [switch]$Fake,
     [switch]$Sim
 )
 $ErrorActionPreference = "Stop"
-$Repo = Join-Path $Dir "vtol-quadcopter"
+. (Join-Path $PSScriptRoot "paths.ps1")
+$Repo = Resolve-Repo $Repo
 $GS = Join-Path $Repo "ground_station"
 $py = Join-Path $GS ".venv\Scripts\python.exe"
 if (-not (Test-Path $py)) { throw "Not set up yet: run SETUP-1-dashboard.cmd first." }

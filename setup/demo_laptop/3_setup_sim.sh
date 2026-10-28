@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Coconut VTOL: ArduPilot SITL + JSBSim inside WSL Ubuntu 24.04, the same
 # versions the demo flights were flown on. Run through SETUP-3-simulator.cmd,
-# or inside Ubuntu:  bash 3_setup_sim.sh /mnt/c/coconut/vtol-quadcopter
+# or inside Ubuntu:  bash setup/demo_laptop/3_setup_sim.sh [REPO]   (default: the clone this script is in)
 # Takes 1-2 h, mostly downloads and compiling; asks for the Ubuntu password once.
 # Safe to run again: finished steps are skipped.
 set -eo pipefail
-REPO="${1:?usage: 3_setup_sim.sh /mnt/c/coconut/vtol-quadcopter}"
+REPO="$(cd "${1:-$(dirname "$0")/../..}" && pwd)"
 AP_URL=https://github.com/ArduPilot/ardupilot.git
 AP_COMMIT=8ab6afde107a91df1b5f60ade8f333cb8a61b190      # ArduPilot master of 2026-10-16
 AP=~/ardupilot

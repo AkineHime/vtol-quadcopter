@@ -1,8 +1,9 @@
 # Coconut VTOL: run 3_setup_sim.sh inside WSL Ubuntu 24.04 (ArduPilot SITL + JSBSim).
 #   Run:  double-click SETUP-3-simulator.cmd
-param([string]$Dir = "C:\coconut")
+param([string]$Repo = "")           # default: see paths.ps1
 $ErrorActionPreference = "Stop"
-$Repo = Join-Path $Dir "vtol-quadcopter"
+. (Join-Path $PSScriptRoot "paths.ps1")
+$Repo = Resolve-Repo $Repo
 if (-not (Test-Path (Join-Path $Repo "flight_software\sim_runner.py"))) { throw "No repo at ${Repo}: run SETUP-1-dashboard.cmd first." }
 
 # copy the script into Ubuntu with Unix line endings (mail and zip tools sometimes add CRLF)

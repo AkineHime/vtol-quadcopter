@@ -2,13 +2,14 @@
 # One-shot environment setup for the Gazebo + ArduPilot demo, inside WSL2
 # Ubuntu 24.04. Safe to re-run: every step skips what is already done.
 #
-#   bash /mnt/c/claude/vtol-quadcopter/flight_software/gazebo/setup_wsl.sh
+#   bash flight_software/gazebo/setup_wsl.sh      (from the repo, inside WSL)
 #
 # Installs: build tools, Gazebo Harmonic, ArduPilot (SITL build of ArduPlane)
 # at ~/ardupilot, the ardupilot_gazebo plugin at ~/ardupilot_gazebo, and the
 # Python venv ~/venv-ardupilot (pymavlink, matplotlib, numpy, gmsh, cadquery),
 # plus ffmpeg for the recorded-run videos.
 set -euo pipefail
+REPO_GZ="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"     # this folder, found before any cd
 
 log() { printf '\n=== %s ===\n' "$*"; }
 
@@ -60,7 +61,6 @@ GZ_VERSION=harmonic cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo
 make -j"$(nproc)"
 
 log "shell environment"
-REPO_GZ=/mnt/c/claude/vtol-quadcopter/flight_software/gazebo
 if ! grep -q "coconut-gazebo-env" ~/.bashrc; then
     cat >> ~/.bashrc <<EOF
 

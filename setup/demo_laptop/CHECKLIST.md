@@ -21,7 +21,8 @@ Level 1 is enough for most demos. Do Level 2 at least a day before.
 
 1. Double-click **SETUP-1-dashboard.cmd**.
    - Installs Git, Python 3.13 and Node.js if missing (Windows may ask for permission),
-     clones the code to `C:\coconut\vtol-quadcopter`, installs packages, builds the dashboard.
+     clones the code into a `vtol-quadcopter` folder next to this folder (or uses the clone
+     these scripts are in), installs packages, builds the dashboard.
    - If it stops right after installing a tool, close the window and run it again.
 2. Double-click **RUN-demo-fake.cmd**: the dashboard opens at http://localhost:8080 and
    a fake aircraft starts circling the field. Close its window to stop it.
