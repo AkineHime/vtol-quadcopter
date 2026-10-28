@@ -1,0 +1,10 @@
+fastapi>=0.110
+uvicorn[standard]>=0.29
+pymavlink>=2.4.40
+cryptography>=42
+segno>=1.6        # QR code for the phone setup link
+httpx>=0.27       # relays the phone / ESP32-CAM MJPEG stream
+openpyxl>=3.1     # prediction export to Excel
+# tests
+pytest>=8
+playwright>=1.44

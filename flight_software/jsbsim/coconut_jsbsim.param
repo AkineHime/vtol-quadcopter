@@ -1,0 +1,49 @@
+# ArduPilot overlay for the JSBSim physics (on top of ../coconut_quadplane.param).
+# Starts from the Gazebo-tuned set (../gazebo/coconut_gazebo.param, each line
+# explained there); differences are marked JSBSIM.
+
+# JSBSIM: JSBSim returns true airspeed -> use a (simulated) airspeed sensor,
+# as the real build should (DLVR/MS4525). Gazebo had to fly on synthetic airspeed.
+ARSPD_TYPE        100
+ARSPD_USE         1
+
+# Control layout (2026-10-27): wing ailerons + tail elevator replace the
+# elevons, whose pitch control mostly dumped lift (see sim_results.md).
+SERVO1_FUNCTION   4        # left aileron
+SERVO2_FUNCTION   4        # right aileron (reversed mechanically on the real build)
+SERVO1_REVERSED   0
+SERVO2_REVERSED   0
+SERVO4_FUNCTION   19       # tail elevator
+SERVO4_MIN        1000
+SERVO4_MAX        2000
+SERVO4_TRIM       1500
+SERVO3_MIN        1000
+SERVO3_MAX        2000
+SERVO3_TRIM       1000
+
+RLL_RATE_P        0.04
+RLL_RATE_I        0.06
+RLL_RATE_D        0.0
+RLL_RATE_FF       0.225
+ROLL_LIMIT_DEG    35
+
+AIRSPEED_CRUISE   15
+AIRSPEED_MIN      12
+Q_ASSIST_SPEED    9
+
+Q_WVANE_ENABLE    1
+Q_WVANE_GAIN      4
+Q_WVANE_SPD_MAX   0
+Q_WVANE_VELZ_MAX  0
+Q_WVANE_HGT_MIN   0
+
+ARMING_RUDDER     0
+THR_FAILSAFE      0
+
+# JSBSIM: rotor_model.py lifts off at ~0.52 throttle (4 motors sagging a 3S pack)
+Q_M_THST_HOVER    0.52
+
+# JSBSIM: the bridge reports pack voltage + current (rotor_model.Pack). The
+# pack is a 3S 4000 mAh (44.4 Wh, as in analysis.py and the ground station's
+# planner); coconut_quadplane.param said 5000.
+BATT_CAPACITY     4000

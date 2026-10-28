@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d1f17">
+<title>Drone camera</title>
+<style>
+  :root { --bg:#0d1f17; --card:#15291f; --line:#24402f; --text:#e8efe9; --mute:#8fa597; --copper:#c8834f; --ok:#5fbf7f; --bad:#e06c5a; }
+  * { box-sizing:border-box; }
+  html, body { margin:0; height:100%; background:var(--bg); color:var(--text);
+    font:16px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  main { display:flex; flex-direction:column; gap:16px; padding:max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom)); height:100%; }
+  h1 { font-size:18px; margin:0; font-weight:600; letter-spacing:.2px; }
+  h1 span { color:var(--copper); }
+  .video { flex:1; min-height:0; border-radius:20px; overflow:hidden; background:#000; border:1px solid var(--line); position:relative; }
+  video { width:100%; height:100%; object-fit:cover; display:block; }
+  .badge { position:absolute; top:12px; left:12px; padding:4px 10px; border-radius:999px; background:rgba(13,31,23,.8); font-size:13px; color:var(--mute); }
+  .badge.live { color:#fff; background:var(--bad); }
+  #status { color:var(--mute); font-size:14px; min-height:20px; }
+  button { appearance:none; border:0; border-radius:16px; padding:18px; font-size:18px; font-weight:600; width:100%;
+    background:var(--copper); color:#1b1006; }
+  button.stop { background:var(--card); color:var(--text); border:1px solid var(--line); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Coconut VTOL &middot; <span>drone camera</span></h1>
+  <div class="video">
+    <video id="preview" autoplay playsinline muted></video>
+    <div id="badge" class="badge">off</div>
+  </div>
+  <div id="status">Tap Start to stream the rear camera to the ground station.</div>
+  <button id="btn">Start</button>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+const statusEl = $("status"), btn = $("btn"), badge = $("badge"), preview = $("preview");
+let stream = null, ws = null, running = false, wakeLock = null;
+const peers = new Map();                       // viewer id -> RTCPeerConnection
+
+function setStatus(t) { statusEl.textContent = t; }
+function updateBadge() {
+  const live = [...peers.values()].filter(p => p.connectionState === "connected").length;
+  badge.textContent = !running ? "off" : live ? `live · ${live} viewer${live > 1 ? "s" : ""}` : "waiting for dashboard";
+  badge.className = "badge" + (live ? " live" : "");
+}
+
+async function start() {
+  if (!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    setStatus("Camera needs HTTPS. Open https://<laptop-ip>:8443/camera and accept the certificate warning.");
+    return;
+  }
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } },
+    });
+  } catch (e) {
+    setStatus("Camera blocked: " + e.message + ". Allow camera access for this site and try again.");
+    return;
+  }
+  preview.srcObject = stream;
+  running = true;
+  btn.textContent = "Stop"; btn.className = "stop";
+  try { wakeLock = await navigator.wakeLock?.request("screen"); } catch (e) {}
+  connect();
+  updateBadge();
+}
+
+function stop() {
+  running = false;
+  if (ws) ws.close();
+  peers.forEach(p => p.close()); peers.clear();
+  if (stream) stream.getTracks().forEach(t => t.stop());
+  stream = null; preview.srcObject = null;
+  try { wakeLock && wakeLock.release(); } catch (e) {}
+  btn.textContent = "Start"; btn.className = "";
+  setStatus("Stopped.");
+  updateBadge();
+}
+
+function connect() {
+  ws = new WebSocket(`wss://${location.host}/ws/signal?role=camera`);
+  ws.onopen = () => setStatus("Connected to ground station. Streaming when the dashboard opens.");
+  ws.onclose = () => {
+    peers.forEach(p => p.close()); peers.clear(); updateBadge();
+    if (running) { setStatus("Lost the ground station, retrying…"); setTimeout(() => running && connect(), 2000); }
+  };
+  ws.onmessage = async (ev) => {
+    const msg = JSON.parse(ev.data);
+    if (msg.type === "viewer") await offer(msg.id);
+    else if (msg.type === "bye") { peers.get(msg.id)?.close(); peers.delete(msg.id); updateBadge(); }
+    else if (msg.type === "answer") await peers.get(msg.from)?.setRemoteDescription(msg.sdp);
+    else if (msg.type === "ice" && msg.candidate) { try { await peers.get(msg.from)?.addIceCandidate(msg.candidate); } catch (e) {} }
+  };
+}
+
+async function offer(id) {
+  peers.get(id)?.close();
+  const pc = new RTCPeerConnection({ iceServers: [] });       // same LAN, no STUN/TURN
+  peers.set(id, pc);
+  stream.getTracks().forEach(t => pc.addTrack(t, stream));
+  pc.onicecandidate = (e) => e.candidate && ws.send(JSON.stringify({ type: "ice", to: id, candidate: e.candidate }));
+  pc.onconnectionstatechange = () => {
+    updateBadge();
+    if (pc.connectionState === "connected") setStatus("Streaming to the dashboard.");
+  };
+  await pc.setLocalDescription(await pc.createOffer());
+  ws.send(JSON.stringify({ type: "offer", to: id, sdp: pc.localDescription }));
+}
+
+btn.onclick = () => (running ? stop() : start());
+document.addEventListener("visibilitychange", async () => {
+  if (running && document.visibilityState === "visible") { try { wakeLock = await navigator.wakeLock?.request("screen"); } catch (e) {} }
+});
+</script>
+</body>
+</html>

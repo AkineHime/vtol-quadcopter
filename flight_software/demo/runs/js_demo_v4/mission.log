@@ -1,0 +1,160 @@
+[link] connecting to tcp:127.0.0.1:5760 ...
+[link] heartbeat from system 1 component 0
+[boot] waiting for GPS + EKF ...
+[fc] Barometer 1 calibration complete
+[fc] Barometer 2 calibration complete
+[fc] Airspeed 1 calibration started
+[fc] ArduPilot Ready
+[fc] Airspeed 1 calibrated
+[fc] GPS 1: probing for u-blox at 230400 baud
+[fc] GPS 1: detected u-blox
+[fc] EKF3 IMU0 initialised
+[fc] EKF3 IMU1 initialised
+[fc] EKF3 IMU1 tilt alignment complete
+[fc] EKF3 IMU0 tilt alignment complete
+[fc] EKF3 IMU1 MAG0 initial yaw alignment complete
+[fc] EKF3 IMU0 MAG0 initial yaw alignment complete
+[fc] EKF3 IMU0 origin set
+[fc] EKF3 IMU0 is using GPS
+[fc] AHRS: EKF3 active
+[fc] Field Elevation Set: 300m
+[boot] GPS+EKF ok, letting it settle ...
+[plan] hybrid: 29 items, 4 targets
+[mission] uploading 29 commands (+ home) = 30 items ...
+[mission]  -> sent item 0/29 (cmd HOME)
+[mission]  -> sent item 1/29 (cmd 84)
+[mission]  -> sent item 2/29 (cmd 3000)
+[mission]  -> sent item 3/29 (cmd 16)
+[mission]  -> sent item 4/29 (cmd 16)
+[mission]  -> sent item 5/29 (cmd 16)
+[mission]  -> sent item 6/29 (cmd 16)
+[mission]  -> sent item 7/29 (cmd 16)
+[mission]  -> sent item 8/29 (cmd 16)
+[mission]  -> sent item 9/29 (cmd 16)
+[mission]  -> sent item 10/29 (cmd 16)
+[mission]  -> sent item 11/29 (cmd 16)
+[mission]  -> sent item 12/29 (cmd 16)
+[mission]  -> sent item 13/29 (cmd 16)
+[mission]  -> sent item 14/29 (cmd 16)
+[mission]  -> sent item 15/29 (cmd 16)
+[mission]  -> sent item 16/29 (cmd 16)
+[mission]  -> sent item 17/29 (cmd 16)
+[mission]  -> sent item 18/29 (cmd 16)
+[mission]  -> sent item 19/29 (cmd 3000)
+[mission]  -> sent item 20/29 (cmd 16)
+[mission]  -> sent item 21/29 (cmd 19)
+[mission]  -> sent item 22/29 (cmd 16)
+[mission]  -> sent item 23/29 (cmd 19)
+[mission]  -> sent item 24/29 (cmd 16)
+[mission]  -> sent item 25/29 (cmd 19)
+[mission]  -> sent item 26/29 (cmd 16)
+[mission]  -> sent item 27/29 (cmd 19)
+[mission]  -> sent item 28/29 (cmd 16)
+[mission]  -> sent item 29/29 (cmd 85)
+[mission] upload accepted by vehicle (30/30 items)
+[verify] round-trip OK
+[fc] Throttle armed
+[arm] armed
+[mission] current set to 1
+[phase]   1  VTOL takeoff (dock)
+[fc] Mission: 1 VTOLTakeoff
+[fc] Weathervane Active: nose in
+[fc] Mission: 2 VTOLTransition
+[fc] Mission: 3 WP
+[fc] Transition started airspeed 2.1
+[phase]   3  FW lane 1 end
+[fc] Transition airspeed reached 12.0
+[fc] Transition done
+[fc] Reached waypoint #3 dist 24m
+[fc] Mission: 4 WP
+[phase]   4  FW lane 2 start
+[fc] Passed waypoint #4 dist 37m
+[fc] Mission: 5 WP
+[phase]   5  FW lane 2 end
+[phase]   6  FW lane 3 start
+[fc] Reached waypoint #5 dist 24m
+[fc] Mission: 6 WP
+[fc] Reached waypoint #6 dist 25m
+[fc] Mission: 7 WP
+[phase]   7  FW lane 3 end
+[phase]   8  FW lane 4 start
+[fc] Reached waypoint #7 dist 25m
+[fc] Mission: 8 WP
+[fc] Passed waypoint #8 dist 26m
+[fc] Mission: 9 WP
+[phase]   9  FW lane 4 end
+[fc] Reached waypoint #9 dist 24m
+[fc] Mission: 10 WP
+[phase]  10  FW lane 5 start
+[fc] Reached waypoint #10 dist 25m
+[fc] Mission: 11 WP
+[phase]  11  FW lane 5 end
+[fc] Reached waypoint #11 dist 25m
+[fc] Mission: 12 WP
+[phase]  12  FW lane 6 start
+[fc] Passed waypoint #12 dist 26m
+[fc] Mission: 13 WP
+[phase]  13  FW lane 6 end
+[fc] Reached waypoint #13 dist 24m
+[fc] Mission: 14 WP
+[phase]  14  FW lane 7 start
+[fc] Reached waypoint #14 dist 25m
+[fc] Mission: 15 WP
+[phase]  15  FW lane 7 end
+[fc] Reached waypoint #15 dist 12m
+[fc] Mission: 16 WP
+[phase]  16  U-turn after the sweep
+[fc] Reached waypoint #16 dist 25m
+[fc] Mission: 17 WP
+[phase]  17  U-turn exit
+[fc] Passed waypoint #17 dist 17m
+[fc] Mission: 18 WP
+[phase]  18  approach first stop
+[fc] Passed waypoint #18 dist 15m
+[fc] Mission: 19 VTOLTransition
+[fc] Entered VTOL mode
+[fc] Mission: 20 WP
+[phase]  20  lead-in P0302
+[fc] Weathervane Active: nose in
+[fc] Passed waypoint #20 dist 0m
+[fc] Mission: 21 LoitTime
+[phase]  21  inspect P0302 (ripe)
+[fc] VTOL position2 started v=3.5 d=9.8 h=26.0
+[fc] Loiter time complete
+[fc] Mission: 22 WP
+[phase]  22  lead-in P0005
+[fc] Passed waypoint #22 dist 0m
+[fc] Mission: 23 LoitTime
+[phase]  23  inspect P0005 (ripe)
+[fc] VTOL position2 started v=3.3 d=10.0 h=26.0
+[fc] Loiter time complete
+[fc] Mission: 24 WP
+[phase]  24  lead-in P0612
+[fc] Passed waypoint #24 dist 0m
+[fc] Mission: 25 LoitTime
+[phase]  25  inspect P0612 (ripe)
+[fc] VTOL position2 started v=3.3 d=9.8 h=26.0
+[fc] Loiter time complete
+[fc] Mission: 26 WP
+[phase]  26  lead-in P0911
+[fc] Passed waypoint #26 dist 0m
+[fc] Mission: 27 LoitTime
+[phase]  27  inspect P0911 (ripe)
+[fc] VTOL position2 started v=3.0 d=10.0 h=26.0
+[fc] Loiter time complete
+[fc] Mission: 28 WP
+[phase]  28  return to dock (VTOL)
+[fc] Reached waypoint #28 dist 1m
+[fc] Mission: 29 VTOLLand
+[fc] VTOL Position1 d=60.0
+[fc] VTOL Overshoot d=60.0 cs=0.7 yerr=-106.6
+[phase]  29  VTOL land (dock)
+[fc] VTOL position2 started v=3.4 d=9.9 h=29.9
+[fc] Weathervane Active: nose in
+[fc] Land descend started
+[fc] Land final started
+[fc] Land complete
+[fc] Throttle disarmed
+[phase] landed & disarmed
+
+FLIGHT: OK {"ok": true, "landed": true, "crashed": false, "wall_s": 291.5, "strategy": "hybrid", "roundtrip_ok": true, "items": 29}
