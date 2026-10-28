@@ -27,7 +27,16 @@ const tiny = classifyPixels(...frame([40, 160, 60], 0.005));                 // 
 out.push({ name: "tiny card ignored", ok: tiny === null, got: tiny });
 const blank = classifyPixels(...frame([235, 232, 225], 0.2));                // just paper
 out.push({ name: "blank paper", ok: blank === null, got: blank });
-const small = classifyPixels(...frame([40, 160, 60], 0.03));                 // partial confidence
-out.push({ name: "small card lower confidence", ok: small && small.confidence < 0.9 && small.confidence > 0.3, got: small });
+const small = classifyPixels(...frame([40, 160, 60], 0.045));                // partial confidence
+out.push({ name: "small card lower confidence", ok: small && small.confidence < 0.9 && small.confidence >= 0.6, got: small });
+const far = classifyPixels(...frame([40, 160, 60], 0.03));                   // too far off to trust
+out.push({ name: "far card ignored", ok: far === null, got: far });
+const noPaper = classifyPixels(...frame([40, 160, 60], 0.12, 160, 120, [40, 44, 42]));   // dark screen, no paper
+out.push({ name: "no white paper ignored", ok: noPaper === null, got: noPaper });
+// a busy scene: green and yellow patches of similar size on paper -> mixed, no reading
+const [mix, mw, mh] = frame([40, 160, 60], 0.08);
+for (let y = 0; y < 30; y++) for (let x = 0; x < 50; x++) mix.set([235, 205, 40, 255], 4 * (y * mw + x));
+const mixed = classifyPixels(mix, mw, mh);
+out.push({ name: "mixed colours ignored", ok: mixed === null, got: mixed });
 console.log(JSON.stringify(out));
 process.exit(out.every((o) => o.ok) ? 0 : 1);

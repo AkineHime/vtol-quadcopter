@@ -168,7 +168,7 @@ button.cell:active { background: rgba(255, 255, 255, 0.08); }
 .inspector .group-title { padding: 0 14px; }
 .inspector select, .inspector input { flex: 1; min-width: 0; height: 34px; border: 0; border-radius: 8px; padding: 0 10px; background: var(--fill-2); outline: none; }
 .inspector select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--secondary) 50%), linear-gradient(135deg, var(--secondary) 50%, transparent 50%);
-  background-position: calc(100% - 15px) 15px, calc(100% - 10px) 15px; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 26px; }
+  background-position: calc(100% - 15px) 15px, calc(100% - 10px) 15px; background-size: 5px 5px; background-repeat: no-repeat; padding: 0 22px 0 9px; font-size: 13px; text-overflow: ellipsis; }
 .inspector select option { background: var(--material-solid); }
 .inspector input::placeholder { color: var(--tertiary); }
 .inspector .segmented { width: 100%; }
@@ -511,6 +511,7 @@ img.relief.wide { opacity: 0.85; }
   .legend { width: 236px; bottom: 112px; }
   .strip { left: 16px; right: 16px; bottom: 16px; }
   .camera-card ~ .strip, .strip:has(~ .camera-card) { right: 312px; }
+  .stage:has(.inspector) .strip { right: 392px; }        /* a palm card is open: stop short of it */
   .inspector { top: 140px; width: min(360px, calc(100% - 32px)); max-height: calc(100% - 156px); z-index: 900; }
   .inspector.compact { max-height: calc(100% - 156px); }
   .toasts { top: 140px; width: min(380px, calc(100% - 32px)); }

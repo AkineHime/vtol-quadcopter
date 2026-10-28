@@ -99,8 +99,11 @@ class Pack:
         self.v_bus = max(0.0, (V_OC + R_PACK * e / RM) / (1 + R_PACK * a / RM))
         return self.v_bus
 
-    def update(self, rotors, dt):
-        total = sum(r.current for r in rotors)
+    def update(self, rotors, throttles, dt):
+        """Pack current: an ESC at duty d draws about d x the motor current
+        from the battery (input power = output power), so summing the winding
+        currents would overstate it ~2.5x at hover throttle."""
+        total = sum(max(0.0, t) * r.current for r, t in zip(rotors, throttles))
         self.used_mah += total * dt / 3.6
         return total
 
@@ -110,7 +113,7 @@ def _settle(throttle, v_axial=0.0, t_end=2.0, dt=1e-4):
     t = 0.0
     while t < t_end:
         r.step(throttle, v_axial, p.solve([r], [throttle]), dt)
-        p.update([r], dt)
+        p.update([r], [throttle], dt)
         t += dt
     return r, p
 
@@ -125,7 +128,7 @@ def _spool_time(t_from, t_to, dt=1e-4):
     t = 0.0
     while t < 1.0:
         r.step(t_to, 0.0, p.solve([r], [t_to]), dt)
-        p.update([r], dt)
+        p.update([r], [t_to], dt)
         t += dt
         if (r1.thrust - r0.thrust) * (r.thrust - target) >= 0:
             return t

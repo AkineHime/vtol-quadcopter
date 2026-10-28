@@ -17,7 +17,7 @@ import json
 import math
 import sqlite3
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS flights (
@@ -101,7 +101,17 @@ class Recorder:
         return fid
 
     def _finish(self, fid: int, result: str) -> None:
-        self.con.execute("UPDATE flights SET ended_at=?, result=? WHERE id=?", (now_iso(), result, fid))
+        # the flight ends at its last recorded point, not when it is closed (a
+        # lost link is only declared 30 s later, a restart can be hours later)
+        ended = now_iso()
+        last = self.con.execute("SELECT t, alt, groundspeed FROM flight_points WHERE flight_id=? ORDER BY t DESC LIMIT 1",
+                                (fid,)).fetchone()
+        if last:
+            (started,) = self.con.execute("SELECT started_at FROM flights WHERE id=?", (fid,)).fetchone()
+            ended = (datetime.fromisoformat(started) + timedelta(seconds=last[0])).isoformat(timespec="seconds")
+            if result == "lost" and last[1] is not None and last[1] < 1.0 and (last[2] or 0.0) < 1.0:
+                result = "landed"       # the link went after touchdown (e.g. the simulator was shut down)
+        self.con.execute("UPDATE flights SET ended_at=?, result=? WHERE id=?", (ended, result, fid))
         self.con.execute("UPDATE flights SET stats_json=? WHERE id=?", (json.dumps(stats(self.con, fid)), fid))
 
 

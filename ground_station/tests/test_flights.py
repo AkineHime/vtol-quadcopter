@@ -1,4 +1,6 @@
 """Flight recorder (backend/flights.py) and the flights API."""
+from datetime import datetime
+
 from fastapi.testclient import TestClient
 
 from backend import db, flights
@@ -69,6 +71,23 @@ def test_link_lost_ends_flight_and_restart_closes_open_one():
     open_id = rec.active
     flights.Recorder(con, snapshot=lambda: ({}, {}), clock=clock)                    # server restarts
     assert flights.get_flight(con, open_id)["result"] == "lost"
+
+
+def test_link_lost_on_the_ground_counts_as_landed():
+    con = db.connect()
+    db.init_db(con)
+    clock = Clock()
+    rec = flights.Recorder(con, snapshot=lambda: ({}, {}), clock=clock)
+    fly(rec, clock, 40, armed=True, lat=10.661, lon=77.005, alt=20.0, groundspeed=5.0)      # 10 s flying
+    fid = rec.active
+    fly(rec, clock, 8, armed=True, lat=10.661, lon=77.005, alt=0.0, groundspeed=0.0)        # touched down
+    for _ in range(int(flights.LINK_END_S / 0.25) + 2):                                     # sim shut down
+        clock.t += 0.25
+        rec.feed({"connected": False})
+    f = flights.get_flight(con, fid)
+    assert f["result"] == "landed"
+    secs = (datetime.fromisoformat(f["ended_at"]) - datetime.fromisoformat(f["started_at"])).total_seconds()
+    assert 10 <= secs <= 13                                  # the last point, not 30 s of lost link later
 
 
 def test_flights_api():

@@ -153,7 +153,7 @@ class Bridge:
             T = self.rotors[i].step(thr[i], -w, vb, self.dt)
             f[f"external_reactions/liftM{i + 1}/magnitude"] = T / LBF2N
             Mz += LIFT_SPIN[i] * self.rotors[i].torque   # reaction on the airframe
-        self.i_total = self.pack.update(self.rotors, self.dt)        # A, all five motors
+        self.i_total = self.pack.update(self.rotors, thr, self.dt)   # A drawn from the pack, all five motors
         mag_lbf = (Mz / (2.0 * YAW_ARM)) / LBF2N
         f["external_reactions/yawTorqueF/magnitude"] = mag_lbf
         f["external_reactions/yawTorqueA/magnitude"] = mag_lbf
