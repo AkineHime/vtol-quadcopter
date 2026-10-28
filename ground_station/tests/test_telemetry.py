@@ -70,6 +70,20 @@ def test_waits_for_sitl_then_connects():
         tel.stop()
 
 
+def test_reports_while_no_vehicle():
+    """With nothing to connect to (SITL shut down), it still reports 'disconnected'
+    every retry, so the flight recorder's link-lost clock keeps running."""
+    v = FakeVehicle()                                  # port bound, nothing listening
+    got = []
+    tel = Telemetry(f"tcp:127.0.0.1:{v.port}")
+    tel.start(got.append)
+    try:
+        assert wait_for(lambda: len(got) >= 1, 15)    # pymavlink retries ~5 s per attempt
+        assert all(m["type"] == "telemetry" and not m["connected"] for m in got)
+    finally:
+        tel.stop()
+
+
 def test_telemetry_reaches_dashboard_websocket():
     v = FakeVehicle()
     v.start()

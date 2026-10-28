@@ -74,8 +74,9 @@ class Telemetry:
         while not self._stop.is_set():
             try:
                 m = mavutil.mavlink_connection(self.url, source_system=255, source_component=190)
-            except Exception as e:                   # SITL not up yet
+            except Exception as e:                   # SITL not up yet, or gone
                 self._update(connected=False, error=str(e))
+                self._push(force=True)               # keeps the recorder's link-lost clock running
                 self._stop.wait(2.0)
                 continue
             try:
