@@ -126,8 +126,11 @@ function MissionPlan({ plan, mission, onSelect, setColorBy }) {
       <div className="cell static plan-actions">
         {plan.stops.length > 5 && <button className="link" onClick={() => setAll(!all)}>{all ? "Fewer" : `All ${plan.stops.length}`}</button>}
         <button className="link" onClick={() => setColorBy("prediction")}>Show prediction</button>
-        <a className="btn btn-sm" href="/api/plan.waypoints" download="next_mission.waypoints">
-          <Icon name="download" size={15} stroke={2} />Export
+        <a className="btn btn-sm btn-quiet" href="/api/prediction.xlsx" title="Every palm's tender prediction and the next mission, as an Excel workbook">
+          <Icon name="download" size={15} stroke={2} />Excel
+        </a>
+        <a className="btn btn-sm" href="/api/plan.waypoints" download="next_mission.waypoints" title="Mission file for Mission Planner / QGroundControl">
+          <Icon name="download" size={15} stroke={2} />Mission
         </a>
       </div>
       {mission && (

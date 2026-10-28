@@ -12,7 +12,7 @@ from fastapi.responses import FileResponse, PlainTextResponse, Response, Streami
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from . import camera, config, db, flights, planner, ripeness
+from . import camera, config, db, export_xlsx, flights, planner, ripeness
 from .capture import Capture
 
 MAX_PHOTO_BYTES = 8 * 1024 * 1024
@@ -185,6 +185,14 @@ def create_app(telemetry=None, signaling=None) -> FastAPI:
     def get_plan_waypoints():
         return PlainTextResponse(planner.waypoints(state["plan"]), headers={
             "Content-Disposition": "attachment; filename=next_mission.waypoints"})
+
+    @app.get("/api/prediction.xlsx")
+    def get_prediction_xlsx():
+        """The ripeness prediction for every palm, with the next mission, as Excel."""
+        data = export_xlsx.workbook(trees_with_scores(con), planner.public(state["plan"]), db.layout(con))
+        name = datetime.now(timezone.utc).strftime("prediction_%Y%m%d_%H%M.xlsx")
+        return Response(data, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        headers={"Content-Disposition": f"attachment; filename={name}"})
 
     @app.get("/api/mission")
     def get_mission():

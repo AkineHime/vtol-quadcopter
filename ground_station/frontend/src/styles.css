@@ -289,7 +289,10 @@ path.route-sim { opacity: .9; }
 .score { width: 48px; height: 4px; border-radius: 2px; background: var(--fill); overflow: hidden; flex: none; }
 .score span { display: block; height: 100%; border-radius: 2px; background: var(--predict); transition: width .6s var(--ease); }
 .score.big { width: 100%; height: 6px; border-radius: 3px; }
-.plan-actions { justify-content: flex-end; gap: 14px; padding: 8px 10px; }
+.plan-actions { justify-content: flex-end; gap: 8px; padding: 8px 10px; }
+.plan-actions .link + .btn { margin-left: 6px; }
+.btn-quiet { background: var(--fill-2); color: var(--label); }
+.plan-actions .btn-sm { padding: 0 10px; }
 .link { font-size: 13px; font-weight: 600; color: var(--tint); }
 .link:hover { text-decoration: underline; }
 .plan-actions .link:first-child { margin-right: auto; }

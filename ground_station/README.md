@@ -16,8 +16,13 @@ serves everything over HTTPS on port **8443**:
 - **next mission planned from the database**: flagged targets plus palms the
   ripeness model predicts are tender, within the 80% battery rule, drawn as a
   dashed route with numbered stops, re-planned live whenever the database
-  changes, exportable as a QGroundControl `.waypoints` file. The simulator's
+  changes, exportable as a QGroundControl `.waypoints` file (**Mission**). The simulator's
   last mission is drawn faintly next to it for comparison.
+- **prediction export to Excel** (**Excel** button, `GET /api/prediction.xlsx`):
+  Summary (counts as live formulas, with an editable predicted-tender
+  threshold), Prediction (every palm, most likely tender first: probability,
+  why, maturity, health, status, mission stop), Next mission (stops in flying
+  order) and How it works (the rules). `backend/export_xlsx.py`.
 - **ripeness prediction**: a per-palm probability of tender nuts from
   bunch-cycle rules (`backend/ripeness.py`), shown on the map and in the tree
   card, with the reason.
@@ -312,6 +317,7 @@ python -m pytest -v
 | `test_camera.py` | camera address checks (private network only, IP Webcam default path), the MJPEG relay against a fake IP Webcam, errors |
 | `test_checks.py` | go/no-go thresholds, wind source, landing projection and every alert rule (Node) |
 | `test_card_reader.py` | the colour-card reader on synthetic frames (Node): green/light green/yellow/brown → stage; tiny, far-off, mixed-colour cards, blank paper, no paper and a brown desk give no reading; young card in dim light |
+| `test_export.py` | Excel export: four sheets, one row per palm sorted by probability, Yes/No formula tied to the threshold, mission stops match the plan |
 | `test_plan.py` | ripeness rules (fresh/stale sightings, harvest cycle, health, survey, visits), migration to maturity/health/harvested, photo with a card reading, planner battery cap + targets first + stop order + WPL export, confirmed palms dropped, plan/export/image endpoints, ML label/model fields, live re-plan |
 | `test_photo.py` | pattern membership (85/43/22), capture only over pattern palms within the radius, retry window, one answer per request, photo upload saved + history + `last_photo`, new round resets |
 | `test_api.py` | REST endpoints, validation, WebSocket push on change, and push when another process writes the DB |
@@ -394,6 +400,7 @@ the same transaction, or call `backend.db.add_event()` from Python.
 | `GET /api/telemetry` | latest telemetry |
 | `GET /api/plan` | next mission from the database: `{stops: [{tree, order, kind: target\|predicted, score, reason, lat, lon}], route: [{seq, label, lat, lon, alt, tree}], dropped, n_targets, n_predicted, distance_m, energy_wh, battery_pct, budget_pct, max_stops}` |
 | `GET /api/plan.waypoints` | the same mission as a QGroundControl WPL 110 file |
+| `GET /api/prediction.xlsx` | the ripeness prediction for every palm plus the next mission, as an Excel workbook |
 | `GET /api/mission` | the simulator's last planned mission (`flight_software/demo/plan.json`): `{route, targets, items}` |
 | `POST /api/trees/{id}/photo?capture_id=…&label=…&confidence=…&model=…` | the capture answer can carry a classifier result (the colour-card reader's): then it is logged as a `detection` |
 | `POST /api/trees/{id}/image` | raw JPEG body → `{"image": path}` to reference from an event (used by the ML pipeline) |
