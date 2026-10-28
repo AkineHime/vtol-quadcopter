@@ -1,2 +1,8 @@
 # Scripts run inside WSL/Linux must keep LF line endings on Windows checkouts.
 *.sh text eol=lf
+
+# Binary documents: never touch their bytes.
+*.pdf binary
+*.docx binary
+*.pptx binary
+*.xlsx binary
