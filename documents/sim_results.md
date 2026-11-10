@@ -162,6 +162,108 @@ All live in `flight_software/gazebo/coconut_gazebo.param` and
 - **Mission rule.** The last waypoint before `VTOL_LAND` must be at least
   the stopping distance away (42 m at 15 m/s); the planner uses 60 m.
 
+## 5. Cross-check with real flight physics (JSBSim, 2026-10-27)
+
+Gazebo's LiftDrag model is coarse, so the key runs were repeated with
+**JSBSim** (stability-derivative aero, MIL-spec turbulence) driven by
+ArduPilot SITL over the same JSON link (`flight_software/jsbsim/`,
+`sim_runner.py --physics jsbsim`). The rotor model in this setup uses
+measured data, not the Gazebo approximations:
+- **Motors:** A2212 1400KV on 1045 props, using UIUC-measured APC 10×4.7
+  CT/CP.
+- **Battery:** 3S pack with internal resistance, so the voltage sags with
+  load.
+- **Spool-up:** about 80–100 ms.
+
+Checks are in `jsbsim/test_physics.py`:
+- **Hover:** lift-off at 52% throttle, with the pack sagged to 9.2 V.
+- **Max lift:** 911 g per rotor at 65% throttle, drawing 22.4 A per motor.
+- **Glide:** L/D 12.7.
+
+**Camera rate.** Every run, Gazebo and JSBSim, was re-analysed at **5 fps**
+(`python reanalyze.py`), the rate recommended in §3.
+
+| mission | wind | Gazebo | JSBSim |
+|---|---|---|---|
+| hybrid demo (sweep + 4 stops) | 0 | PASS, 326 s, 13.9 Wh, 4/4 targets | PASS, 295 s, 13.6 Wh, 4/4 targets (median 34 frames) |
+| fixed-wing sweep | 0 | PASS, 7.0 Wh, 163/169 | PASS, 7.3 Wh, **168/169** |
+| fixed-wing sweep | 5 + 2 gust | 9.7 Wh, 157/169, **12** lift on/off, roll 48° | **PASS**, 8.0 Wh, 164/169, **2** lift on/off, roll 40° |
+| fixed-wing sweep | 8 + 3 gust | **lost**: hit the ground, roll 101°, 41 Wh | **safe**: min clearance 5.1 m, roll 40°, 8.1 Wh; imaging 134/169 (FAIL) |
+| hover at 29 ripe palms | 0 | 27/29, 37.6 Wh | 28/29, 34.9 Wh (79% battery) |
+
+What changes with real physics:
+- **The airspeed sensor fixes the wind problem.**
+  - JSBSim runs fly with a simulated pitot (`ARSPD_TYPE 100`).
+  - In 5 m/s wind the lift motors only start and stop at the two planned
+    transitions, not 12 times.
+  - Roll error at those events is 11° *below* the cruise baseline, and
+    altitude changes by ≤ 2.4 m.
+- **8 m/s wind is survivable but not useful.**
+  - The aircraft stays in control, but imaging drops to 79%.
+  - **Keep the ~6 m/s operating limit**, now for data quality, not safety.
+- **Transition test:** fixed-wing altitude error median 0.4 m, p95 1.2 m.
+- **Hover energy stays the limit:** 29 hover stops use 79% of the battery,
+  so per-tree hovering is still ruled out.
+
+**Design flaw found and fixed: the tail needs an elevator.**
+- **The problem:** with the measured derivatives, the wing elevons dump lift
+  (CL_δe 3.16) more than they pitch the nose (Cm_δe −0.38), at a static
+  margin of about 27%. So "nose up" elevon first drops the aircraft and the
+  pitch response is reversed.
+  - This was the real cause of the spiral dives that §4 patched with
+    `MIXING_GAIN`.
+- **The fix, now in the CAD (`airframe/params.py`):**
+  - A 30%-chord elevator on the stab.
+  - A 9 g servo in the pod, driving the elevator by pushrod.
+  - The wing surfaces become plain ailerons.
+  - ArduPilot servo functions: SERVO1/2 = 4 (aileron), SERVO4 = 19
+    (elevator).
+- **Cost:** CG moves to 33.9% MAC (accepted). Mass is 1858 g.
+
+## 6. Review mission and video (2026-10-27)
+
+The route planner was reworked for the review mission (`js_demo_v4`, JSBSim,
+calm air, the same 4 ripe targets):
+- **The dock can be anywhere.** The planner faces it along the racetrack lane
+  whose start is nearest, so the aircraft transitions straight into the sweep.
+  The old line-up point flew 70 m away from the field first.
+- **Racetrack sweep** from the centre lane, in the order 4, 1, 5, 2, 6, 3, 7.
+  Lanes are >= 45 m apart and every turn is in the same direction.
+- **Handover to the stops.** A fixed-wing U-turn (35 m radius) whose exit
+  points straight at one of the stops. The back-transition then decelerates
+  along a straight line onto it, and the remaining stops flow back to the dock.
+  Back-transitioning toward a stop off that line made the aircraft overshoot
+  and backtrack about 20 m (v2/v3).
+
+| run | flight | energy | targets | palms >= 2 frames | min clearance |
+|---|---|---|---|---|---|
+| js_demo_hybrid4 (old route) | 295 s | 13.6 Wh | 4/4 | 169/169 | 5.4 m |
+| **js_demo_v4 (new route)** | **288 s** | **13.1 Wh (30%)** | **4/4 (median 34 frames)** | 167/169 | 5.1 m |
+
+- Lanes are 1.9 m off line (median) inside the field. Some lanes start 5-17 m
+  off line at the field edge, because the turn between lanes (45-60 m) is
+  narrower than the U-turn needs (~66 m).
+- A 70 m run-in instead of 40 m would straighten them, for about +30 s and
+  +1 Wh. We left it, because imaging is unaffected.
+- **Stops are 6-8 m short of the palm on purpose.** The nose camera looks 60 deg
+  down, so that offset centres the crown. The video shows it with the camera's
+  field-of-view wedge.
+
+**Review video:** `flight_software/demo/runs/js_demo_v4/js_demo_v4_review.mp4`,
+3:07, 1080p. It replays the logged JSBSim flight in Blender:
+- a title card over the dock;
+- a side-on transition shot;
+- a 6x map view with the planned and flown paths, palms turning "imaged" and
+  the 4 flagged targets;
+- four confirm stops with the field-of-view wedge (green once the crown is
+  wholly in frame);
+- two simulated ESP32-CAM inserts;
+- a telemetry HUD from the log: state, airspeed, altitude, lift/pusher
+  throttle, energy;
+- a summary card.
+
+Pipeline: `TEAM_GUIDE.md` → "render the review video".
+
 ## Media
 
 `flight_software/demo/runs/fw_calm/` and `.../demo_hybrid4/` hold
@@ -175,7 +277,7 @@ All live in `flight_software/gazebo/coconut_gazebo.param` and
 
 - The aero is Gazebo LiftDrag with real airfoil slopes, but it has no
   downwash, prop wash or ground effect.
-- Airspeed is synthetic.
+- Airspeed is synthetic in the Gazebo runs; the JSBSim runs (§5) use a simulated pitot.
 - The ML performance numbers (70% / 4% per frame) are assumptions; replace
   them with measured ones once a detector exists.
 - Energy uses momentum theory plus drag×speed, with η 0.45 / 0.50.

@@ -1,0 +1,38 @@
+{
+ "name": "js_fw_calm",
+ "physics": "jsbsim",
+ "test": null,
+ "strategy": "fw_sweep",
+ "targets": null,
+ "wind_ne": [
+  0.0,
+  0.0
+ ],
+ "gust": 0.0,
+ "param_files": [],
+ "events": null,
+ "flight_s": 214.4,
+ "distance_m": 2480,
+ "energy_wh": 7.3,
+ "battery_used_pct": 16.4,
+ "trees_imaged": 168,
+ "trees_imaged_2plus": 168,
+ "targets_imaged_2plus": 0,
+ "target_frames_median": null,
+ "frames_per_tree_median": 6,
+ "frames_total": 1072,
+ "min_crown_clearance_m": 14.34,
+ "max_abs_roll": 37.3,
+ "max_abs_pitch": 32.1,
+ "lift_events": 2,
+ "n_targets": 0,
+ "flight": {
+  "ok": true,
+  "landed": true,
+  "crashed": false,
+  "wall_s": 220.0,
+  "strategy": "fw_sweep",
+  "roundtrip_ok": true,
+  "items": 19
+ }
+}

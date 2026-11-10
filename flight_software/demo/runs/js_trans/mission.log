@@ -1,0 +1,101 @@
+[link] connecting to tcp:127.0.0.1:5760 ...
+[link] heartbeat from system 1 component 0
+[boot] waiting for GPS + EKF ...
+[fc] Barometer 1 calibration complete
+[fc] Barometer 2 calibration complete
+[fc] Airspeed 1 calibration started
+[fc] ArduPilot Ready
+[fc] Airspeed 1 calibrated
+[fc] GPS 1: probing for u-blox at 230400 baud
+[fc] GPS 1: detected u-blox
+[fc] EKF3 IMU0 initialised
+[fc] EKF3 IMU1 initialised
+[fc] EKF3 IMU1 tilt alignment complete
+[fc] EKF3 IMU0 tilt alignment complete
+[fc] EKF3 IMU1 MAG0 initial yaw alignment complete
+[fc] EKF3 IMU0 MAG0 initial yaw alignment complete
+[fc] EKF3 IMU0 origin set
+[fc] EKF3 IMU0 is using GPS
+[fc] AHRS: EKF3 active
+[fc] Field Elevation Set: 300m
+[boot] GPS+EKF ok, letting it settle ...
+[mission] uploading 7 commands (+ home) = 8 items ...
+[mission]  -> sent item 0/7 (cmd HOME)
+[mission]  -> sent item 1/7 (cmd 84)
+[mission]  -> sent item 2/7 (cmd 16)
+[mission]  -> sent item 3/7 (cmd 16)
+[mission]  -> sent item 4/7 (cmd 16)
+[mission]  -> sent item 5/7 (cmd 16)
+[mission]  -> sent item 6/7 (cmd 16)
+[mission]  -> sent item 7/7 (cmd 85)
+[mission] upload accepted by vehicle (8/8 items)
+[fc] Throttle armed
+[arm] armed
+[mission] current set to 1
+[pos] t=    0  n=    0.0 e=    0.0 alt= -0.3
+[seq] 1  t=0s  max roll 0 pitch 0 asp 0.8
+[fc] Mission: 1 VTOLTakeoff
+[fc] Weathervane Active: nose in
+[pos] t=    4  n=   -0.3 e=    0.0 alt=  8.3
+[pos] t=    9  n=    0.1 e=   -0.0 alt= 20.8
+[fc] Mission: 2 WP
+[fc] Transition started airspeed 2.5
+[seq] 2  t=13s  max roll 0 pitch 2 asp 3.3
+[pos] t=   14  n=   -2.2 e=    0.1 alt= 32.3
+[fc] Transition airspeed reached 12.3
+[pos] t=   19  n=  -35.4 e=   40.7 alt= 36.5
+[fc] Transition done
+[pos] t=   24  n=   28.4 e=   86.8 alt= 39.8
+[pos] t=   29  n=   92.0 e=   38.0 alt= 38.7
+[fc] Passed waypoint #2 dist 1m
+[fc] Mission: 3 WP
+[seq] 3  t=34s  max roll 37 pitch 4 asp 18.4
+[pos] t=   34  n=  157.4 e=   -3.2 alt= 39.4
+[pos] t=   39  n=  227.2 e=  -15.7 alt= 40.3
+[fc] Reached waypoint #3 dist 24m
+[fc] Mission: 4 WP
+[seq] 4  t=43s  max roll 37 pitch 4 asp 18.4
+[pos] t=   44  n=  300.9 e=    1.2 alt= 39.7
+[pos] t=   49  n=  316.0 e=  -61.5 alt= 40.8
+[seq] 5  t=53s  max roll 37 pitch 4 asp 18.4
+[fc] Reached waypoint #4 dist 24m
+[fc] Mission: 5 WP
+[pos] t=   54  n=  298.4 e= -134.0 alt= 40.1
+[pos] t=   59  n=  256.6 e= -182.4 alt= 40.0
+[pos] t=   64  n=  192.2 e= -148.4 alt= 39.2
+[pos] t=   69  n=  114.6 e= -152.2 alt= 39.6
+[fc] Reached waypoint #5 dist 10m
+[fc] Mission: 6 WP
+[seq] 6  t=69s  max roll 37 pitch 5 asp 18.4
+[pos] t=   74  n=   48.6 e= -123.2 alt= 39.9
+[pos] t=   79  n=   -3.4 e=  -65.8 alt= 39.9
+[pos] t=   84  n=  -63.9 e=  -21.9 alt= 39.9
+[fc] Reached waypoint #6 dist 25m
+[fc] Mission: 7 VTOLLand
+[fc] VTOL airbrake v=15.1 d=73 sd=57 h=40.0
+[seq] 7  t=84s  max roll 37 pitch 5 asp 18.4
+[fc] VTOL position1 v=14.0 d=81.8 h=40.2 dc=13.7
+[fc] VTOL Overshoot d=81.8 cs=-8.9 yerr=-129.9
+[pos] t=   89  n= -101.8 e=   28.7 alt= 43.6
+[pos] t=   94  n=  -97.4 e=   31.3 alt= 41.6
+[pos] t=   99  n=  -73.5 e=   23.5 alt= 41.5
+[pos] t=  104  n=  -50.3 e=   16.3 alt= 41.6
+[pos] t=  109  n=  -25.3 e=    7.8 alt= 41.6
+[fc] VTOL position2 started v=3.5 d=9.7 h=41.5
+[pos] t=  113  n=   -5.5 e=    1.6 alt= 41.5
+[fc] Weathervane Active: nose in
+[fc] Land descend started
+[pos] t=  119  n=   -0.2 e=   -0.0 alt= 37.8
+[pos] t=  124  n=    0.0 e=   -0.1 alt= 30.3
+[pos] t=  129  n=    0.1 e=   -0.1 alt= 22.8
+[pos] t=  134  n=    0.0 e=   -0.1 alt= 15.0
+[pos] t=  139  n=   -0.1 e=    0.0 alt=  8.3
+[fc] Land final started
+[pos] t=  143  n=   -0.1 e=   -0.1 alt=  4.9
+[pos] t=  148  n=    0.0 e=   -0.1 alt=  2.4
+[pos] t=  153  n=    0.0 e=   -0.1 alt= -0.2
+[pos] t=  158  n=    0.0 e=   -0.1 alt= -0.4
+[fc] Land complete
+[fc] Throttle disarmed
+[done] landed & disarmed
+[stats] max roll 37 deg, max pitch 31 deg, max airspeed 18.4 m/s

@@ -109,7 +109,7 @@ def _alt_span(pos, t, win):
     return (max(alts) - min(alts)) if alts else 0.0
 
 
-def analyse(path, fps=3.0):
+def analyse(path, fps=5.0):
     d = load_log(path)
     layout = json.loads((DEMO / "layout.json").read_text())
     trees = list(csv.DictReader((DEMO / "trees.csv").open()))
@@ -135,9 +135,11 @@ def analyse(path, fps=3.0):
     # energy
     ctun = d["CTUN"]
     e_wh, e_lift, e_push = 0.0, 0.0, 0.0
+    t_air = (airborne[0][0] - 1.0, airborne[-1][0] + 1.0) if airborne else (0.0, 0.0)
     for a, b, l in zip(rc, rc[1:], lift):
         dt = (b.TimeUS - a.TimeUS) / 1e6
-        if dt <= 0 or dt > 1:
+        # only while flying: a crashed aircraft left armed kept "using" energy
+        if dt <= 0 or dt > 1 or not t_air[0] <= a.TimeUS / 1e6 <= t_air[1]:
             continue
         asp = getattr(nearest(ctun, a.TimeUS), "As", 0.0) if ctun else 0.0
         pl = lift_power_w(l, hover_thr)
@@ -244,7 +246,7 @@ def analyse(path, fps=3.0):
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("log")
-    ap.add_argument("--fps", type=float, default=3.0)
+    ap.add_argument("--fps", type=float, default=5.0)
     ap.add_argument("--json")
     a = ap.parse_args()
     res = analyse(a.log, a.fps)

@@ -1,0 +1,29 @@
+{
+ "name": "js_hover",
+ "physics": "jsbsim",
+ "test": "hover",
+ "strategy": "fw_sweep",
+ "targets": null,
+ "wind_ne": [
+  0.0,
+  0.0
+ ],
+ "gust": 0.0,
+ "param_files": [],
+ "events": null,
+ "flight_s": 68.4,
+ "distance_m": 47,
+ "energy_wh": 5.2,
+ "battery_used_pct": 11.7,
+ "trees_imaged": 0,
+ "trees_imaged_2plus": 0,
+ "targets_imaged_2plus": 0,
+ "target_frames_median": null,
+ "frames_per_tree_median": 0,
+ "frames_total": 342,
+ "min_crown_clearance_m": 14.19,
+ "max_abs_roll": 14.6,
+ "max_abs_pitch": 12.5,
+ "lift_events": 0,
+ "n_targets": 0
+}

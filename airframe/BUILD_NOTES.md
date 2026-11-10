@@ -8,7 +8,7 @@ source ~/venv-ardupilot/bin/activate && python build_airframe.py
 ```
 
 Outputs:
-- `print/*.stl`: 40 parts, every one checked against a **220 × 220 × 250 mm** bed.
+- `print/*.stl`: 44 parts, every one checked against a **220 × 220 × 250 mm** bed.
 - `out/coconut_quadplane_build.step`: the assembly, including the carbon parts.
 - `out/mass_properties.json`: per-part mass, CG and inertia.
 
@@ -30,8 +30,8 @@ roughly halves skin weight versus PLA.
 | **Pod** (124 × 108 mm, 462 mm) | 3 sections: nose (LW-PLA), mid (PLA, carries the wing bolts), tail cone (LW-PLA). | 10 mm sleeve lips + radial M3 screws. |
 | **Hatch** (LW-PLA) | Top, ahead of the wing, X −165…0. | A front tongue under the skin + **2 magnets (5 × 2 mm)** at the rear corners on ledge blocks. Battery and FC are reachable without removing the wing. |
 | **Inside the pod** | Battery tray on 6 posts with 2 strap slots: the battery **slides to set the CG**. ESP32-CAM window (30° down) and a VL53L1X port in the nose. | |
-| **Tail** | H-stab: centre with a keel that slides on the **10 mm carbon tail boom** + 2 tips on a 4 mm rod, −1.79° incidence. Twin fins, 170 cm² each (aero fin sizing). | The tail boom plugs into the pod's tail socket. The pusher mount sits on the boom end. |
-| **Elevons** | 25% chord, two printed pieces per side joined by a 2 mm rod. Tape or CA hinges. MG90S pocket in segment 3. | |
+| **Tail** | H-stab: centre with a keel that slides on the **10 mm carbon tail boom** + 2 tips on a 4 mm rod, −1.79° incidence. Twin fins, 170 cm² each (aero fin sizing). **Elevator:** the aft 30% of the stab, hinged 88 mm aft of the stab LE, in 4 printed pieces (centre L/R + tip L/R) on a 2 mm carbon joiner, split around the boom. | The tail boom plugs into the pod's tail socket. The pusher mount sits on the boom end. The elevator is driven by a **9 g servo in the pod's aft bay** through a 1.5 mm carbon pushrod and a horn + clevis (a tail-mounted servo put the CG at 34.6% MAC). |
+| **Ailerons** (were elevons) | 25% chord, two printed pieces per side joined by a 2 mm rod. Tape or CA hinges. MG90S pocket in segment 3. **Roll only:** ArduPilot `SERVO1/2_FUNCTION 4`; the elevator is `SERVO4_FUNCTION 19`. | |
 
 ## Print settings
 
@@ -45,13 +45,17 @@ roughly halves skin weight versus PLA.
 
 | Config | Total | Printed | Carbon | Bought-in | CG with battery in tray |
 |---|---|---|---|---|---|
-| **LW-PLA skins + PLA mid + PETG** (recommended) | **1843 g** | 661 g | 248 g | 934 g | **33.0% MAC** (target 33%, limits 25–40%). Battery at X = −149 mm, the front of the tray. |
-| All PLA | 2312 g | 1130 g | 248 g | 934 g | 41% MAC. **Out of limits**: needs nose ballast or a heavier battery forward. |
+| **LW-PLA skins + PLA mid + PETG** (recommended) | **1858 g** | 661 g | 251 g | 946 g | **33.9% MAC** (target 33%, limits 25–40%; accepted). Battery at X = −150 mm, the front of the tray; 33.0% would need it at −162 mm. |
+| All PLA | 2327 g | 1131 g | 251 g | 946 g | 42% MAC. **Out of limits**: needs nose ballast or a heavier battery forward. |
 
 What this means:
 - The design figure was 1.4 kg. The recommended build is **~0.44 kg over**, mostly in bought-in parts.
 - **Wing loading** 6.1 kg/m². Stall is ~8.9 m/s in 35 °C air, so cruise is 13 m/s, `AIRSPEED_MIN` 11 and `Q_ASSIST_SPEED` 9.
-- **Hover:** 4 × A2212 2200KV / 1045 at ~4.5 N each, about 50–55% throttle. Margin is OK.
+- **Lift motors: A2212 1400KV + 1045 props on 3S** (UIUC-measured APC 10×4.7 data, JSBSim rotor model `flight_software/jsbsim/rotor_model.py`):
+  - Hover at about **52% throttle** with the pack sagged to ~9.2 V.
+  - 911 g thrust per rotor at 65% throttle, drawing **22.4 A per motor**: use ESCs of at least 30 A, and keep the pack's C rating for ~90 A on the lift motors.
+  - Spool-up time constant 80–100 ms; from standstill ~250 ms.
+- **Fit an airspeed sensor** (MS4525/DLVR, `ARSPD_TYPE` + `ARSPD_USE 1`). In the JSBSim runs it stopped the lift motors cycling on in 5 m/s wind (2 on/off events instead of 12).
 
 ## Recommended weight cuts (not yet applied to the BOM)
 
@@ -82,4 +86,13 @@ What this means:
    - The Gazebo runs needed -3.0 deg. At the design -1.79 deg the cruise held
      full up-elevon with no margin, and a 40 deg bank ended in a spiral dive.
    - Hand-glide it, or fly short fixed-wing hops in FBWA. Adjust until the
-     elevons sit near neutral at 12-13 m/s, then glue.
+     elevator sits near neutral at 12-13 m/s, then glue.
+
+## Why the tail has an elevator (JSBSim finding, 2026-10-27)
+
+With the stability derivatives in `flight_software/jsbsim/aircraft/CoconutQuadplane/`,
+wing elevons make more lift change (CL_de 3.16) than pitching moment (Cm_de -0.38)
+at a ~27% static margin. A nose-up elevon first drops the aircraft, so the pitch
+response is reversed. That was the real cause of the spiral dives the Gazebo runs
+patched with `MIXING_GAIN`. A 30%-chord stab elevator (Cm_de -0.85, CL_de 0.40)
+fixes it, and the wing surfaces become plain ailerons.

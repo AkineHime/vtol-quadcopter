@@ -1,0 +1,1939 @@
+{
+ "strategy": "hover",
+ "home": {
+  "lat": 10.6609,
+  "lon": 77.0047999
+ },
+ "layout": {
+  "spacing": 7.5,
+  "grid": 13,
+  "field_m": 100.0,
+  "field_n0": 15.0,
+  "field_e0": -50.0,
+  "dock": {
+   "n": 0.0,
+   "e": 0.0,
+   "heading_deg": 180.0
+  },
+  "home": {
+   "lat": 10.6609,
+   "lon": 77.0048
+  },
+  "crown_radius_m": 4.0,
+  "seed": 7
+ },
+ "trees": [
+  {
+   "id": "P0000",
+   "n": 20.0,
+   "e": -45.0,
+   "height": 12.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0001",
+   "n": 20.0,
+   "e": -37.5,
+   "height": 12.3,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0002",
+   "n": 20.0,
+   "e": -30.0,
+   "height": 13.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0003",
+   "n": 20.0,
+   "e": -22.5,
+   "height": 14.0,
+   "condition": "ripe",
+   "status": "target"
+  },
+  {
+   "id": "P0004",
+   "n": 20.0,
+   "e": -15.0,
+   "height": 13.7,
+   "condition": "ripe",
+   "status": "target"
+  },
+  {
+   "id": "P0005",
+   "n": 20.0,
+   "e": -7.5,
+   "height": 12.4,
+   "condition": "ripe",
+   "status": "target"
+  },
+  {
+   "id": "P0006",
+   "n": 20.0,
+   "e": 0.0,
+   "height": 15.3,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0007",
+   "n": 20.0,
+   "e": 7.5,
+   "height": 12.9,
+   "condition": "frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0008",
+   "n": 20.0,
+   "e": 15.0,
+   "height": 15.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0009",
+   "n": 20.0,
+   "e": 22.5,
+   "height": 13.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0010",
+   "n": 20.0,
+   "e": 30.0,
+   "height": 12.2,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0011",
+   "n": 20.0,
+   "e": 37.5,
+   "height": 13.2,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0012",
+   "n": 20.0,
+   "e": 45.0,
+   "height": 12.5,
+   "condition": "frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0100",
+   "n": 27.5,
+   "e": -45.0,
+   "height": 15.3,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0101",
+   "n": 27.5,
+   "e": -37.5,
+   "height": 14.3,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0102",
+   "n": 27.5,
+   "e": -30.0,
+   "height": 13.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0103",
+   "n": 27.5,
+   "e": -22.5,
+   "height": 12.3,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0104",
+   "n": 27.5,
+   "e": -15.0,
+   "height": 12.8,
+   "condition": "ripe",
+   "status": "target"
+  },
+  {
+   "id": "P0105",
+   "n": 27.5,
+   "e": -7.5,
+   "height": 13.7,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0106",
+   "n": 27.5,
+   "e": 0.0,
+   "height": 14.3,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0107",
+   "n": 27.5,
+   "e": 7.5,
+   "height": 13.2,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0108",
+   "n": 27.5,
+   "e": 15.0,
+   "height": 14.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0109",
+   "n": 27.5,
+   "e": 22.5,
+   "height": 14.3,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0110",
+   "n": 27.5,
+   "e": 30.0,
+   "height": 15.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0111",
+   "n": 27.5,
+   "e": 37.5,
+   "height": 13.2,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0112",
+   "n": 27.5,
+   "e": 45.0,
+   "height": 12.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0200",
+   "n": 35.0,
+   "e": -45.0,
+   "height": 15.0,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0201",
+   "n": 35.0,
+   "e": -37.5,
+   "height": 14.0,
+   "condition": "frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0202",
+   "n": 35.0,
+   "e": -30.0,
+   "height": 14.7,
+   "condition": "ripe",
+   "status": "target"
+  },
+  {
+   "id": "P0203",
+   "n": 35.0,
+   "e": -22.5,
+   "height": 14.3,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0204",
+   "n": 35.0,
+   "e": -15.0,
+   "height": 13.3,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0205",
+   "n": 35.0,
+   "e": -7.5,
+   "height": 14.4,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0206",
+   "n": 35.0,
+   "e": 0.0,
+   "height": 13.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0207",
+   "n": 35.0,
+   "e": 7.5,
+   "height": 15.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0208",
+   "n": 35.0,
+   "e": 15.0,
+   "height": 14.7,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0209",
+   "n": 35.0,
+   "e": 22.5,
+   "height": 14.8,
+   "condition": "ripe",
+   "status": "target"
+  },
+  {
+   "id": "P0210",
+   "n": 35.0,
+   "e": 30.0,
+   "height": 16.0,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0211",
+   "n": 35.0,
+   "e": 37.5,
+   "height": 13.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0212",
+   "n": 35.0,
+   "e": 45.0,
+   "height": 14.7,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0300",
+   "n": 42.5,
+   "e": -45.0,
+   "height": 13.8,
+   "condition": "ripe",
+   "status": "target"
+  },
+  {
+   "id": "P0301",
+   "n": 42.5,
+   "e": -37.5,
+   "height": 12.5,
+   "condition": "ripe+frond",
+   "status": "target"
+  },
+  {
+   "id": "P0302",
+   "n": 42.5,
+   "e": -30.0,
+   "height": 15.1,
+   "condition": "ripe",
+   "status": "target"
+  },
+  {
+   "id": "P0303",
+   "n": 42.5,
+   "e": -22.5,
+   "height": 13.0,
+   "condition": "frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0304",
+   "n": 42.5,
+   "e": -15.0,
+   "height": 15.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0305",
+   "n": 42.5,
+   "e": -7.5,
+   "height": 13.8,
+   "condition": "ripe",
+   "status": "target"
+  },
+  {
+   "id": "P0306",
+   "n": 42.5,
+   "e": 0.0,
+   "height": 15.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0307",
+   "n": 42.5,
+   "e": 7.5,
+   "height": 15.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0308",
+   "n": 42.5,
+   "e": 15.0,
+   "height": 13.7,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0309",
+   "n": 42.5,
+   "e": 22.5,
+   "height": 15.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0310",
+   "n": 42.5,
+   "e": 30.0,
+   "height": 12.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0311",
+   "n": 42.5,
+   "e": 37.5,
+   "height": 12.9,
+   "condition": "ripe+frond",
+   "status": "target"
+  },
+  {
+   "id": "P0312",
+   "n": 42.5,
+   "e": 45.0,
+   "height": 13.9,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0400",
+   "n": 50.0,
+   "e": -45.0,
+   "height": 13.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0401",
+   "n": 50.0,
+   "e": -37.5,
+   "height": 13.7,
+   "condition": "ripe",
+   "status": "target"
+  },
+  {
+   "id": "P0402",
+   "n": 50.0,
+   "e": -30.0,
+   "height": 14.3,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0403",
+   "n": 50.0,
+   "e": -22.5,
+   "height": 14.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0404",
+   "n": 50.0,
+   "e": -15.0,
+   "height": 14.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0405",
+   "n": 50.0,
+   "e": -7.5,
+   "height": 12.2,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0406",
+   "n": 50.0,
+   "e": 0.0,
+   "height": 15.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0407",
+   "n": 50.0,
+   "e": 7.5,
+   "height": 15.2,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0408",
+   "n": 50.0,
+   "e": 15.0,
+   "height": 13.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0409",
+   "n": 50.0,
+   "e": 22.5,
+   "height": 14.5,
+   "condition": "frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0410",
+   "n": 50.0,
+   "e": 30.0,
+   "height": 12.3,
+   "condition": "ripe",
+   "status": "target"
+  },
+  {
+   "id": "P0411",
+   "n": 50.0,
+   "e": 37.5,
+   "height": 12.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0412",
+   "n": 50.0,
+   "e": 45.0,
+   "height": 12.2,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0500",
+   "n": 57.5,
+   "e": -45.0,
+   "height": 12.6,
+   "condition": "ripe",
+   "status": "target"
+  },
+  {
+   "id": "P0501",
+   "n": 57.5,
+   "e": -37.5,
+   "height": 13.5,
+   "condition": "frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0502",
+   "n": 57.5,
+   "e": -30.0,
+   "height": 15.5,
+   "condition": "ripe",
+   "status": "target"
+  },
+  {
+   "id": "P0503",
+   "n": 57.5,
+   "e": -22.5,
+   "height": 12.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0504",
+   "n": 57.5,
+   "e": -15.0,
+   "height": 13.4,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0505",
+   "n": 57.5,
+   "e": -7.5,
+   "height": 12.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0506",
+   "n": 57.5,
+   "e": 0.0,
+   "height": 16.0,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0507",
+   "n": 57.5,
+   "e": 7.5,
+   "height": 13.9,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0508",
+   "n": 57.5,
+   "e": 15.0,
+   "height": 12.4,
+   "condition": "ripe",
+   "status": "target"
+  },
+  {
+   "id": "P0509",
+   "n": 57.5,
+   "e": 22.5,
+   "height": 13.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0510",
+   "n": 57.5,
+   "e": 30.0,
+   "height": 12.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0511",
+   "n": 57.5,
+   "e": 37.5,
+   "height": 15.8,
+   "condition": "ripe",
+   "status": "target"
+  },
+  {
+   "id": "P0512",
+   "n": 57.5,
+   "e": 45.0,
+   "height": 12.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0600",
+   "n": 65.0,
+   "e": -45.0,
+   "height": 12.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0601",
+   "n": 65.0,
+   "e": -37.5,
+   "height": 15.9,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0602",
+   "n": 65.0,
+   "e": -30.0,
+   "height": 14.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0603",
+   "n": 65.0,
+   "e": -22.5,
+   "height": 13.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0604",
+   "n": 65.0,
+   "e": -15.0,
+   "height": 15.1,
+   "condition": "ripe+frond",
+   "status": "target"
+  },
+  {
+   "id": "P0605",
+   "n": 65.0,
+   "e": -7.5,
+   "height": 15.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0606",
+   "n": 65.0,
+   "e": 0.0,
+   "height": 12.9,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0607",
+   "n": 65.0,
+   "e": 7.5,
+   "height": 15.9,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0608",
+   "n": 65.0,
+   "e": 15.0,
+   "height": 15.2,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0609",
+   "n": 65.0,
+   "e": 22.5,
+   "height": 15.0,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0610",
+   "n": 65.0,
+   "e": 30.0,
+   "height": 14.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0611",
+   "n": 65.0,
+   "e": 37.5,
+   "height": 12.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0612",
+   "n": 65.0,
+   "e": 45.0,
+   "height": 13.1,
+   "condition": "ripe",
+   "status": "target"
+  },
+  {
+   "id": "P0700",
+   "n": 72.5,
+   "e": -45.0,
+   "height": 14.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0701",
+   "n": 72.5,
+   "e": -37.5,
+   "height": 13.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0702",
+   "n": 72.5,
+   "e": -30.0,
+   "height": 16.0,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0703",
+   "n": 72.5,
+   "e": -22.5,
+   "height": 13.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0704",
+   "n": 72.5,
+   "e": -15.0,
+   "height": 12.9,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0705",
+   "n": 72.5,
+   "e": -7.5,
+   "height": 12.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0706",
+   "n": 72.5,
+   "e": 0.0,
+   "height": 15.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0707",
+   "n": 72.5,
+   "e": 7.5,
+   "height": 13.9,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0708",
+   "n": 72.5,
+   "e": 15.0,
+   "height": 15.2,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0709",
+   "n": 72.5,
+   "e": 22.5,
+   "height": 14.6,
+   "condition": "ripe",
+   "status": "target"
+  },
+  {
+   "id": "P0710",
+   "n": 72.5,
+   "e": 30.0,
+   "height": 15.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0711",
+   "n": 72.5,
+   "e": 37.5,
+   "height": 13.9,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0712",
+   "n": 72.5,
+   "e": 45.0,
+   "height": 15.2,
+   "condition": "ripe+frond",
+   "status": "target"
+  },
+  {
+   "id": "P0800",
+   "n": 80.0,
+   "e": -45.0,
+   "height": 15.2,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0801",
+   "n": 80.0,
+   "e": -37.5,
+   "height": 13.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0802",
+   "n": 80.0,
+   "e": -30.0,
+   "height": 15.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0803",
+   "n": 80.0,
+   "e": -22.5,
+   "height": 12.7,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0804",
+   "n": 80.0,
+   "e": -15.0,
+   "height": 12.6,
+   "condition": "frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0805",
+   "n": 80.0,
+   "e": -7.5,
+   "height": 15.2,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0806",
+   "n": 80.0,
+   "e": 0.0,
+   "height": 15.3,
+   "condition": "frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0807",
+   "n": 80.0,
+   "e": 7.5,
+   "height": 14.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0808",
+   "n": 80.0,
+   "e": 15.0,
+   "height": 14.2,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0809",
+   "n": 80.0,
+   "e": 22.5,
+   "height": 12.1,
+   "condition": "frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0810",
+   "n": 80.0,
+   "e": 30.0,
+   "height": 14.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0811",
+   "n": 80.0,
+   "e": 37.5,
+   "height": 15.7,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0812",
+   "n": 80.0,
+   "e": 45.0,
+   "height": 15.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0900",
+   "n": 87.5,
+   "e": -45.0,
+   "height": 12.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0901",
+   "n": 87.5,
+   "e": -37.5,
+   "height": 13.2,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0902",
+   "n": 87.5,
+   "e": -30.0,
+   "height": 14.3,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0903",
+   "n": 87.5,
+   "e": -22.5,
+   "height": 13.7,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0904",
+   "n": 87.5,
+   "e": -15.0,
+   "height": 15.6,
+   "condition": "frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0905",
+   "n": 87.5,
+   "e": -7.5,
+   "height": 13.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0906",
+   "n": 87.5,
+   "e": 0.0,
+   "height": 15.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0907",
+   "n": 87.5,
+   "e": 7.5,
+   "height": 15.7,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0908",
+   "n": 87.5,
+   "e": 15.0,
+   "height": 14.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0909",
+   "n": 87.5,
+   "e": 22.5,
+   "height": 12.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0910",
+   "n": 87.5,
+   "e": 30.0,
+   "height": 12.7,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P0911",
+   "n": 87.5,
+   "e": 37.5,
+   "height": 15.2,
+   "condition": "ripe",
+   "status": "target"
+  },
+  {
+   "id": "P0912",
+   "n": 87.5,
+   "e": 45.0,
+   "height": 13.9,
+   "condition": "ripe+frond",
+   "status": "target"
+  },
+  {
+   "id": "P1000",
+   "n": 95.0,
+   "e": -45.0,
+   "height": 14.2,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1001",
+   "n": 95.0,
+   "e": -37.5,
+   "height": 14.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1002",
+   "n": 95.0,
+   "e": -30.0,
+   "height": 15.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1003",
+   "n": 95.0,
+   "e": -22.5,
+   "height": 14.2,
+   "condition": "frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1004",
+   "n": 95.0,
+   "e": -15.0,
+   "height": 13.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1005",
+   "n": 95.0,
+   "e": -7.5,
+   "height": 14.0,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1006",
+   "n": 95.0,
+   "e": 0.0,
+   "height": 15.0,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1007",
+   "n": 95.0,
+   "e": 7.5,
+   "height": 13.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1008",
+   "n": 95.0,
+   "e": 15.0,
+   "height": 14.0,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1009",
+   "n": 95.0,
+   "e": 22.5,
+   "height": 14.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1010",
+   "n": 95.0,
+   "e": 30.0,
+   "height": 14.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1011",
+   "n": 95.0,
+   "e": 37.5,
+   "height": 15.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1012",
+   "n": 95.0,
+   "e": 45.0,
+   "height": 15.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1100",
+   "n": 102.5,
+   "e": -45.0,
+   "height": 13.0,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1101",
+   "n": 102.5,
+   "e": -37.5,
+   "height": 15.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1102",
+   "n": 102.5,
+   "e": -30.0,
+   "height": 12.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1103",
+   "n": 102.5,
+   "e": -22.5,
+   "height": 13.8,
+   "condition": "frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1104",
+   "n": 102.5,
+   "e": -15.0,
+   "height": 13.0,
+   "condition": "ripe",
+   "status": "target"
+  },
+  {
+   "id": "P1105",
+   "n": 102.5,
+   "e": -7.5,
+   "height": 14.7,
+   "condition": "ripe",
+   "status": "target"
+  },
+  {
+   "id": "P1106",
+   "n": 102.5,
+   "e": 0.0,
+   "height": 15.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1107",
+   "n": 102.5,
+   "e": 7.5,
+   "height": 14.9,
+   "condition": "frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1108",
+   "n": 102.5,
+   "e": 15.0,
+   "height": 12.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1109",
+   "n": 102.5,
+   "e": 22.5,
+   "height": 15.9,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1110",
+   "n": 102.5,
+   "e": 30.0,
+   "height": 15.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1111",
+   "n": 102.5,
+   "e": 37.5,
+   "height": 13.9,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1112",
+   "n": 102.5,
+   "e": 45.0,
+   "height": 15.3,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1200",
+   "n": 110.0,
+   "e": -45.0,
+   "height": 13.7,
+   "condition": "ripe+frond",
+   "status": "target"
+  },
+  {
+   "id": "P1201",
+   "n": 110.0,
+   "e": -37.5,
+   "height": 13.4,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1202",
+   "n": 110.0,
+   "e": -30.0,
+   "height": 13.3,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1203",
+   "n": 110.0,
+   "e": -22.5,
+   "height": 12.1,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1204",
+   "n": 110.0,
+   "e": -15.0,
+   "height": 13.8,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1205",
+   "n": 110.0,
+   "e": -7.5,
+   "height": 13.3,
+   "condition": "ripe",
+   "status": "target"
+  },
+  {
+   "id": "P1206",
+   "n": 110.0,
+   "e": 0.0,
+   "height": 14.0,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1207",
+   "n": 110.0,
+   "e": 7.5,
+   "height": 15.9,
+   "condition": "ripe",
+   "status": "target"
+  },
+  {
+   "id": "P1208",
+   "n": 110.0,
+   "e": 15.0,
+   "height": 15.9,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1209",
+   "n": 110.0,
+   "e": 22.5,
+   "height": 13.1,
+   "condition": "frond",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1210",
+   "n": 110.0,
+   "e": 30.0,
+   "height": 15.1,
+   "condition": "ripe",
+   "status": "target"
+  },
+  {
+   "id": "P1211",
+   "n": 110.0,
+   "e": 37.5,
+   "height": 12.5,
+   "condition": "healthy",
+   "status": "unscouted"
+  },
+  {
+   "id": "P1212",
+   "n": 110.0,
+   "e": 45.0,
+   "height": 15.6,
+   "condition": "healthy",
+   "status": "unscouted"
+  }
+ ],
+ "mission": [
+  {
+   "seq": 1,
+   "label": "VTOL takeoff (dock)",
+   "cmd": 84,
+   "n": 0.0,
+   "e": 0.0,
+   "alt": 30.0,
+   "tree": null
+  },
+  {
+   "seq": 2,
+   "label": "stay VTOL",
+   "cmd": 3000,
+   "n": null,
+   "e": null,
+   "alt": 0.0,
+   "tree": null
+  },
+  {
+   "seq": 3,
+   "label": "lead-in P0005",
+   "cmd": 16,
+   "n": -1.396960340522078,
+   "e": 0.5238601276957802,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 4,
+   "label": "inspect P0005 (ripe)",
+   "cmd": 19,
+   "n": 12.64797732301359,
+   "e": -4.742991496130097,
+   "alt": 26.0,
+   "tree": "P0005"
+  },
+  {
+   "seq": 5,
+   "label": "lead-in P0004",
+   "cmd": 16,
+   "n": 7.124161261581525,
+   "e": 2.9634358103680754,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 6,
+   "label": "inspect P0004 (ripe)",
+   "cmd": 19,
+   "n": 15.862861454721177,
+   "e": -9.22816453308237,
+   "alt": 26.0,
+   "tree": "P0004"
+  },
+  {
+   "seq": 7,
+   "label": "lead-in P0003",
+   "cmd": 16,
+   "n": 13.474182895025368,
+   "e": -1.565344330018565,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 8,
+   "label": "inspect P0003 (ripe)",
+   "cmd": 19,
+   "n": 17.938171829580202,
+   "e": -15.885707551395736,
+   "alt": 26.0,
+   "tree": "P0003"
+  },
+  {
+   "seq": 9,
+   "label": "lead-in P0104",
+   "cmd": 16,
+   "n": 4.975403135310568,
+   "e": -17.086442590227417,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 10,
+   "label": "inspect P0104 (ripe)",
+   "cmd": 19,
+   "n": 19.911462601152323,
+   "e": -15.702922574890117,
+   "alt": 26.0,
+   "tree": "P0104"
+  },
+  {
+   "seq": 11,
+   "label": "lead-in P0202",
+   "cmd": 16,
+   "n": 19.37593457584066,
+   "e": -15.195485343645837,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 12,
+   "label": "inspect P0202 (ripe)",
+   "cmd": 19,
+   "n": 30.2642615310455,
+   "e": -25.512671787466644,
+   "alt": 26.0,
+   "tree": "P0202"
+  },
+  {
+   "seq": 13,
+   "label": "lead-in P0302",
+   "cmd": 16,
+   "n": 22.508866316642667,
+   "e": -22.668462275042373,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 14,
+   "label": "inspect P0302 (ripe)",
+   "cmd": 19,
+   "n": 36.591679654617636,
+   "e": -27.83318574176876,
+   "alt": 26.0,
+   "tree": "P0302"
+  },
+  {
+   "seq": 15,
+   "label": "lead-in P0301",
+   "cmd": 16,
+   "n": 30.612744064670277,
+   "e": -18.050835355991072,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 16,
+   "label": "inspect P0301 (ripe+frond)",
+   "cmd": 19,
+   "n": 38.435287301053826,
+   "e": -30.84957815811465,
+   "alt": 26.0,
+   "tree": "P0301"
+  },
+  {
+   "seq": 17,
+   "label": "lead-in P0300",
+   "cmd": 16,
+   "n": 36.414056338631404,
+   "e": -23.813097876107896,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 18,
+   "label": "inspect P0300 (ripe)",
+   "cmd": 19,
+   "n": 40.555342309618815,
+   "e": -38.23009307297547,
+   "alt": 26.0,
+   "tree": "P0300"
+  },
+  {
+   "seq": 19,
+   "label": "lead-in P0401",
+   "cmd": 16,
+   "n": 27.964332171265113,
+   "e": -39.20340619719151,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 20,
+   "label": "inspect P0401 (ripe)",
+   "cmd": 19,
+   "n": 42.91971477763185,
+   "e": -38.047321815676405,
+   "alt": 26.0,
+   "tree": "P0401"
+  },
+  {
+   "seq": 21,
+   "label": "lead-in P0500",
+   "cmd": 16,
+   "n": 36.97741232350168,
+   "e": -35.21370669722175,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 22,
+   "label": "inspect P0500 (ripe)",
+   "cmd": 19,
+   "n": 50.51682699607855,
+   "e": -41.670040821476036,
+   "alt": 26.0,
+   "tree": "P0500"
+  },
+  {
+   "seq": 23,
+   "label": "lead-in P0502",
+   "cmd": 16,
+   "n": 46.68507386713205,
+   "e": -48.07353611043898,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 24,
+   "label": "inspect P0502 (ripe)",
+   "cmd": 19,
+   "n": 54.38721622531598,
+   "e": -35.201978197961225,
+   "alt": 26.0,
+   "tree": "P0502"
+  },
+  {
+   "seq": 25,
+   "label": "lead-in P0604",
+   "cmd": 16,
+   "n": 55.09730332886188,
+   "e": -33.85029097912738,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 26,
+   "label": "inspect P0604 (ripe+frond)",
+   "cmd": 19,
+   "n": 62.073287331126004,
+   "e": -20.571147663380124,
+   "alt": 26.0,
+   "tree": "P0604"
+  },
+  {
+   "seq": 27,
+   "label": "lead-in P0305",
+   "cmd": 16,
+   "n": 60.8318042207526,
+   "e": -19.742078494632086,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 28,
+   "label": "inspect P0305 (ripe)",
+   "cmd": 19,
+   "n": 48.35760993529016,
+   "e": -11.411743751745941,
+   "alt": 26.0,
+   "tree": "P0305"
+  },
+  {
+   "seq": 29,
+   "label": "lead-in P0508",
+   "cmd": 16,
+   "n": 50.02498103115745,
+   "e": -6.594821939023827,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 30,
+   "label": "inspect P0508 (ripe)",
+   "cmd": 19,
+   "n": 54.93157401354079,
+   "e": 7.57999182713291,
+   "alt": 26.0,
+   "tree": "P0508"
+  },
+  {
+   "seq": 31,
+   "label": "lead-in P0410",
+   "cmd": 16,
+   "n": 54.92163072021516,
+   "e": 7.625196201438904,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 32,
+   "label": "inspect P0410 (ripe)",
+   "cmd": 19,
+   "n": 51.69921990595921,
+   "e": 22.274976696182378,
+   "alt": 26.0,
+   "tree": "P0410"
+  },
+  {
+   "seq": 33,
+   "label": "lead-in P0209",
+   "cmd": 16,
+   "n": 56.4643743769946,
+   "e": 22.21076586428052,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 34,
+   "label": "inspect P0209 (ripe)",
+   "cmd": 19,
+   "n": 41.46573602467491,
+   "e": 22.41287369768897,
+   "alt": 26.0,
+   "tree": "P0209"
+  },
+  {
+   "seq": 35,
+   "label": "lead-in P0311",
+   "cmd": 16,
+   "n": 40.95684631513101,
+   "e": 14.989543189225774,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 36,
+   "label": "inspect P0311 (ripe+frond)",
+   "cmd": 19,
+   "n": 41.98272980928426,
+   "e": 29.954420838455786,
+   "alt": 26.0,
+   "tree": "P0311"
+  },
+  {
+   "seq": 37,
+   "label": "lead-in P0511",
+   "cmd": 16,
+   "n": 38.71430137545049,
+   "e": 28.365082947304643,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 38,
+   "label": "inspect P0511 (ripe)",
+   "cmd": 19,
+   "n": 52.20397761746613,
+   "e": 34.92470449779053,
+   "alt": 26.0,
+   "tree": "P0511"
+  },
+  {
+   "seq": 39,
+   "label": "lead-in P0612",
+   "cmd": 16,
+   "n": 47.36312543395984,
+   "e": 31.113128152166492,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 40,
+   "label": "inspect P0612 (ripe)",
+   "cmd": 19,
+   "n": 59.14837391207599,
+   "e": 40.39256338870222,
+   "alt": 26.0,
+   "tree": "P0612"
+  },
+  {
+   "seq": 41,
+   "label": "lead-in P0712",
+   "cmd": 16,
+   "n": 52.42623143684542,
+   "e": 38.072857523455596,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 42,
+   "label": "inspect P0712 (ripe+frond)",
+   "cmd": 19,
+   "n": 66.60570395978007,
+   "e": 42.96597094655761,
+   "alt": 26.0,
+   "tree": "P0712"
+  },
+  {
+   "seq": 43,
+   "label": "lead-in P0709",
+   "cmd": 16,
+   "n": 66.52712299842318,
+   "e": 43.23881704405743,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 44,
+   "label": "inspect P0709 (ripe)",
+   "cmd": 19,
+   "n": 70.67845346193933,
+   "e": 28.824710919060195,
+   "alt": 26.0,
+   "tree": "P0709"
+  },
+  {
+   "seq": 45,
+   "label": "lead-in P0911",
+   "cmd": 16,
+   "n": 68.62669185942369,
+   "e": 27.7665665334223,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 46,
+   "label": "inspect P0911 (ripe)",
+   "cmd": 19,
+   "n": 81.95819726929405,
+   "e": 34.64195477748513,
+   "alt": 26.0,
+   "tree": "P0911"
+  },
+  {
+   "seq": 47,
+   "label": "lead-in P0912",
+   "cmd": 16,
+   "n": 77.12816842578724,
+   "e": 25.61426836961445,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 48,
+   "label": "inspect P0912 (ripe+frond)",
+   "cmd": 19,
+   "n": 84.20439468428143,
+   "e": 38.84026632585947,
+   "alt": 26.0,
+   "tree": "P0912"
+  },
+  {
+   "seq": 49,
+   "label": "lead-in P1210",
+   "cmd": 16,
+   "n": 89.85691741984527,
+   "e": 36.90312215793754,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 50,
+   "label": "inspect P1210 (ripe)",
+   "cmd": 19,
+   "n": 104.04677160824937,
+   "e": 32.0401973063867,
+   "alt": 26.0,
+   "tree": "P1210"
+  },
+  {
+   "seq": 51,
+   "label": "lead-in P1207",
+   "cmd": 16,
+   "n": 105.08897348939452,
+   "e": 27.744067859744007,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 52,
+   "label": "inspect P1207 (ripe)",
+   "cmd": 19,
+   "n": 108.62526829114536,
+   "e": 13.166872688000229,
+   "alt": 26.0,
+   "tree": "P1207"
+  },
+  {
+   "seq": 53,
+   "label": "lead-in P1205",
+   "cmd": 16,
+   "n": 108.51775879142231,
+   "e": 14.783104516520467,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 54,
+   "label": "inspect P1205 (ripe)",
+   "cmd": 19,
+   "n": 109.51333783719969,
+   "e": -0.1838197621551272,
+   "alt": 26.0,
+   "tree": "P1205"
+  },
+  {
+   "seq": 55,
+   "label": "lead-in P1105",
+   "cmd": 16,
+   "n": 117.394823440882,
+   "e": 8.037995663970579,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 56,
+   "label": "inspect P1105 (ripe)",
+   "cmd": 19,
+   "n": 107.01470129203364,
+   "e": -2.790349739413424,
+   "alt": 26.0,
+   "tree": "P1105"
+  },
+  {
+   "seq": 57,
+   "label": "lead-in P1104",
+   "cmd": 16,
+   "n": 110.30526350889933,
+   "e": 6.108713837511086,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 58,
+   "label": "inspect P1104 (ripe)",
+   "cmd": 19,
+   "n": 105.10303852757316,
+   "e": -7.960289511826279,
+   "alt": 26.0,
+   "tree": "P1104"
+  },
+  {
+   "seq": 59,
+   "label": "lead-in P1200",
+   "cmd": 16,
+   "n": 107.10321468307588,
+   "e": -23.08925185762419,
+   "alt": 26.0,
+   "tree": null
+  },
+  {
+   "seq": 60,
+   "label": "inspect P1200 (ripe+frond)",
+   "cmd": 19,
+   "n": 109.0692332798262,
+   "e": -37.95985274922343,
+   "alt": 26.0,
+   "tree": "P1200"
+  },
+  {
+   "seq": 61,
+   "label": "return to dock",
+   "cmd": 16,
+   "n": 60.0,
+   "e": 0.0,
+   "alt": 30.0,
+   "tree": null
+  },
+  {
+   "seq": 62,
+   "label": "VTOL land (dock)",
+   "cmd": 85,
+   "n": 0.0,
+   "e": 0.0,
+   "alt": 0.0,
+   "tree": null
+  }
+ ]
+}

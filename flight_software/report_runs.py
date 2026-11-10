@@ -20,6 +20,10 @@ RUNS = Path(__file__).resolve().parent / "demo" / "runs"
 
 def verdict(s):
     why = []
+    if s.get("test"):                  # staged flight test (hover/transition): only safety counts
+        clear = s.get("min_crown_clearance_m") or 0
+        ok = (s.get("max_abs_roll") or 0) < 60 and clear >= 2 and (s.get("flight_s") or 0) > 0
+        return ("TEST OK" if ok else "TEST FAIL"), f"{s['test']} test"
     fl = s.get("flight") or {}
     if not (fl.get("landed") and not fl.get("crashed")):
         why.append("no clean landing")
@@ -53,7 +57,7 @@ def main() -> None:
         wind = f"{(w[0] ** 2 + w[1] ** 2) ** 0.5:.0f} m/s" + (f" +gust {s['gust']:g}" if s.get("gust") else "")
         img = (f"{s.get('targets_imaged_2plus')}/{s['n_targets']} targets" if s.get("n_targets")
                else f"{s.get('trees_imaged_2plus')}/169 palms")
-        rows.append([s["name"], s["strategy"], wind, dist or "-", s.get("flight_s"), s.get("energy_wh"),
+        rows.append([s["name"] + (" (jsbsim)" if s.get("physics") == "jsbsim" else ""), s.get("test") or s["strategy"], wind, dist or "-", s.get("flight_s"), s.get("energy_wh"),
                      s.get("battery_used_pct"), img, s.get("min_crown_clearance_m"), s.get("max_abs_roll"),
                      s.get("lift_events"), v, why])
     hdr = ["run", "strategy", "wind", "disturbance", "flight s", "Wh", "batt %", "imaged >=2 frames",

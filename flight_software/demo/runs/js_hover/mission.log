@@ -1,0 +1,73 @@
+[link] connecting to tcp:127.0.0.1:5760 ...
+[link] heartbeat from system 1 component 0
+[boot] waiting for GPS + EKF ...
+[fc] Barometer 1 calibration complete
+[fc] Barometer 2 calibration complete
+[fc] Airspeed 1 calibration started
+[fc] ArduPilot Ready
+[fc] Airspeed 1 calibrated
+[fc] GPS 1: probing for u-blox at 230400 baud
+[fc] GPS 1: detected u-blox
+[fc] EKF3 IMU0 initialised
+[fc] EKF3 IMU1 initialised
+[fc] EKF3 IMU1 tilt alignment complete
+[fc] EKF3 IMU0 tilt alignment complete
+[fc] EKF3 IMU1 MAG0 initial yaw alignment complete
+[fc] EKF3 IMU0 MAG0 initial yaw alignment complete
+[fc] EKF3 IMU0 origin set
+[fc] EKF3 IMU0 is using GPS
+[fc] AHRS: EKF3 active
+[fc] Field Elevation Set: 300m
+[boot] GPS+EKF ok, letting it settle ...
+[mission] uploading 5 commands (+ home) = 6 items ...
+[mission]  -> sent item 0/5 (cmd HOME)
+[mission]  -> sent item 1/5 (cmd 84)
+[mission]  -> sent item 2/5 (cmd 3000)
+[mission]  -> sent item 3/5 (cmd 19)
+[mission]  -> sent item 4/5 (cmd 19)
+[mission]  -> sent item 5/5 (cmd 85)
+[mission] upload accepted by vehicle (6/6 items)
+[fc] Throttle armed
+[arm] armed
+[mission] current set to 1
+[pos] t=    0  n=    0.0 e=    0.0 alt= -0.1
+[seq] 1  t=0s  max roll 0 pitch 0 asp 0.2
+[fc] Mission: 1 VTOLTakeoff
+[fc] Weathervane Active: nose in
+[pos] t=    4  n=   -0.3 e=    0.0 alt=  8.5
+[fc] Mission: 2 VTOLTransition
+[fc] Entered VTOL mode
+[fc] Mission: 3 LoitTime
+[fc] VTOL Overshoot d=0.2 cs=0.1 yerr=173.7
+[fc] VTOL position2 started v=0.1 d=0.2 h=15.0
+[seq] 3  t=7s  max roll 0 pitch 2 asp 3.0
+[pos] t=    9  n=   -0.0 e=    0.0 alt= 15.5
+[pos] t=   15  n=    0.2 e=    0.1 alt= 15.0
+[pos] t=   20  n=   -0.1 e=   -0.0 alt= 15.0
+[pos] t=   25  n=    0.0 e=    0.1 alt= 15.0
+[fc] Loiter time complete
+[fc] Mission: 4 LoitTime
+[seq] 4  t=27s  max roll 0 pitch 2 asp 3.0
+[pos] t=   29  n=    0.6 e=    4.7 alt= 15.0
+[pos] t=   34  n=   -0.1 e=   18.9 alt= 15.0
+[pos] t=   39  n=   -0.2 e=   20.0 alt= 15.0
+[seq] 5  t=43s  max roll 14 pitch 13 asp 4.7
+[fc] Loiter time complete
+[fc] Mission: 5 VTOLLand
+[fc] VTOL Position1 d=20.5
+[fc] VTOL Overshoot d=20.5 cs=0.3 yerr=113.3
+[pos] t=   45  n=    0.7 e=   18.0 alt= 15.0
+[fc] VTOL position2 started v=3.2 d=9.7 h=15.0
+[fc] Weathervane Active: nose in
+[pos] t=   50  n=   -0.3 e=    3.2 alt= 15.0
+[fc] Land descend started
+[pos] t=   55  n=    0.2 e=    0.0 alt= 10.0
+[fc] Land final started
+[pos] t=   59  n=   -0.1 e=    0.3 alt=  5.9
+[pos] t=   64  n=    0.0 e=   -0.2 alt=  3.3
+[pos] t=   69  n=   -0.1 e=    0.0 alt=  0.7
+[pos] t=   74  n=   -0.1 e=   -0.0 alt= -0.1
+[fc] Land complete
+[fc] Throttle disarmed
+[done] landed & disarmed
+[stats] max roll 14 deg, max pitch 13 deg, max airspeed 4.7 m/s

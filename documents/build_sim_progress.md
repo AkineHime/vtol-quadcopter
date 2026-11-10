@@ -52,7 +52,9 @@ is ≥ 85%:
 | 5 | Inspection strategy comparison | done | Fixed-wing sweep: 7 Wh for 4-6 frames/palm. Hover stop: 1.3 Wh/palm. Optimum: daily scout + VTOL-confirm palms with >= 2 agreeing frames. See `documents/sim_results.md`. |
 | 6 | Disturbance scenarios | done | Noise, GPS glitch, bird strike, 5 m/s wind: pass. 8 m/s wind: fail, so the limit is ~6 m/s. A lift-motor failure loses the aircraft; mitigations are in sim_results. |
 | 7 | Week schedule sim | done | `schedule_sim.py`: 6 policies, 500 weeks. |
-| 8 | Visual polish | pending (budget permitting) | |
+| 8 | Visual polish | done 2026-10-27 | Blender replay of the JSBSim flight log; review cut `demo/runs/js_demo_v4/js_demo_v4_review.mp4`. |
+| 9 | Real-physics cross-check (JSBSim) | done 2026-10-27 | Found the elevon pitch reversal, so the CAD gets a tail elevator. Measured rotor data. Airspeed sensor fixes the wind assist cycling. `sim_results.md` §5. |
+| 10 | Review route | done 2026-10-27 | Racetrack from a dock anywhere, U-turn into the stops. `sim_results.md` §6. |
 
 ## Log
 
@@ -154,3 +156,31 @@ is ≥ 85%:
   - A 5 fps camera trigger in the planner/firmware notes.
   - An airspeed sensor in the BOM.
   - Commit: the user said "not now, after the review" (2026-10-18).
+
+### 2026-10-27: JSBSim physics, tail elevator, review video
+
+- **JSBSim + ArduPilot SITL** over the JSON link, at 1000 Hz. 400 Hz failed
+  the gyro-rate pre-arm.
+  - Rotor model: A2212 1400KV, UIUC APC 10x4.7 data, battery sag, spool lag.
+  - `test_physics.py` passes: lift-off at 52% throttle (9.2 V), yaw sign
+    correct, glide L/D 12.7.
+- **Elevon pitch reversal found.** The wing elevons dump lift more than they
+  pitch the nose. The user chose a tail elevator with its servo in the pod;
+  CG 33.9% MAC was accepted. CAD rebuilt: 44 parts, 1858 g.
+- **JSBSim runs:**
+  - 5 m/s wind: PASS, with 2 lift events instead of Gazebo's 12, using the
+    airspeed sensor.
+  - 8 m/s wind: safe (Gazebo crashed it), but imaging fails (134/169), so the
+    ~6 m/s limit stands.
+  - All runs re-scored at 5 fps (`reanalyze.py`).
+- **Planner:** the racetrack starts from the lane nearest the dock, then a
+  U-turn whose exit points at the first stop. `js_demo_v4`: 288 s, 13.1 Wh,
+  4/4 targets.
+- **Render:**
+  - Blender 5.2 (portable), Eevee, user-supplied Poly Haven HDRI and dirt
+    texture, procedural coconut palms.
+  - Only changed shots are re-rendered (`--shots`); `assemble_video.py`
+    splices them in and adds the HUD and cards.
+- **Open:** commit (ask the user); the elevator in the Gazebo model; the
+  detection pipeline and ripeness training (next).
+

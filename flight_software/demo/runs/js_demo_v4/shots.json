@@ -1,0 +1,9 @@
+[
+ {"name": "trans_side", "cam": "trans_side", "t0": 15.0, "t1": 30.0, "tree": null},
+ {"name": "s1_side",   "cam": "side",   "t0": 170.0, "t1": 178.0, "tree": "P0302"},
+ {"name": "s1_esp",    "cam": "esp32",  "t0": 178.0, "t1": 183.5, "tree": "P0302"},
+ {"name": "s2_high",   "cam": "high",   "t0": 190.0, "t1": 200.0, "tree": "P0005"},
+ {"name": "s3_side",   "cam": "side",   "t0": 212.0, "t1": 217.5, "tree": "P0612"},
+ {"name": "s3_esp",    "cam": "esp32",  "t0": 217.5, "t1": 222.5, "tree": "P0612"},
+ {"name": "s4_orbit",  "cam": "orbit",  "t0": 227.0, "t1": 237.0, "tree": "P0911"}
+]

@@ -33,6 +33,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 GZD = HERE / "gazebo"
+JSD = HERE / "jsbsim"
 RUNS = HERE / "demo" / "runs"
 HOME = Path.home()
 
@@ -61,7 +62,7 @@ def kill_all(procs):
         except Exception:  # noqa: BLE001
             pass
     for sig in ("-TERM", "-KILL"):        # a hung gz server ignores SIGTERM
-        for pat in ("arduplane", "gz sim", "camera_keepalive"):
+        for pat in ("arduplane", "gz sim", "camera_keepalive", "jsbsim_bridge"):
             subprocess.run(["pkill", sig, "-f", pat], check=False)
         time.sleep(3)
 
@@ -99,9 +100,14 @@ def main():
     ap.add_argument("--param-file", action="append", default=[])
     ap.add_argument("--events")
     ap.add_argument("--record", action="store_true")
-    ap.add_argument("--fps", type=float, default=3.0)
+    ap.add_argument("--fps", type=float, default=5.0)   # ESP32-CAM trigger: 5 fps (3 fps left palms under 2 frames in wind)
     ap.add_argument("--timeout", type=float, default=1800)
+    ap.add_argument("--physics", choices=["gazebo", "jsbsim"], default="gazebo")
+    ap.add_argument("--test", choices=["hover", "transition"],
+                    help="fly gazebo/flight_test.py instead of the plantation mission")
     a = ap.parse_args()
+    if a.physics == "jsbsim" and a.record:
+        ap.error("--record needs gazebo cameras; JSBSim runs are rendered in Blender instead")
 
     out = RUNS / a.name
     if out.exists():
@@ -117,37 +123,46 @@ def main():
     tgt = ["--targets", a.targets] if a.targets else []
     tgt += ["--wind-n", a.wind_n, "--wind-e", a.wind_e]   # forecast = actual mean wind
     run([py, HERE / "route_planner.py", "--strategy", a.strategy, "--hover-s", a.hover_s, *tgt], check=True)
-    run([py, GZD / "gen_sdf.py"], check=True, stdout=subprocess.DEVNULL)
-    wargs = ["--wind-n", a.wind_n, "--wind-e", a.wind_e, "--gust", a.gust]
-    if a.record:
-        for cam in ("chase", "overview", "esp32cam"):     # gz won't create these itself
-            (rec / cam).mkdir(parents=True)
-        wargs += ["--record", rec]
-    run([py, GZD / "gen_world.py", *wargs], check=True)
+    layout = json.loads((HERE / "demo" / "plan.json").read_text())["layout"]   # dock heading set by the planner
+    home = f"{layout['home']['lat']},{layout['home']['lon']},300"
+    if a.physics == "gazebo":
+        run([py, GZD / "gen_sdf.py"], check=True, stdout=subprocess.DEVNULL)
+        wargs = ["--wind-n", a.wind_n, "--wind-e", a.wind_e, "--gust", a.gust]
+        if a.record:
+            for cam in ("chase", "overview", "esp32cam"):     # gz won't create these itself
+                (rec / cam).mkdir(parents=True)
+            wargs += ["--record", rec]
+        run([py, GZD / "gen_world.py", *wargs], check=True)
 
     procs = []
     try:
-        gz_cmd = ["gz", "sim", "-s", "-r", GZD / "worlds" / "coconut_plantation.sdf"]
-        if a.record:
-            gz_cmd.insert(3, "--headless-rendering")
-        procs.append(subprocess.Popen([str(c) for c in gz_cmd], env=env(), cwd=work,
-                                      stdout=open(work / "gz.log", "w"), stderr=subprocess.STDOUT,
+        if a.physics == "gazebo":
+            phys = ["gz", "sim", "-s", "-r", GZD / "worlds" / "coconut_plantation.sdf"]
+            if a.record:
+                phys.insert(3, "--headless-rendering")
+        else:
+            phys = [py, "-u", JSD / "jsbsim_bridge.py", "--root", JSD, "--model", "CoconutQuadplane",
+                    "--rate", "1000", "--home", home, "--heading", layout["dock"].get("heading_deg", 0),
+                    "--wind-n", a.wind_n, "--wind-e", a.wind_e, "--gust", a.gust]
+        procs.append(subprocess.Popen([str(c) for c in phys], env=env(), cwd=work,
+                                      stdout=open(work / "physics.log", "w"), stderr=subprocess.STDOUT,
                                       start_new_session=True))
         if a.record:   # cameras only render with a subscriber; <save> writes the PNGs
             procs.append(subprocess.Popen(["/usr/bin/python3", str(GZD / "camera_keepalive.py")],
                                           env=env(), cwd=work, stdout=subprocess.DEVNULL,
                                           stderr=subprocess.STDOUT, start_new_session=True))
-        layout =json.loads((HERE / "demo" / "layout.json").read_text())
         sv = ["sim_vehicle.py", "-v", "ArduPlane", "-f", "quadplane", "--model", "JSON", "--no-rebuild",
               "--no-mavproxy", "-w", f"--custom-location={layout['home']['lat']},{layout['home']['lon']},300,0",
               f"--add-param-file={HERE / 'coconut_quadplane.param'}",
-              f"--add-param-file={GZD / 'coconut_gazebo.param'}"]
+              f"--add-param-file={(GZD / 'coconut_gazebo.param') if a.physics == 'gazebo' else (JSD / 'coconut_jsbsim.param')}"]
         sv += [f"--add-param-file={Path(p).resolve()}" for p in a.param_file]
         procs.append(subprocess.Popen(sv, env=env(), cwd=work, stdout=open(work / "sitl.log", "w"),
                                       stderr=subprocess.STDOUT, start_new_session=True))
         time.sleep(14)
         cmd = [py, "-u", HERE / "route_planner.py", "--strategy", a.strategy, "--hover-s", a.hover_s,
                "--connect", "tcp:127.0.0.1:5760", "--fly", "--result", out / "result.json", *tgt]
+        if a.test:
+            cmd = [py, "-u", GZD / "flight_test.py", a.test, "--connect", "tcp:127.0.0.1:5760"]
         if a.events:
             cmd += ["--events", Path(a.events).resolve()]
         with open(out / "mission.log", "w") as ml:
@@ -159,7 +174,7 @@ def main():
         kill_all(procs)
 
     logs = sorted(glob.glob(str(work / "logs" / "*.BIN")), key=os.path.getmtime)
-    summary = {"name": a.name, "strategy": a.strategy, "targets": a.targets, "wind_ne": [a.wind_n, a.wind_e], "gust": a.gust,
+    summary = {"name": a.name, "physics": a.physics, "test": a.test, "strategy": a.strategy, "targets": a.targets, "wind_ne": [a.wind_n, a.wind_e], "gust": a.gust,
                "param_files": a.param_file, "events": a.events}
     if logs:
         shutil.copy(logs[-1], out / "flight.BIN")
