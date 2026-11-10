@@ -144,7 +144,10 @@ It prints:
 - **Every flight is recorded** automatically from arming to disarming
   (`backend/flights.py`): the track at 2 Hz, the plan and mission as they were
   at takeoff, and a summary. A flight that loses the link for 30 s, or is left
-  open by a restart, is closed as `lost`.
+  open by a restart, is closed at its last recorded point: as `landed` if that
+  point was on the ground (e.g. the simulator was shut down after touchdown),
+  otherwise as `lost`. The telemetry reader keeps reporting "disconnected"
+  while it retries, so this happens without a restart.
 - **Post-flight report** opens on landing, or from *Flights* in the rail →
   *Report*. It shows:
   - flight time and distance against the plan;
@@ -321,7 +324,7 @@ python -m pytest -v
 | `test_plan.py` | ripeness rules (fresh/stale sightings, harvest cycle, health, survey, visits), migration to maturity/health/harvested, photo with a card reading, planner battery cap + targets first + stop order + WPL export, confirmed palms dropped, plan/export/image endpoints, ML label/model fields, live re-plan |
 | `test_photo.py` | pattern membership (85/43/22), capture only over pattern palms within the radius, retry window, one answer per request, photo upload saved + history + `last_photo`, new round resets |
 | `test_api.py` | REST endpoints, validation, WebSocket push on change, and push when another process writes the DB |
-| `test_telemetry.py` | MAVLink reader against a fake vehicle: mode/armed/position/battery/waypoint, GCS heartbeat, 5 Hz throttle, waits for SITL, detects link loss |
+| `test_telemetry.py` | MAVLink reader against a fake vehicle: mode/armed/position/battery/waypoint, GCS heartbeat, 5 Hz throttle, waits for SITL, detects link loss, keeps reporting while no vehicle answers |
 | `test_video.py` | signalling relay protocol, camera page, certificate, and a real WebRTC stream between two headless Chromium pages over HTTPS |
 | `test_dashboard.py` | the built dashboard in headless Chromium: 169 palm icons, no tiles, every-2nd pattern, moving drone + trail, live video, palms photographed automatically turn green, inspector photo + actions |
 
