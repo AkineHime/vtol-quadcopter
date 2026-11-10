@@ -334,7 +334,19 @@ Set `GS_SCREENSHOT=/some/prefix` to save screenshots from the dashboard test.
 
 File: `ground_station/data/ground_station.db` (SQLite, WAL mode, so other
 processes can read while the server runs). Created and seeded on first start,
-or with `python -m backend.db`.
+or with `python -m backend.db`. The live file is git-ignored.
+
+**Shared farm snapshot**: `ground_station/snapshots/farm_2026-11-10.db` is a copy
+of the team's working database: the 169 palms with their history (survey seed,
+visits, the ML test detection, the P0606 target) and one recorded JSBSim flight
+of the 22-stop plan (landed, 2.72 km, 9:03, battery 99% → 29%) for replay and the
+post-flight report. Photos are not in git, so their references were cleared, and
+the camera setting was removed (set your own on the camera card). To start from
+it instead of the plain seed, stop the dashboard, then (PowerShell, from `ground_station`):
+```
+Remove-Item data\ground_station.db* -ErrorAction SilentlyContinue
+Copy-Item snapshots\farm_2026-11-10.db data\ground_station.db
+```
 
 **`trees`**: one row per palm. The first eight columns are exactly
 `trees.csv`.

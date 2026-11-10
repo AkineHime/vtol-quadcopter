@@ -49,7 +49,7 @@ no hardware has been bought or flown yet.
 | `report/` | Review 2 report source (`build_report.py`, `content.py`, a Word template) and the built `.docx`/`.pdf`. |
 | `flight_software/render/` | Review video: `extract_track.py` (flight log → track), `blender_replay.py`, `assemble_video.py` (HUD, captions, cards). |
 | `ml/` | Ripeness dataset prep, YOLO26s training, `detect_pipeline.py` (frames + flight log → per-palm observations, `--post` to the dashboard), `check_projection.py`. Results in `ml/README.md`. |
-| `ground_station/` | The dashboard: FastAPI backend (`backend/`), React frontend (`frontend/`), tests (`tests/`), `tools/colour_cards.py`. Full feature list, API and test table in its `README.md`. |
+| `ground_station/` | The dashboard: FastAPI backend (`backend/`), React frontend (`frontend/`), tests (`tests/`), `tools/colour_cards.py`, and `snapshots/` (a shareable copy of the team's farm database with one recorded JSBSim flight; how to load it: `ground_station/README.md`, Database). Full feature list, API and test table in its `README.md`. |
 | `setup/demo_laptop/` | Setup and run scripts for a new Windows laptop, plus `CHECKLIST.md` for demo day. |
 | `documents/dashboard/` | Dashboard spec, UI reference, printable colour cards. |
 
