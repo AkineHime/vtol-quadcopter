@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d1f17">
+<title>Phone setup</title>
+<style>
+  :root { --bg:#0d1f17; --card:#15291f; --line:#24402f; --text:#e8efe9; --mute:#8fa597; --copper:#c8834f; --ok:#5fbf7f; }
+  * { box-sizing:border-box; }
+  html, body { margin:0; background:var(--bg); color:var(--text);
+    font:16px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  main { display:flex; flex-direction:column; gap:14px; padding:max(18px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom)); max-width:520px; margin:0 auto; }
+  h1 { font-size:20px; margin:4px 0 0; font-weight:650; }
+  h1 span { color:var(--copper); }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:16px; display:flex; flex-direction:column; gap:10px; }
+  .step { display:flex; gap:10px; align-items:center; font-weight:600; }
+  .n { width:26px; height:26px; border-radius:13px; display:grid; place-items:center; background:var(--copper); color:#1b1006; font-size:14px; flex:none; }
+  p, li { color:var(--mute); margin:0; font-size:15px; }
+  ol { margin:0; padding-left:20px; display:flex; flex-direction:column; gap:4px; }
+  a.btn { display:block; text-align:center; text-decoration:none; border-radius:14px; padding:15px; font-size:17px; font-weight:600;
+    background:var(--copper); color:#1b1006; }
+  a.btn.alt { background:transparent; color:var(--text); border:1px solid var(--line); }
+  details summary { cursor:pointer; color:var(--text); font-weight:600; }
+  #ok { color:var(--ok); font-weight:600; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Coconut VTOL &middot; <span>phone setup</span></h1>
+  <p>This phone will stream its rear camera to the ground station as the drone camera. Stay on the same Wi-Fi as the laptop.</p>
+
+  <section class="card">
+    <div class="step"><span class="n">1</span>Trust the ground station (once)</div>
+    <p id="ok"></p>
+    <p>Install its certificate so the camera page opens without a security warning. Skip this if you are happy to tap through the warning each time.</p>
+    <a class="btn alt" href="/ca.crt">Download certificate</a>
+    <details>
+      <summary>Android</summary>
+      <ol>
+        <li>Open <b>Settings → Security → Encryption &amp; credentials → Install a certificate → CA certificate</b> (the path varies a little by phone; search Settings for "CA certificate").</li>
+        <li>Tap <b>Install anyway</b>, pick <b>coconut-ground-station-ca.crt</b> from Downloads.</li>
+      </ol>
+    </details>
+    <details>
+      <summary>iPhone</summary>
+      <ol>
+        <li>Open this page in <b>Safari</b>, tap Download certificate, then <b>Allow</b>.</li>
+        <li><b>Settings → Profile Downloaded → Install</b>.</li>
+        <li><b>Settings → General → About → Certificate Trust Settings</b>: turn on <b>Coconut VTOL ground station local CA</b>.</li>
+      </ol>
+    </details>
+  </section>
+
+  <section class="card">
+    <div class="step"><span class="n">2</span>Start the camera</div>
+    <p>Allow camera access when asked, hold the phone camera-down like the drone's nose camera, and keep the screen on.</p>
+    <a class="btn" href="/camera">Open camera</a>
+  </section>
+
+  <section class="card">
+    <div class="step"><span class="n">3</span>Colour cards (optional)</div>
+    <p>Hold a coloured shape on white paper in view when the drone reaches a palm: <b>green</b> = tender, <b>light green</b> = young, <b>yellow</b> = mature, <b>brown</b> = over-mature. The dashboard logs it for that palm.</p>
+  </section>
+</main>
+<script>
+  // reached over HTTPS without a warning click-through? then the certificate is already trusted
+  if (location.protocol === "https:") document.getElementById("ok").textContent = "Secure connection: if you did not tap through a warning to get here, this phone already trusts the ground station.";
+</script>
+</body>
+</html>

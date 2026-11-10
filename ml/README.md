@@ -10,7 +10,7 @@ Run everything in WSL (`source ~/venv-ardupilot/bin/activate`; CUDA via the RTX 
 |---|---|
 | `prepare_ripeness.py` | Roboflow export (`dataset/Coconut*.zip`) → `dataset/ripeness3/`: 3 classes, split by source video |
 | `train_ripeness.py` | Trains YOLO26s. Writes `models/ripeness_yolo26s.pt` and its **held-out test** metrics `models/ripeness_yolo26s_test.json` |
-| `detect_pipeline.py` | Frames + `track.json` → `RUN/detections/` (`observations.json`, `trees.csv`, annotated frames) |
+| `detect_pipeline.py` | Frames + `track.json` → `RUN/detections/` (`observations.json`, `trees.csv`, annotated frames). With `--post`, each palm's best frame and a `detection` event go to the ground-station dashboard, and palms passing the rule become `target` (so they join the next mission) |
 | `check_projection.py` | Checks the pipeline's crown projection against the boxes Blender saved for the ESP32 shots |
 
 ```bash
@@ -18,6 +18,7 @@ python ml/prepare_ripeness.py
 python ml/train_ripeness.py
 python ml/detect_pipeline.py flight_software/demo/runs/js_demo_v4 --sim-shots s1_esp,s3_esp
 python ml/detect_pipeline.py RUN --frames manifest.csv      # real flight: CSV with path,t (log clock)
+python ml/detect_pipeline.py RUN --frames manifest.csv --post https://<laptop>:8443 --insecure   # -> dashboard
 ```
 
 ## Decisions (2026-10-27)

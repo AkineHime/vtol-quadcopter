@@ -43,3 +43,7 @@ THR_FAILSAFE      0
 # JSBSIM: rotor_model.py lifts off at ~0.52 throttle (4 motors sagging a 3S pack)
 Q_M_THST_HOVER    0.52
 
+# JSBSIM: the bridge reports pack voltage + current (rotor_model.Pack). The
+# pack is a 3S 4000 mAh (44.4 Wh, as in analysis.py and the ground station's
+# planner); coconut_quadplane.param said 5000.
+BATT_CAPACITY     4000

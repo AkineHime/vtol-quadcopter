@@ -6,29 +6,31 @@ hardware BOM, and architecture decisions: **`documents/vtol_project_summary.md`*
 (the original planning doc — some of its "Remaining Work" is now done; see
 the status table below for what's current).
 
-This file is a handoff index, not the documentation itself — **full written
-documentation and report imagery are still to be done** (see "For whoever
-writes up the report" at the bottom). It exists so anyone picking this repo
-up cold can find what's here and regenerate any of it.
+This file is a handoff index, not the documentation itself. It exists so
+anyone picking this repo up cold can find what's here, run it, and regenerate
+any of it. Everything below the airframe is built and tested **in simulation**;
+no hardware has been bought or flown yet.
 
-> **New to the project? Start with [`documents/TEAM_GUIDE.md`](documents/TEAM_GUIDE.md)**: what's new, how to run everything, results, and open items.
+> **New to the project? Start with [`documents/TEAM_GUIDE.md`](documents/TEAM_GUIDE.md)** (how to run everything, results, open items).
+> **Setting up a demo laptop?** Use [`setup/demo_laptop/CHECKLIST.md`](setup/demo_laptop/CHECKLIST.md) (double-click scripts; dashboard in ~20–30 min).
 
-## Status snapshot (2026-09-19; Gazebo demo 2026-10-16; printable airframe + 1 ha sim study 2026-10-18)
+## Status snapshot (2026-11-10)
 
 | Area | State | Where |
 |---|---|---|
-| Real airfoil aerodynamics (SD7037 wing / NACA0009 tail) | Done — trim, fin sizing, control authority all computed | `aero/` |
-| Full CAD solid model (patent-reference quality) | Done — iteratively corrected against real KCL reference geometry through many review passes | `models/freecad/` |
+| Real airfoil aerodynamics (SD7037 wing / NACA0009 tail) | Done: trim, fin sizing, control authority all computed | `aero/` |
+| Full CAD solid model (patent-reference quality) | Done (FreeCAD, frozen: FreeCAD is no longer installed; new CAD work is CadQuery in `airframe/`) | `models/freecad/` |
 | Patent-style line drawings | Done, first pass (3 orthographic views, no reference-numeral callouts yet) | `models/patent_drawings/` |
-| ArduPilot SITL (generic aero) | Done — full VTOL mission (takeoff/transition/survey/land) passes | `flight_software/` |
-| ArduPilot ↔ JSBSim bridge (real aero in the loop) | Working but **not flight-tuned** — completes a mission, flies badly (porpoising, no stable cruise). Root causes and next steps are written down, not guessed at | `flight_software/jsbsim/BRIDGE_RESULTS.md` |
-| Propulsion (measured thrust curves) | Not started — currently hand-calibrated placeholder curves | `flight_software/jsbsim/PROPULSION_NOTES.md` |
-| AUTOTUNE / transition tuning | Not started | — |
-| Review 2 report | Drafted | `report/report.docx`, `report/report.pdf` |
-| **Visual Gazebo demo** (final review) | Done. ArduPilot QuadPlane SITL flies our Gazebo model (the printed build: 1.84 kg) over a **1 ha, 169-palm** plantation. The mission is dock takeoff, then a fixed-wing scout sweep, then VTOL confirm stops at 4 flagged palms, then landing on the dock. Run: `bash flight_software/gazebo/run_demo.sh` in WSL | `flight_software/gazebo/README.md` |
-| Route planner + sim study | Done. Strategies: fw_sweep, vtol_sweep, hover, hybrid. Wind-aligned lanes; camera-aware hover stops. Headless batch runner, flight analysis (imaging, energy, transition turbulence, clearance), disturbance scenarios, a week-of-operations Monte-Carlo. **Results and recommendations: `documents/sim_results.md`** | `flight_software/route_planner.py`, `sim_runner.py`, `analysis.py`, `schedule_sim.py`, `report_runs.py` |
-| **Print-ready airframe** | Done (CadQuery, no FreeCAD). 40 parts for a 220 mm bed. Detachable wing halves on a carbon spar; openable electronics hatch. LW-PLA build is 1843 g at CG 33% MAC | `airframe/BUILD_NOTES.md`, `airframe/print/` |
-| Detection pipelines, dashboard | Not started (scoped in the summary doc) | — |
+| **Print-ready airframe** | Done (CadQuery). 44 parts for a 220 mm bed, detachable wing halves on a carbon spar, openable hatch. **Tail elevator added** (30% chord, pod servo) after JSBSim showed the wing elevons reverse pitch; the wing surfaces are now ailerons. 1858 g, CG 33.9% MAC | `airframe/BUILD_NOTES.md`, `airframe/print/` |
+| ArduPilot SITL + **JSBSim** (real aero in the loop) | Done and the **default simulator**. 1000 Hz bridge with a measured A2212 1400 KV / APC 10×4.7 rotor model, battery sag and spool lag; the bridge reports battery voltage/current, so ArduPilot's battery % drains (hover check: 12% vs 11.7% from the energy model). The 22-stop database mission flew 2.76 km in 555 s on 32.4 Wh vs 34.6 Wh estimated | `flight_software/jsbsim/`, `documents/sim_results.md` |
+| Gazebo visual demo | Done earlier (first prototype); superseded by JSBSim for missions and the review video. Still runs: `bash flight_software/gazebo/run_demo.sh` | `flight_software/gazebo/README.md` |
+| Route planner + sim study | Done. Strategies fw_sweep, vtol_sweep, hover, hybrid; racetrack sweep from the lane nearest the dock (dock anywhere), fixed-wing U-turn into the stops. Batch runner, flight analysis, disturbance scenarios, week-of-operations Monte-Carlo | `flight_software/route_planner.py`, `sim_runner.py`, `analysis.py`, `documents/sim_results.md` |
+| **Review video** | Done (final, approved). Flight log → Blender replay with FOV wedge, ESP32 view inserts, telemetry HUD and captions | `flight_software/render/`; output `flight_software/demo/runs/js_demo_v4/js_demo_v4_review.mp4` (git-ignored) |
+| **Ripeness detection (ML)** | Baseline done. YOLO26s, 3 classes (pre-mature = tender = harvest target, mature, over-mature), split by source video: test mAP50 0.55 overall, 0.72 pre-mature. `detect_pipeline.py` maps detections to palms via the camera model and posts them to the dashboard. Ground-level training images: aerial accuracy still to be measured | `ml/README.md` |
+| **Ground-station dashboard** | Done (built on Caser's dashboard). Per-palm SQLite (maturity, health, status, history), ripeness prediction, next mission planned from the database within 80% of the battery (export `.waypoints`), map lenses, alerts + go/no-go, flight recorder with replay and post-flight report, photos at palm stops, phone camera (IP Webcam MJPEG relay or browser WebRTC, local CA for HTTPS), colour-card reader as a stand-in classifier, Excel export, tablet layout. 48 automated tests pass | `ground_station/README.md`, colour cards: `documents/dashboard/colour_cards.pdf` |
+| Demo-laptop setup | Done. Double-click scripts for the dashboard, optional WSL + ArduPilot + JSBSim (pinned ArduPilot commit), and launchers (dashboard / fake aircraft / live JSBSim flight); repo found relative to the scripts | `setup/demo_laptop/` |
+| Health detection (pests, frond damage) | Not started: nothing detects health yet; the database and dashboard can already store it | — |
+| Real hardware, AUTOTUNE, real flights | Not started: parts not purchased. Planned bill of materials (estimates) is in the Project-I report (Table 7.3) | `documents/vtol_project_summary.md` |
 
 ## Repo map
 
@@ -45,6 +47,11 @@ up cold can find what's here and regenerate any of it.
 | `airframe/` | Print-ready airframe (CadQuery): `params.py` (all dimensions), `build_airframe.py`, `BUILD_NOTES.md`, the STLs in `print/`. |
 | `flight_software/jsbsim/` | The JSBSim aircraft model (real aero) and the bridge that connects it to ArduPilot. `BRIDGE.md` explains the bridge design, `BRIDGE_RESULTS.md` has the test results and exactly what's still wrong, `PROPULSION_NOTES.md` covers the motor/prop modeling gap. |
 | `report/` | Review 2 report source (`build_report.py`, `content.py`, a Word template) and the built `.docx`/`.pdf`. |
+| `flight_software/render/` | Review video: `extract_track.py` (flight log → track), `blender_replay.py`, `assemble_video.py` (HUD, captions, cards). |
+| `ml/` | Ripeness dataset prep, YOLO26s training, `detect_pipeline.py` (frames + flight log → per-palm observations, `--post` to the dashboard), `check_projection.py`. Results in `ml/README.md`. |
+| `ground_station/` | The dashboard: FastAPI backend (`backend/`), React frontend (`frontend/`), tests (`tests/`), `tools/colour_cards.py`, and `snapshots/` (a shareable copy of the team's farm database with one recorded JSBSim flight; how to load it: `ground_station/README.md`, Database). Full feature list, API and test table in its `README.md`. |
+| `setup/demo_laptop/` | Setup and run scripts for a new Windows laptop, plus `CHECKLIST.md` for demo day. |
+| `documents/dashboard/` | Dashboard spec, UI reference, printable colour cards. |
 
 ## Regenerating things
 
@@ -73,7 +80,18 @@ python analyze.py
 **ArduPilot SITL** and **JSBSim bridge**: see `flight_software/README.md` §3
 and `flight_software/jsbsim/BRIDGE.md` respectively — both need WSL2 with
 the ArduPilot build already in place (full from-scratch rebuild steps are
-in `flight_software/README.md` §6 if starting on a new machine).
+in `flight_software/README.md` §6, or run `setup/demo_laptop/SETUP-3-simulator.cmd`).
+
+**Dashboard** (Windows; details in `ground_station/README.md`):
+```
+setup\demo_laptop\SETUP-1-dashboard.cmd      # once: tools, packages, build, certificate
+setup\demo_laptop\RUN-demo-with-sim.cmd      # dashboard + JSBSim flight of the next mission
+```
+`RUN-demo.cmd` starts the dashboard alone, `RUN-demo-fake.cmd` adds a fake aircraft
+(no WSL needed). If the simulator link drops, just run `RUN-demo-with-sim.cmd` again:
+the dashboard reconnects by itself and closes the old flight after 30 s.
+
+**Tests**: `cd ground_station && .venv\Scripts\python -m pytest -q` (48 tests).
 
 ## Tooling this repo assumes
 
@@ -104,7 +122,13 @@ the write-up and imagery pulling it together:
   FreeCAD model (`models/freecad/`) and JSBSim bridge results
   (`flight_software/jsbsim/captures/bridge_mission.png` is the latest, most
   accurate flight-test plot).
-- **Known-wrong/in-progress items to state honestly, not gloss over**: the
-  JSBSim bridge flies but isn't tuned (`BRIDGE_RESULTS.md` lists exactly
-  why); propulsion is a placeholder curve, not measured data; detection
-  pipelines and the dashboard haven't been started.
+- **Dashboard figures**: the Project-I report revision (2026-10-28) has
+  regenerated architecture/DFD/use-case/class diagrams and dashboard
+  screenshots; sequence and screenshots can be re-taken from a running
+  dashboard with a JSBSim flight (`RUN-demo-with-sim.cmd`).
+- **Known-wrong/in-progress items to state honestly, not gloss over**: all
+  flights are simulated; the camera is a smartphone standing in for the
+  aircraft's camera module (not yet chosen); the ripeness model is trained on
+  ground-level images and the prediction is rule-based; the colour-card
+  reader is a demo stand-in; nothing detects health yet; the drone's bill of
+  materials is mostly estimates, not quotes.
